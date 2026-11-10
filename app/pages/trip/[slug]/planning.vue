@@ -318,7 +318,7 @@ async function saveEditedOption() {
           class="p-4 rounded-md bg-(--ui-bg-elevated) flex flex-col gap-4"
         >
           <div class="flex gap-2 items-center justify-between">
-            <p class="font-medium text-(--ui-text)">
+            <p class="font-semibold text-xl text-(--ui-text) tracking-tight">
               {{ resource.name }}
             </p>
 
@@ -447,7 +447,9 @@ async function saveEditedOption() {
             class="flex flex-col gap-2 rounded-md p-2 bg-(--ui-text-contrast)"
           >
             <div class="flex gap-2 items-center justify-between">
-              <p class="font-bold text-(--ui-text)">{{ category.name }}</p>
+              <p class="font-semibold text-lg text-(--ui-text) tracking-tight">
+                {{ category.name }}
+              </p>
               <UModal
                 :open="addOptionModalOpen && selectedCategoryId === category.id"
                 title="Nueva opción"
@@ -546,7 +548,7 @@ async function saveEditedOption() {
               class="flex gap-2 bg-blue-200 rounded-md p-2 items-center justify-between"
             >
               <div class="flex flex-col">
-                <p class="text-sm text-(--ui-text) font-semibold">
+                <p class="text-(--ui-text) font-semibold tracking-tight">
                   {{ option.name }}
                 </p>
                 <p class="text-xs text-(--ui-text) italic">{{ option.link }}</p>
@@ -562,6 +564,7 @@ async function saveEditedOption() {
                 @update:model-value="
                   updateOptionSelection(option.id, category.id)
                 "
+                :ui="{ base: 'border-2' }"
                 class="w-fit"
               />
               <p class="text-sm text-(--ui-text) font-semibold">
@@ -609,6 +612,25 @@ async function saveEditedOption() {
               }}
               €
             </div>
+          </div>
+          <div class="flex gap-2 items-center justify-end">
+            <p class="text-(--ui-text) font-bold tracking-tight">
+              Total:
+              {{
+                resource?.categories?.reduce((acc, category) => {
+                  return (
+                    acc +
+                    category.options?.reduce((acc, option) => {
+                      if (option.selected) {
+                        return acc + option.quantity * option.unit_price;
+                      }
+                      return acc;
+                    }, 0)
+                  );
+                }, 0)
+              }}
+              €
+            </p>
           </div>
         </div>
       </div>
