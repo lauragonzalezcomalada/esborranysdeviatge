@@ -1,0 +1,128 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+@import url('https://fonts.googleapis.com/css2?family=La+Belle+Aurore&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap');
+
+
+  
+@theme static {
+  --font-la-belle-aurore: "La Belle Aurore", cursive;
+
+  --color-green-50: #EFFDF5;
+  --color-green-100: #D9FBE8;
+  --color-green-200: #B3F5D1;
+  --color-green-300: #75EDAE;
+  --color-green-400: #00DC82;
+  --color-green-500: #00C16A;
+  --color-green-600: #00A155;
+  --color-green-700: #007F45;
+  --color-green-800: #016538;
+  --color-green-900: #0A5331;
+  --color-green-950: #052E16;
+}
+
+/* Placeholder palettes. The active mode is the class useColorMode puts on <html>. */
+.wild-nature {
+  --app-bg: #6a994e;
+  --app-fg: #f2e8cf;
+  --ui-primary: #7c6a5a;
+  --ui-bg: #6bb640;
+  --ui-bg-muted: #292018;
+  --ui-bg-elevated: #9fc7f0;
+  --ui-bg-accented: #57504a;
+  --ui-text: #b93739;
+  --ui-border: #bc4749;
+  --ui-border-accented: #bc4749;
+  --glass-shadow: #80A1C1;
+  --ui-text-contrast: #ffeaea;
+}
+
+.psico {
+  --app-bg: #FF7900;
+  --app-fg: #e7f6ff;
+  --ui-primary: #FF3DA4;
+  --ui-bg: #00FF37;
+  --ui-bg-muted: #FF8000;
+  --ui-bg-elevated: #C3FF00;
+  --ui-bg-accented: #FFFB00;
+  --ui-text: #7540FF;
+  --ui-text-muted: #b7d4e6;
+  --ui-text-highlighted: #f0f9ff;
+  --ui-border: #00FF37;
+  --glass-shadow: #C3FF00;
+  --ui-text-contrast: #FF8000;
+}
+
+.mnm {
+  --app-bg: #FFFEFC;
+  --app-fg: #383838;
+  --ui-primary: #000000;
+  --ui-bg: #FFFEFC;
+  --ui-bg-muted: #383838;
+  --ui-bg-elevated: #ffc800;
+  --ui-bg-accented: #ffc800;
+  --ui-text: #383838;
+  --ui-text-muted: #383838;
+  --ui-text-highlighted: #383838;
+  --ui-border: #000000;
+  --glass-shadow: #ffc800;
+  --ui-text-contrast: #ffc800;
+
+}
+
+
+
+.handwrite {
+  -webkit-mask-image: linear-gradient(90deg, #000 0, #000 72%, transparent 100%);
+  mask-image: linear-gradient(90deg, #000 0, #000 72%, transparent 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 0% 100%;
+  mask-size: 0% 100%;
+  animation: handwrite 4.2s cubic-bezier(0.37, 0, 0.63, 1) both;
+}
+
+@keyframes handwrite {
+  to {
+    -webkit-mask-size: 145% 100%;
+    mask-size: 145% 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .handwrite {
+    animation: none;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+.viewport-attribution .maplibregl-ctrl-attrib {
+  float: none;
+  margin: 0;
+  max-width: calc(100vw - 1.25rem);
+}
+
+.draft-popup .maplibregl-popup-content {
+  background: #0f172a;
+  color: white;
+  border-radius: 12px;
+  padding: 8px 12px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+}
+
+.draft-popup.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  border-top-color: #0f172a;
+}
+
+.draft-popup.maplibregl-popup-anchor-top .maplibregl-popup-tip {
+  border-bottom-color: #0f172a;
+}
+
+.draft-popup.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: #0f172a;
+}
+
+.draft-popup.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: #0f172a;
+}
