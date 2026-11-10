@@ -62,6 +62,13 @@ const handleLogout = async () => {
   await supabase.auth.signOut();
   navigateTo("/");
 };
+
+const openOurStories = () => {
+  window.open(
+    "https://lauragonzalezcomalada.github.io/borradoresdeviaje/",
+    "_blank",
+  );
+};
 </script>
 <template>
   <!--  bg-[url('/bg_image.jpg')] bg-cover bg-center  -->
@@ -75,7 +82,7 @@ const handleLogout = async () => {
       >
         <div class="flex gap-10 items-center">
           <div
-            @click="navigateTo('/our-stories')"
+            @click="openOurStories()"
             class="text-lg font-bold tracking-tighter cursor-pointer hover:underline"
             key="our-stories"
           >
