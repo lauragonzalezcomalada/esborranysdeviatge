@@ -57,16 +57,27 @@ function openAddCategoryModal(groupId) {
 
 async function saveCategory() {
   try {
+    const group = resources.value.find(
+      (resource) => resource.id === selectedGroupId.value,
+    );
+
+    if (!group) throw new Error("No se ha encontrado el grupo");
+
     const category = await insertCategory({
       name: categoryName.value,
-      groupId: selectedGroupId.value,
+      groupId: group.id,
     });
-    const group = resources.value.find((r) => r.id === selectedGroupId.value);
-    group.categories.push(category);
+
+    group.categories ??= [];
+    group.categories.push({
+      ...category,
+      options: category.options ?? [],
+    });
+
     addCategoryModalOpen.value = false;
     categoryName.value = "";
   } catch (error) {
-    console.error(error);
+    console.error("Error al guardar la categoría:", error);
   }
 }
 
@@ -323,6 +334,63 @@ async function saveEditedOption() {
               </UButton>
               <UModal
                 title="Nueva categoría"
+                :open="addCategoryModalOpen && selectedGroupId === resource.id"
+                @update:open="addCategoryModalOpen = $event"
+                :ui="{
+                  title: 'text-(--ui-text-contrast) tracking-tight',
+                  content: 'bg-(--ui-text)',
+                  close:
+                    'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10',
+                }"
+              >
+                <UButton
+                  icon="i-heroicons-plus"
+                  aria-label="Nueva categoría"
+                  variant="solid"
+                  class="w-fit self-end"
+                  @click="openAddCategoryModal(resource.id)"
+                >
+                  <span class="hidden md:inline">Nueva categoría</span>
+                </UButton>
+
+                <template #body>
+                  <UForm
+                    :id="`add-category-form-${resource.id}`"
+                    class="flex flex-col gap-3"
+                    :state="{ name: categoryName }"
+                    @submit="saveCategory"
+                  >
+                    <UFormField
+                      label="Nombre"
+                      name="name"
+                      :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
+                    >
+                      <UInput
+                        v-model="categoryName"
+                        placeholder="Ej.: Ropa de baño"
+                        required
+                        :ui="{
+                          base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                        }"
+                        class="w-full"
+                      />
+                    </UFormField>
+                  </UForm>
+                </template>
+
+                <template #footer>
+                  <div class="flex w-full justify-end gap-2">
+                    <UButton
+                      type="submit"
+                      :form="`add-category-form-${resource.id}`"
+                    >
+                      Añadir
+                    </UButton>
+                  </div>
+                </template>
+              </UModal>
+              <!--   <UModal
+                title="Nueva categoría"
                 :ui="{
                   title: 'text-(--ui-text-contrast) tracking-tight',
                   content: ' bg-(--ui-text)',
@@ -369,7 +437,7 @@ async function saveEditedOption() {
                     </UButton>
                   </div>
                 </template>
-              </UModal>
+              </UModal> -->
             </div>
           </div>
 
@@ -392,11 +460,12 @@ async function saveEditedOption() {
               >
                 <UButton
                   icon="i-heroicons-plus"
-                  label="Nueva opción"
                   variant="solid"
                   class="w-fit self-end bg-(--ui-text) text-(--ui-text-contrast)"
                   @click="openAddOptionModal(category.id)"
-                />
+                >
+                  <span class="hidden md:inline">Nueva opción</span>
+                </UButton>
 
                 <template #body>
                   <UForm
