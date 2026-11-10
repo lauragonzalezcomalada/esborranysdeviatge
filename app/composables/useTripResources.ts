@@ -136,6 +136,19 @@ export function useTripResources() {
     return data;
   }
 
+  async function deleteCategory(categoryId: string) {
+    const { data, error } = await supabase
+      .from("categories")
+      .delete()
+      .eq("id", categoryId)
+      .select("id")
+      .single();
+
+    if (error) throw error;
+
+    return data;
+  }
+
   return {
     loadTripResources,
     insertGroup,
@@ -145,5 +158,6 @@ export function useTripResources() {
     updateOption,
     deleteGroup,
     deleteOption,
+    deleteCategory,
   };
 }

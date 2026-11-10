@@ -11,6 +11,7 @@ const {
   updateOption,
   updateOptionSelected,
   deleteOption,
+  deleteCategory,
 } = useTripResources();
 
 const resources = ref([]);
@@ -234,6 +235,22 @@ async function saveEditedOption() {
     editOptionSaving.value = false;
   }
 }
+
+async function removeCategory(categoryId, groupId) {
+  try {
+    await deleteCategory(categoryId);
+
+    const group = resources.value.find((resource) => resource.id === groupId);
+
+    if (group) {
+      group.categories = group.categories.filter(
+        (category) => category.id !== categoryId,
+      );
+    }
+  } catch (error) {
+    console.error("Error al eliminar la categoría:", error);
+  }
+}
 </script>
 
 <template>
@@ -450,97 +467,120 @@ async function saveEditedOption() {
               <p class="font-semibold text-lg text-(--ui-text) tracking-tight">
                 {{ category.name }}
               </p>
-              <UModal
-                :open="addOptionModalOpen && selectedCategoryId === category.id"
-                title="Nueva opción"
-                :ui="{
-                  title: 'text-(--ui-text-contrast) tracking-tight',
-                  content: ' bg-(--ui-text)',
-                  close:
-                    'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10',
-                }"
-              >
+
+              <div class="flex items-center gap-2">
                 <UButton
-                  icon="i-heroicons-plus"
+                  icon="i-heroicons-trash"
+                  aria-label="Eliminar categoría"
                   variant="solid"
-                  class="w-fit self-end bg-(--ui-text) text-(--ui-text-contrast)"
-                  @click="openAddOptionModal(category.id)"
+                  color="error"
+                  @click="removeCategory(category.id, resource.id)"
                 >
-                  <span class="hidden md:inline">Nueva opción</span>
+                  <span class="hidden md:inline">Eliminar</span>
                 </UButton>
 
-                <template #body>
-                  <UForm
-                    id="add-place-form"
-                    class="flex flex-col gap-3"
-                    :on-submit="saveOption"
+                <UModal
+                  :open="
+                    addOptionModalOpen && selectedCategoryId === category.id
+                  "
+                  title="Nueva opción"
+                  :ui="{
+                    title: 'text-(--ui-text-contrast) tracking-tight',
+                    content: ' bg-(--ui-text)',
+                    close:
+                      'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10',
+                  }"
+                >
+                  <UButton
+                    icon="i-heroicons-plus"
+                    variant="solid"
+                    class="w-fit self-end bg-(--ui-text) text-(--ui-text-contrast)"
+                    @click="openAddOptionModal(category.id)"
                   >
-                    <UFormField
-                      label="Nombre"
-                      :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
+                    <span class="hidden md:inline">Nueva opción</span>
+                  </UButton>
+
+                  <template #body>
+                    <UForm
+                      id="add-place-form"
+                      class="flex flex-col gap-3"
+                      :on-submit="saveOption"
                     >
-                      <UInput
-                        v-model="optionName"
-                        placeholder="Ej.: Ropa de baño"
-                        required
+                      <UFormField
+                        label="Nombre"
                         :ui="{
-                          base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                          label: 'font-semibold text-(--ui-text-contrast)',
                         }"
-                        class="w-full"
-                      />
-                    </UFormField>
-                    <UFormField
-                      label="Precio"
-                      :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
-                    >
-                      <UInput
-                        v-model="optionPrice"
-                        placeholder="20.00"
-                        required
+                      >
+                        <UInput
+                          v-model="optionName"
+                          placeholder="Ej.: Ropa de baño"
+                          required
+                          :ui="{
+                            base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                          }"
+                          class="w-full"
+                        />
+                      </UFormField>
+                      <UFormField
+                        label="Precio"
                         :ui="{
-                          base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                          label: 'font-semibold text-(--ui-text-contrast)',
                         }"
-                        class="w-full"
-                      />
-                    </UFormField>
-                    <UFormField
-                      label="Enlace"
-                      :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
-                    >
-                      <UInput
-                        v-model="optionLink"
-                        placeholder="https://www.google.com"
-                        required
+                      >
+                        <UInput
+                          v-model="optionPrice"
+                          placeholder="20.00"
+                          required
+                          :ui="{
+                            base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                          }"
+                          class="w-full"
+                        />
+                      </UFormField>
+                      <UFormField
+                        label="Enlace"
                         :ui="{
-                          base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                          label: 'font-semibold text-(--ui-text-contrast)',
                         }"
-                        class="w-full"
-                      />
-                    </UFormField>
-                    <UFormField
-                      label="Cantidad"
-                      :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
-                    >
-                      <UInput
-                        v-model="optionQuantity"
-                        placeholder="1"
-                        required
+                      >
+                        <UInput
+                          v-model="optionLink"
+                          placeholder="https://www.google.com"
+                          required
+                          :ui="{
+                            base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                          }"
+                          class="w-full"
+                        />
+                      </UFormField>
+                      <UFormField
+                        label="Cantidad"
                         :ui="{
-                          base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                          label: 'font-semibold text-(--ui-text-contrast)',
                         }"
-                        class="w-full"
-                      />
-                    </UFormField>
-                  </UForm>
-                </template>
-                <template #footer>
-                  <div class="flex w-full justify-end gap-2">
-                    <UButton type="submit" form="add-place-form">
-                      Añadir
-                    </UButton>
-                  </div>
-                </template>
-              </UModal>
+                      >
+                        <UInput
+                          v-model="optionQuantity"
+                          placeholder="1"
+                          required
+                          :ui="{
+                            base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                          }"
+                          class="w-full"
+                        />
+                      </UFormField>
+                    </UForm>
+                  </template>
+                  <template #footer>
+                    <div class="flex w-full justify-end gap-2">
+                      <UButton type="submit" form="add-place-form">
+                        Añadir
+                      </UButton>
+                    </div>
+                  </template>
+                </UModal>
+              </div>
             </div>
             <div
               v-for="option in category.options"
