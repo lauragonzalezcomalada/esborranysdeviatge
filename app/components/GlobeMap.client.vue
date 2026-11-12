@@ -238,7 +238,7 @@ onBeforeUnmount(() => {
     >
       <div
         class="pointer-events-auto relative aspect-square max-h-full min-w-0 max-w-full overflow-hidden rounded-full transition-[width,transform] duration-500 ease-out"
-        :class="places.length > 0 ? 'translate-x-[20%]' : 'translate-x-0'"
+        :class="places.length > 0 ? 'md:translate-x-[20%]' : ''"
         :style="{ width: `min(${maxGlobeDiameter}, 100%)` }"
       >
         <div ref="container" class="h-full w-full" />

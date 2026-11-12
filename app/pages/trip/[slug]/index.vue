@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import type { Place, Trip } from "~/composables/useTripPlaces";
-import UColorModeSelect from "~/components/ColorModeSelect.vue";
+import type { Place } from "~/composables/useTripPlaces";
+
+definePageMeta({
+  layout: "trip",
+});
 
 type PhotonFeature = {
   geometry: {
@@ -26,30 +29,16 @@ type DraftLocation = {
   coordinates: [number, number];
 };
 
-const route = useRoute();
 useAppColorMode();
-const {
-  loadTrip,
-  updateTrip,
-  loadPlaces,
-  insertPlace,
-  updatePlace,
-  deletePlace,
-  saveOrder,
-  deleteTrip,
-} = useTripPlaces();
+const { loadPlaces, insertPlace, updatePlace, deletePlace, saveOrder } =
+  useTripPlaces();
+const { trip, tripId, editMode, canBeEdited } = useTripShell();
 
-const trip = ref<Trip | null>(null);
 const places = ref<Place[]>([]);
 const focusedPlaceId = ref<string | null>(null);
-const editMode = ref(false);
 const collapseAll = ref(false);
 const pageError = ref("");
-
-const editOpen = ref(false);
-const draftName = ref("");
-const draftDescription = ref("");
-const draftStart = ref("");
+const mobilePane = ref<"globe" | "places">("globe");
 
 const addPlaceOpen = ref(false);
 const placeName = ref("");
@@ -67,21 +56,8 @@ const editName = ref("");
 const editDescription = ref("");
 const editDays = ref<number>();
 
-const publicUsage = ref(false);
-
 let searchTimer: ReturnType<typeof setTimeout> | undefined;
 let searchGeneration = 0;
-
-const tripId = computed(() => {
-  const slug = route.params.slug;
-  const value = Array.isArray(slug) ? slug[0] : slug;
-  return value &&
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      value,
-    )
-    ? value
-    : "";
-});
 
 const preview = computed<[number, number] | null>(
   () => selectedLocation.value?.coordinates ?? null,
@@ -95,39 +71,13 @@ const supabaseConfig = useRuntimeConfig().public.supabase as
   | { url?: string; key?: string }
   | undefined;
 
-function dateFromInput(value: string) {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (!match) {
-    return null;
-  }
-  const date = new Date(
-    Number(match[1]),
-    Number(match[2]) - 1,
-    Number(match[3]),
-  );
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function dateToInput(date: Date | null) {
-  if (!date) {
-    return "";
-  }
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${date.getFullYear()}-${month}-${day}`;
-}
-
 watch(
   tripId,
   async (id) => {
-    trip.value = null;
     places.value = [];
     focusedPlaceId.value = null;
-    editMode.value = false;
-    editOpen.value = false;
     addPlaceOpen.value = false;
     editPlaceOpen.value = false;
-    publicUsage.value = false;
     pageError.value = "";
     if (!id) {
       return;
@@ -138,15 +88,7 @@ watch(
       return;
     }
     try {
-      const [loadedTrip, loadedPlaces] = await Promise.all([
-        loadTrip(id),
-        loadPlaces(id),
-      ]);
-      trip.value = loadedTrip;
-      places.value = loadedPlaces;
-      console.log("loadedTrip", loadedTrip);
-      console.log("loadedTrip.public", loadedTrip?.public);
-      publicUsage.value = loadedTrip?.public === true;
+      places.value = await loadPlaces(id);
     } catch (error) {
       pageError.value =
         error instanceof Error ? error.message : "No se pudo cargar el viaje.";
@@ -154,15 +96,6 @@ watch(
   },
   { immediate: true },
 );
-
-watch(editOpen, (open) => {
-  if (!open || !trip.value) {
-    return;
-  }
-  draftName.value = trip.value.name;
-  draftDescription.value = trip.value.description;
-  draftStart.value = dateToInput(trip.value.startDate);
-});
 
 watch(editMode, (on) => {
   if (on) {
@@ -177,14 +110,14 @@ async function deleteEditedPlace(id: string) {
     return;
   }
 
+  if (!canBeEdited.value) {
+    return;
+  }
   try {
-    // Don't persist if public trip
-    if (!publicUsage.value) {
-      if (!confirm("¿Estás seguro de querer eliminar este lugar?")) {
-        return;
-      }
-      await deletePlace(id);
+    if (!confirm("¿Estás seguro de querer eliminar este lugar?")) {
+      return;
     }
+    await deletePlace(id);
 
     places.value = places.value.filter((place) => place.id !== id);
     pageError.value = "";
@@ -196,32 +129,8 @@ async function deleteEditedPlace(id: string) {
   }
 }
 
-async function saveTripDetails() {
-  const current = trip.value;
-  const name = draftName.value.trim();
-  if (!current || !name) {
-    return;
-  }
-  current.name = name;
-  current.description = draftDescription.value.trim();
-  current.startDate = dateFromInput(draftStart.value);
-  editOpen.value = false;
-
-  // Don't persist if public trip
-  if (publicUsage.value) {
-    return;
-  }
-  try {
-    await updateTrip(current);
-    pageError.value = "";
-  } catch (error) {
-    pageError.value =
-      error instanceof Error ? error.message : "No se pudo guardar el viaje.";
-  }
-}
-
 async function savePlaceOrder(next: Place[]) {
-  if (publicUsage.value) {
+  if (!canBeEdited.value) {
     return;
   }
   const weights = next.map((place) => place.orderWeight).sort((a, b) => a - b);
@@ -231,11 +140,6 @@ async function savePlaceOrder(next: Place[]) {
   places.value = [...places.value].sort(
     (a, b) => a.orderWeight - b.orderWeight,
   );
-
-  // Don't persist if public trip
-  if (publicUsage.value) {
-    return;
-  }
 
   try {
     await saveOrder(places.value);
@@ -340,36 +244,19 @@ async function savePlace() {
     }
     return;
   }
+  if (!canBeEdited.value) {
+    return;
+  }
   const days = Number(placeDays.value);
   try {
-    let placeToAdd = {
+    const newPlace = await insertPlace(tripId.value, {
       name,
       description: placeDescription.value.trim(),
       days: Number.isFinite(days) && days > 0 ? days : undefined,
       coordinates: location.coordinates,
       orderWeight: places.value.length,
-    };
-    //Don't persist if public trip
-    if (!publicUsage.value) {
-      const newPlace = await insertPlace(tripId.value, {
-        name: placeToAdd.name,
-        description: placeToAdd.description,
-        days: placeToAdd.days,
-        coordinates: placeToAdd.coordinates,
-        orderWeight: placeToAdd.orderWeight,
-      });
-      placeToAdd = {
-        ...newPlace,
-        days: placeToAdd.days,
-        coordinates: placeToAdd.coordinates,
-        orderWeight: placeToAdd.orderWeight,
-      };
-    }
-    places.value.push({
-      ...placeToAdd,
-      id: "00000000-0000-0000-0000-000000000000",
-      tripId: tripId.value,
     });
+    places.value.push(newPlace);
     addPlaceOpen.value = false;
     pageError.value = "";
   } catch (error) {
@@ -393,7 +280,7 @@ function openPlaceEditor(id: string) {
 async function saveEditedPlace() {
   const place = editingPlace.value;
   const name = editName.value.trim();
-  if (!place || !name) {
+  if (!place || !name || !canBeEdited.value) {
     return;
   }
   place.name = name;
@@ -402,10 +289,6 @@ async function saveEditedPlace() {
   place.days = Number.isFinite(days) && days > 0 ? days : undefined;
   editPlaceOpen.value = false;
   editingPlace.value = null;
-  // Don't persist if public trip
-  if (publicUsage.value) {
-    return;
-  }
   try {
     await updatePlace(place);
     pageError.value = "";
@@ -434,69 +317,107 @@ onBeforeUnmount(() => {
   clearTimeout(searchTimer);
   window.removeEventListener("click", unfocusOutsideGlobe);
 });
-
-async function removeTrip() {
-  if (!confirm("¿Estás seguro de querer eliminar este viaje?")) {
-    return;
-  }
-  if (!trip.value) {
-    return;
-  }
-  await deleteTrip(trip.value.id);
-  navigateTo("/");
-}
 </script>
 
 <template>
-  <main class="relative h-dvh w-full overflow-hidden bg-[var(--app-bg)]">
-    <div v-if="tripId" class="absolute inset-0 flex">
-      <div class="relative min-w-0 flex-1">
+  <main class="relative h-full min-h-0 overflow-hidden bg-[var(--app-bg)]">
+    <div
+      v-if="tripId"
+      class="flex h-full min-h-0 flex-col md:absolute md:inset-0 md:flex-row"
+    >
+      <div class="flex shrink-0 justify-center gap-2 px-4 py-2 md:hidden">
+        <button
+          type="button"
+          class="flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-bold tracking-tight"
+          :class="
+            mobilePane === 'globe'
+              ? 'bg-(--ui-text) text-(--ui-text-contrast)'
+              : 'bg-white/40'
+          "
+          :aria-pressed="mobilePane === 'globe'"
+          @click="mobilePane = 'globe'"
+        >
+          <UIcon name="i-lucide-globe" class="size-4" />
+          Globo
+        </button>
+        <button
+          type="button"
+          class="flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-bold tracking-tight"
+          :class="
+            mobilePane === 'places'
+              ? 'bg-(--ui-text) text-(--ui-text-contrast)'
+              : 'bg-white/40'
+          "
+          :aria-pressed="mobilePane === 'places'"
+          @click="mobilePane = 'places'"
+        >
+          <UIcon name="i-lucide-map-pin" class="size-4" />
+          Lugares
+        </button>
+      </div>
+
+      <div
+        class="relative min-h-0 min-w-0 flex-1"
+        :class="mobilePane !== 'globe' && 'max-md:hidden'"
+      >
         <GlobeMap
           :places="places"
           :focused-place-id="focusedPlaceId"
           :preview="preview"
           @focus-place="focusedPlaceId = $event"
         />
-
-        <div class="relative z-10 flex flex-col p-8 h-[95vh] max-w-sm">
-          <UButton
-            class="px-0 text-sm font-medium text-(--ui-bg-elevated) tracking-[0.18em] uppercase hover:font-bold hover:text-(--ui-bg-elevated) transition-all duration-300"
-            variant="link"
-            @click="navigateTo('/')"
-          >
-            Borradores de viaje
-          </UButton>
-          <TripHeader
-            v-if="trip"
-            :trip="trip"
-            @edit="editOpen = true"
-            :editingPlaces="!editMode"
-          />
-          <div
-            class="flex flex-col gap-2 mt-8 bg-(--ui-bg-elevated)/70 w-fit rounded-lg p-4"
-          >
-            <USwitch v-model="editMode" label="Edit mode" />
-            <USwitch v-model="collapseAll" label="Collapse all" />
-            <UButton
-              variant="solid"
-              icon="i-heroicons-cog-6-tooth"
-              class="w-fit text-(--ui-text-contrast) bg-(--ui-text) font-bold"
-              @click="navigateTo(`/trip/${tripId}/planning`)"
+        <div
+          class="pointer-events-none relative z-10 hidden flex-col px-8 pt-44 pb-8 md:flex"
+        >
+          <div class="pointer-events-auto mt-8 flex flex-col gap-2">
+            <div
+              v-if="canBeEdited"
+              class="w-fit rounded-full bg-(--ui-bg-elevated)/70 px-4 py-2 shadow-[0_8px_32px_color-mix(in_srgb,var(--glass-shadow)_24%,transparent)] backdrop-blur-2xl"
             >
-              Planificación
-            </UButton>
+              <USwitch
+                v-model="editMode"
+                label="Edit mode"
+                :ui="{ label: 'tracking-tight ' }"
+              />
+            </div>
+            <div
+              class="w-fit rounded-full bg-(--ui-bg-elevated)/70 px-4 py-2 shadow-[0_8px_32px_color-mix(in_srgb,var(--glass-shadow)_24%,transparent)] backdrop-blur-2xl"
+            >
+              <USwitch
+                v-model="collapseAll"
+                label="Collapse all"
+                :ui="{ label: 'tracking-tight' }"
+              />
+            </div>
 
             <p v-if="pageError" class="max-w-xs text-xs text-red-300">
               {{ pageError }}
             </p>
           </div>
-          <div class="flex-grow" />
-          <UColorModeSelect class="w-fit" />
         </div>
+      </div>
 
+      <div
+        class="flex min-h-0 flex-col max-md:flex-1 md:h-full md:shrink-0"
+        :class="mobilePane !== 'places' && 'max-md:hidden'"
+      >
+        <div class="flex flex-col gap-2 px-4 py-2 md:hidden">
+          <div
+            v-if="canBeEdited"
+            class="w-fit rounded-full bg-(--ui-bg-elevated)/70 px-4 py-2"
+          >
+            <USwitch v-model="editMode" label="Edit mode" />
+          </div>
+          <div class="w-fit rounded-full bg-(--ui-bg-elevated)/70 px-4 py-2">
+            <USwitch v-model="collapseAll" label="Collapse all" />
+          </div>
+          <p v-if="pageError" class="max-w-xs text-xs text-red-300">
+            {{ pageError }}
+          </p>
+        </div>
         <div
           v-if="editMode"
-          class="pointer-events-none fixed top-10 right-10 z-40 flex w-[min(24rem,calc(100vw-2.5rem))] flex-col items-end gap-3"
+          class="pointer-events-none fixed z-40 flex w-[min(24rem,calc(100vw-2.5rem))] flex-col items-end max-md:top-44 max-md:right-4 md:top-24 md:right-6"
         >
           <UModal
             v-model:open="addPlaceOpen"
@@ -512,7 +433,7 @@ async function removeTrip() {
           >
             <UButton
               icon="i-lucide-plus"
-              class="pointer-events-auto rounded-full hover:text-background/80 text-(--ui-bg-elevated)"
+              class="pointer-events-auto rounded-full px-4 py-2 text-md tracking-tight text-(--ui-bg-elevated) hover:text-background/80"
             >
               Añadir lugar
             </UButton>
@@ -627,7 +548,7 @@ async function removeTrip() {
                 <UButton
                   type="button"
                   variant="link"
-                  class="text-(--ui-bg-elevated) font-bold"
+                  class="font-bold text-(--ui-bg-elevated)"
                   @click="addPlaceOpen = false"
                 >
                   Cancelar
@@ -643,19 +564,20 @@ async function removeTrip() {
             </template>
           </UModal>
         </div>
-      </div>
 
-      <TripPlacesPanel
-        :places="places"
-        :start-date="trip?.startDate ?? null"
-        :editing="editMode"
-        :collapse-all="collapseAll"
-        :focused-place-id="focusedPlaceId"
-        @focus-place="focusedPlaceId = $event"
-        @reorder="savePlaceOrder"
-        @edit-place="openPlaceEditor"
-        @delete-place="deleteEditedPlace"
-      />
+        <TripPlacesPanel
+          class="self-end"
+          :places="places"
+          :start-date="trip?.startDate ?? null"
+          :editing="editMode"
+          :collapse-all="collapseAll"
+          :focused-place-id="focusedPlaceId"
+          @focus-place="focusedPlaceId = $event"
+          @reorder="savePlaceOrder"
+          @edit-place="openPlaceEditor"
+          @delete-place="deleteEditedPlace"
+        />
+      </div>
     </div>
 
     <div
@@ -674,78 +596,6 @@ async function removeTrip() {
         </NuxtLink>
       </div>
     </div>
-
-    <UModal
-      v-model:open="editOpen"
-      title="Editar viaje"
-      :ui="{
-        title: 'text-(--ui-text-contrast) tracking-tight',
-        content: ' bg-(--ui-text)',
-        close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10',
-      }"
-    >
-      <template #body>
-        <UForm
-          id="edit-trip-form"
-          class="flex flex-col gap-3"
-          :on-submit="saveTripDetails"
-        >
-          <UFormField
-            label="Nombre"
-            required
-            :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
-          >
-            <UInput
-              v-model="draftName"
-              required
-              class="w-full"
-              :ui="{
-                base: 'placeholder:text-(--ui-text-contrast) text-(--ui-text-contrast)',
-              }"
-            />
-          </UFormField>
-          <UFormField
-            label="Descripción"
-            :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
-          >
-            <UTextarea
-              v-model="draftDescription"
-              :rows="3"
-              class="w-full"
-              :ui="{
-                base: 'placeholder:text-(--ui-text-contrast) text-(--ui-text-contrast)',
-              }"
-            />
-          </UFormField>
-          <UFormField
-            label="Inicio"
-            :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
-          >
-            <UInput
-              v-model="draftStart"
-              type="date"
-              class="w-full"
-              :ui="{
-                base: 'placeholder:text-(--ui-text-contrast) text-(--ui-text-contrast)',
-              }"
-            />
-          </UFormField>
-        </UForm>
-      </template>
-      <template #footer>
-        <div class="flex w-full justify-end gap-4">
-          <UButton
-            @click="removeTrip"
-            icon="i-lucide-trash"
-            variant="link"
-            class="text-(--ui-bg-elevated) font-bold"
-            >Eliminar viaje</UButton
-          >
-
-          <UButton type="submit" form="edit-trip-form">Guardar</UButton>
-        </div>
-      </template>
-    </UModal>
 
     <UModal
       v-model:open="editPlaceOpen"

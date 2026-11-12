@@ -101,12 +101,13 @@ function dropPlace(index: number) {
 </script>
 
 <template>
-  <aside
-    class="relative z-20 mt-10 flex max-h-[90vh] flex-col items-end justify-center gap-4 overflow-hidden transition-[width] duration-500 ease-out"
-    :class="places.length > 0 ? 'w-[min(26rem,42vw)]' : 'w-0'"
+  <section
+    aria-label="Lugares del viaje"
+    class="relative z-20 flex h-[60vh] w-full flex-col items-center justify-start gap-4 overflow-hidden md:mt-10 md:items-end md:justify-center"
+    :class="places.length > 0 ? 'md:w-[min(26rem,42vw)]' : 'md:w-0'"
   >
     <div
-      class="flex max-h-[90vh] w-[min(26rem,42vw)] flex-col gap-4 overflow-y-auto pe-4"
+      class="flex w-full flex-col gap-4 overflow-y-auto px-4 md:w-[min(26rem,42vw)] md:px-0 md:pe-4"
     >
       <div
         v-for="(place, index) in places"
@@ -199,5 +200,5 @@ function dropPlace(index: number) {
         </UCard>
       </div>
     </div>
-  </aside>
+  </section>
 </template>

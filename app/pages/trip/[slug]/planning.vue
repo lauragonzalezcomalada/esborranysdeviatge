@@ -1,7 +1,12 @@
 <script setup>
+definePageMeta({
+  layout: "trip",
+});
+
 const tripId = useRoute().params.slug;
 
-const { loadTrip } = useTripPlaces();
+const { canBeEdited } = useTripShell();
+
 const {
   loadTripResources,
   insertGroup,
@@ -15,7 +20,6 @@ const {
 } = useTripResources();
 
 const resources = ref([]);
-const trip = ref(null);
 
 const groupName = ref("");
 const categoryName = ref("");
@@ -33,14 +37,19 @@ const optionLink = ref("");
 const optionQuantity = ref(1);
 
 function openAddGroupModal() {
+  if (!canBeEdited.value) {
+    return;
+  }
   addGroupModalOpen.value = true;
 }
 onMounted(async () => {
-  trip.value = await loadTrip(tripId);
   resources.value = await loadTripResources(tripId);
 });
 
 async function saveGroup() {
+  if (!canBeEdited.value) {
+    return;
+  }
   try {
     const group = await insertGroup({ name: groupName.value, tripId: tripId });
     resources.value.push(group);
@@ -52,11 +61,17 @@ async function saveGroup() {
 }
 
 function openAddCategoryModal(groupId) {
+  if (!canBeEdited.value) {
+    return;
+  }
   selectedGroupId.value = groupId;
   addCategoryModalOpen.value = true;
 }
 
 async function saveCategory() {
+  if (!canBeEdited.value) {
+    return;
+  }
   try {
     const group = resources.value.find(
       (resource) => resource.id === selectedGroupId.value,
@@ -83,11 +98,17 @@ async function saveCategory() {
 }
 
 function openAddOptionModal(categoryId) {
+  if (!canBeEdited.value) {
+    return;
+  }
   selectedCategoryId.value = categoryId;
   addOptionModalOpen.value = true;
 }
 
 async function saveOption() {
+  if (!canBeEdited.value) {
+    return;
+  }
   try {
     const category = resources.value
       .flatMap((group) => group.categories ?? [])
@@ -117,6 +138,9 @@ async function saveOption() {
 }
 
 async function updateOptionSelection(optionId, categoryId) {
+  if (!canBeEdited.value) {
+    return;
+  }
   const option = resources.value
     .flatMap((group) => group.categories ?? [])
     .find((category) => category.id === categoryId)
@@ -133,6 +157,9 @@ async function updateOptionSelection(optionId, categoryId) {
 }
 
 async function removeGroup(groupId) {
+  if (!canBeEdited.value) {
+    return;
+  }
   try {
     await deleteGroup(groupId);
     resources.value = resources.value.filter((r) => r.id !== groupId);
@@ -142,6 +169,9 @@ async function removeGroup(groupId) {
 }
 
 async function removeOption(optionId, categoryId) {
+  if (!canBeEdited.value) {
+    return;
+  }
   try {
     await deleteOption(optionId);
     resources.value
@@ -169,6 +199,9 @@ const editOptionForm = reactive({
 });
 
 function openEditOptionModal(option, categoryId) {
+  if (!canBeEdited.value) {
+    return;
+  }
   editingOptionId.value = option.id;
   editingCategoryId.value = categoryId;
   editOptionError.value = "";
@@ -184,6 +217,9 @@ function openEditOptionModal(option, categoryId) {
 }
 
 async function saveEditedOption() {
+  if (!canBeEdited.value) {
+    return;
+  }
   if (editOptionSaving.value) return;
 
   editOptionError.value = "";
@@ -237,6 +273,9 @@ async function saveEditedOption() {
 }
 
 async function removeCategory(categoryId, groupId) {
+  if (!canBeEdited.value) {
+    return;
+  }
   try {
     await deleteCategory(categoryId);
 
@@ -257,82 +296,66 @@ const cardBgColors = ref([
   "bg-(--ui-bg)/70",
   "bg-(--app-fg)/70",
 ]);
+
+function selectedCost(resource) {
+  return (resource.categories ?? []).reduce((subtotal, category) => {
+    return (
+      subtotal +
+      (category.options ?? []).reduce((sum, option) => {
+        return option.selected
+          ? sum +
+              (Number(option.quantity) || 0) * (Number(option.unit_price) || 0)
+          : sum;
+      }, 0)
+    );
+  }, 0);
+}
+
+const tripTotal = computed(() =>
+  (resources.value ?? []).reduce(
+    (total, resource) => total + selectedCost(resource),
+    0,
+  ),
+);
 </script>
 
 <template>
   <main
     class="min-h-screen w-full overflow-hidden bg-(--app-bg) flex flex-col py-2 md:py-4 px-4 md:px-8"
   >
-    <div class="flex gap-2 w-full justify-between items-center">
-      <div class="flex gap-2 md:gap-8 items-center max-w-[55%] md:w-auto">
-        <div class="flex flex-col gap-0 md:gap-2">
-          <UButton
-            class="text-left px-0 text-sm font-medium text-(--ui-bg-elevated) tracking-[0.18em] uppercase hover:font-bold hover:text-(--ui-bg-elevated) transition-all duration-300"
-            variant="link"
-            @click="navigateTo('/')"
-          >
-            Borradores de viaje
-          </UButton>
-          <p class="font-semibold tracking-tight text-4xl">
-            {{ trip?.name ?? "" }}
-          </p>
-        </div>
-
-        <ColorModeSelect />
-      </div>
-
-      <div class="flex gap-3 items-center">
-        <div class="hidden md:flex flex-wrap gap-2 max-w-[50vw]">
+    <div class="relative mt-4 flex w-full items-center justify-end gap-3 md:mt-24">
+      <div
+        class="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block"
+      >
+        <div class="relative">
+          <div class="flex max-w-[50vw] flex-wrap justify-center gap-2">
+            <div
+              v-for="(resource, index) in resources"
+              :key="resource.id"
+              class="flex h-fit rounded-full px-2.5 py-1.5 text-sm"
+              :class="cardBgColors[index % cardBgColors.length]"
+            >
+              {{ resource.name }}: {{ selectedCost(resource) }} €
+            </div>
+          </div>
           <div
-            v-for="(resource, index) in resources"
-            :key="resource.id"
-            class="flex rounded-full px-2.5 py-1.5 h-fit text-sm"
-            :class="cardBgColors[index % cardBgColors.length]"
+            class="absolute top-1/2 left-full ml-3 flex -translate-y-1/2 flex-row gap-1 rounded-full bg-(--ui-text) px-3 py-2 font-bold whitespace-nowrap text-(--ui-text-contrast)"
           >
-            {{ resource.name }}:
-            {{
-              resource.categories?.reduce((acc, category) => {
-                return (
-                  acc +
-                  category.options?.reduce((acc, option) => {
-                    if (option.selected) {
-                      return acc + option.quantity * option.unit_price;
-                    }
-                    return acc;
-                  }, 0)
-                );
-              }, 0)
-            }}
+            <span>Total:</span>
+            {{ tripTotal }}
             €
           </div>
         </div>
-        <div
-          class="flex flex-col md:flex-row gap-1 rounded-full bg-(--ui-text) text-(--ui-text-contrast) font-bold py-2 px-2 md:py-2 md:px-3 whitespace-nowrap"
-        >
-          <span class="hidden md:inline">Total:</span>
-          {{
-            (resources ?? []).reduce((total, resource) => {
-              return (
-                total +
-                (resource.categories ?? []).reduce((subtotal, category) => {
-                  return (
-                    subtotal +
-                    (category.options ?? []).reduce((sum, option) => {
-                      return option.selected
-                        ? sum +
-                            (Number(option.quantity) || 0) *
-                              (Number(option.unit_price) || 0)
-                        : sum;
-                    }, 0)
-                  );
-                }, 0)
-              );
-            }, 0)
-          }}
-          €
-        </div>
+      </div>
+      <div
+        class="flex flex-col gap-1 rounded-full bg-(--ui-text) px-2 py-2 font-bold whitespace-nowrap text-(--ui-text-contrast) md:hidden"
+      >
+        <span>Total:</span>
+        {{ tripTotal }}
+        €
       </div>
       <UModal
+        v-if="canBeEdited"
         title="Nuevo grupo"
         :ui="{
           title: 'text-(--ui-text-contrast) tracking-tight',
@@ -413,7 +436,7 @@ const cardBgColors = ref([
               {{ resource.name }}
             </p>
 
-            <div class="flex gap-2 items-center">
+            <div v-if="canBeEdited" class="flex gap-2 items-center">
               <UButton
                 icon="i-heroicons-trash"
                 aria-label="Borrar grupo"
@@ -498,7 +521,7 @@ const cardBgColors = ref([
                 {{ category.name }}
               </p>
 
-              <div class="flex items-center gap-2">
+              <div v-if="canBeEdited" class="flex items-center gap-2">
                 <UButton
                   icon="i-heroicons-trash"
                   aria-label="Eliminar categoría"
@@ -626,6 +649,7 @@ const cardBgColors = ref([
             >
               <UCheckbox
                 :model-value="option.selected"
+                :disabled="!canBeEdited"
                 @update:model-value="
                   updateOptionSelection(option.id, category.id)
                 "
@@ -666,6 +690,7 @@ const cardBgColors = ref([
                   </p>
 
                   <UDropdownMenu
+                    v-if="canBeEdited"
                     :items="[
                       {
                         label: 'Editar',

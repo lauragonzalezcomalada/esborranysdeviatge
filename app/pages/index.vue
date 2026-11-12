@@ -259,20 +259,6 @@ const openOurStories = () => {
           </div>
         </div>
       </div>
-
-      <!--  <div
-        class="rounded-full border border-(--ui-border)/10 bg-white/40 p-3 w-fit flex items-center justify-center backdrop-blur-2xl shadow-[0_8px_32px_color-mix(in_srgb,var(--glass-shadow)_24%,transparent)]"
-      >
-        <UModal :overlay="false">
-          <UButton icon="i-lucide-user" variant="link" />
-
-          <template #content>
-            <Placeholder class="h-48 m-4" />
-          </template>
-        </UModal>
-       
-   
-      </div> -->
     </div>
 
     <h1
