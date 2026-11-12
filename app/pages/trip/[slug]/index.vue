@@ -366,22 +366,28 @@ onBeforeUnmount(() => {
           :preview="preview"
           @focus-place="focusedPlaceId = $event"
         />
+      </div>
+
+      <div
+        class="flex min-h-0 flex-col overflow-hidden max-md:flex-1 md:h-full md:shrink-0 md:pt-24"
+        :class="mobilePane !== 'places' && 'max-md:hidden'"
+      >
         <div
-          class="pointer-events-none relative z-10 hidden flex-col px-8 pt-44 pb-8 md:flex"
+          class="flex w-full shrink-0 flex-col items-end gap-2 px-4 py-2 md:px-0 md:pe-4"
         >
-          <div class="pointer-events-auto mt-8 flex flex-col gap-2">
+          <div class="flex items-center gap-2">
             <div
               v-if="canBeEdited"
-              class="w-fit rounded-full bg-(--ui-bg-elevated)/70 px-4 py-2 shadow-[0_8px_32px_color-mix(in_srgb,var(--glass-shadow)_24%,transparent)] backdrop-blur-2xl"
+              class="w-fit rounded-full bg-(--ui-bg-elevated)/70 px-2 md:px-4 py-1 md:py-2 shadow-[0_8px_32px_color-mix(in_srgb,var(--glass-shadow)_24%,transparent)] backdrop-blur-2xl"
             >
               <USwitch
                 v-model="editMode"
                 label="Edit mode"
-                :ui="{ label: 'tracking-tight ' }"
+                :ui="{ label: 'tracking-tight' }"
               />
             </div>
             <div
-              class="w-fit rounded-full bg-(--ui-bg-elevated)/70 px-4 py-2 shadow-[0_8px_32px_color-mix(in_srgb,var(--glass-shadow)_24%,transparent)] backdrop-blur-2xl"
+              class="w-fit rounded-full bg-(--ui-bg-elevated)/70 px-2 md:px-4 py-1 md:py-2 shadow-[0_8px_32px_color-mix(in_srgb,var(--glass-shadow)_24%,transparent)] backdrop-blur-2xl"
             >
               <USwitch
                 v-model="collapseAll"
@@ -389,51 +395,25 @@ onBeforeUnmount(() => {
                 :ui="{ label: 'tracking-tight' }"
               />
             </div>
-
-            <p v-if="pageError" class="max-w-xs text-xs text-red-300">
-              {{ pageError }}
-            </p>
           </div>
-        </div>
-      </div>
-
-      <div
-        class="flex min-h-0 flex-col max-md:flex-1 md:h-full md:shrink-0"
-        :class="mobilePane !== 'places' && 'max-md:hidden'"
-      >
-        <div class="flex flex-col gap-2 px-4 py-2 md:hidden">
-          <div
-            v-if="canBeEdited"
-            class="w-fit rounded-full bg-(--ui-bg-elevated)/70 px-4 py-2"
-          >
-            <USwitch v-model="editMode" label="Edit mode" />
-          </div>
-          <div class="w-fit rounded-full bg-(--ui-bg-elevated)/70 px-4 py-2">
-            <USwitch v-model="collapseAll" label="Collapse all" />
-          </div>
-          <p v-if="pageError" class="max-w-xs text-xs text-red-300">
+          <p v-if="pageError" class="max-w-xs text-right text-xs text-red-300">
             {{ pageError }}
           </p>
-        </div>
-        <div
-          v-if="editMode"
-          class="pointer-events-none fixed z-40 flex w-[min(24rem,calc(100vw-2.5rem))] flex-col items-end max-md:top-44 max-md:right-4 md:top-24 md:right-6"
-        >
           <UModal
+            v-if="editMode"
             v-model:open="addPlaceOpen"
             title="Añadir lugar"
-            :overlay="false"
-            :portal="false"
+            class="mb-2"
             :ui="{
-              title: 'text-(--ui-bg-elevated) tracking-tight',
-              content:
-                'pointer-events-auto relative inset-auto w-full max-w-none translate-none max-h-[calc(100dvh-5.5rem)] overflow-hidden bg-(--ui-text)',
-              close: 'text-(--ui-bg-elevated) hover:bg-(--ui-text-contrast)/10',
+              title: 'text-(--ui-text-contrast) tracking-tight',
+              content: 'bg-(--ui-text)',
+              close:
+                'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10',
             }"
           >
             <UButton
               icon="i-lucide-plus"
-              class="pointer-events-auto rounded-full px-4 py-2 text-md tracking-tight text-(--ui-bg-elevated) hover:text-background/80"
+              class="rounded-full px-4 py-2 text-md tracking-tight text-(--ui-bg-elevated) hover:text-background/80"
             >
               Añadir lugar
             </UButton>

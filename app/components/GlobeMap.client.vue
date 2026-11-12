@@ -232,7 +232,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="pointer-events-none absolute inset-0">
+  <div class="pointer-events-none absolute inset-y-0 inset-x-4 md:inset-x-0">
     <div
       class="flex h-full min-w-0 items-center justify-center [container-type:size]"
     >

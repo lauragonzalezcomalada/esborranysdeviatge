@@ -323,7 +323,9 @@ const tripTotal = computed(() =>
   <main
     class="min-h-screen w-full overflow-hidden bg-(--app-bg) flex flex-col py-2 md:py-4 px-4 md:px-8"
   >
-    <div class="relative mt-4 flex w-full items-center justify-end gap-3 md:mt-24">
+    <div
+      class="relative mt-4 flex w-full items-center justify-end gap-3 md:mt-24"
+    >
       <div
         class="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block"
       >
@@ -342,7 +344,7 @@ const tripTotal = computed(() =>
             class="absolute top-1/2 left-full ml-3 flex -translate-y-1/2 flex-row gap-1 rounded-full bg-(--ui-text) px-3 py-2 font-bold whitespace-nowrap text-(--ui-text-contrast)"
           >
             <span>Total:</span>
-            {{ tripTotal }}
+            {{ tripTotal.toFixed(2) }}
             €
           </div>
         </div>
@@ -350,8 +352,8 @@ const tripTotal = computed(() =>
       <div
         class="flex flex-col gap-1 rounded-full bg-(--ui-text) px-2 py-2 font-bold whitespace-nowrap text-(--ui-text-contrast) md:hidden"
       >
-        <span>Total:</span>
-        {{ tripTotal }}
+        <span class="hidden md:inline">Total:</span>
+        {{ tripTotal.toFixed(2) }}
         €
       </div>
       <UModal
@@ -526,12 +528,11 @@ const tripTotal = computed(() =>
                   icon="i-heroicons-trash"
                   aria-label="Eliminar categoría"
                   variant="solid"
-                  color="error"
-                  class="rounded-full"
+                  class="rounded-full text-(--ui-text-contrast) bg-(--ui-primary)"
                   @click="removeCategory(category.id, resource.id)"
                   :ui="{ leadingIcon: 'size-4 md:size-5' }"
                 >
-                  <span class="hidden md:inline">Eliminar</span>
+                  <span class="hidden md:inline">Borrar categoría</span>
                 </UButton>
 
                 <UModal
@@ -695,6 +696,7 @@ const tripTotal = computed(() =>
                       {
                         label: 'Editar',
                         icon: 'i-heroicons-pencil-square',
+
                         onSelect: () =>
                           openEditOptionModal(option, category.id),
                       },
@@ -705,6 +707,12 @@ const tripTotal = computed(() =>
                         onSelect: () => removeOption(option.id, category.id),
                       },
                     ]"
+                    :ui="{
+                      content: 'bg-(--ui-text) rounded-xl',
+                      item: 'text-(--ui-text-contrast) rounded-xl hover:bg-(--ui-text-contrast)/10',
+                      itemLabel: 'text-(--ui-text-contrast)',
+                      itemLeading: 'text-(--ui-text-contrast)',
+                    }"
                   >
                     <UButton
                       icon="i-heroicons-ellipsis-horizontal"

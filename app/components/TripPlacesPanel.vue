@@ -103,16 +103,16 @@ function dropPlace(index: number) {
 <template>
   <section
     aria-label="Lugares del viaje"
-    class="relative z-20 flex h-[60vh] w-full flex-col items-center justify-start gap-4 overflow-hidden md:mt-10 md:items-end md:justify-center"
+    class="relative flex min-h-0 w-full flex-1 flex-col items-stretch justify-start gap-4 overflow-hidden md:items-end"
     :class="places.length > 0 ? 'md:w-[min(26rem,42vw)]' : 'md:w-0'"
   >
     <div
-      class="flex w-full flex-col gap-4 overflow-y-auto px-4 md:w-[min(26rem,42vw)] md:px-0 md:pe-4"
+      class="flex min-h-0 w-full flex-1 flex-col gap-4 overflow-y-auto px-4 md:w-[min(26rem,42vw)] md:px-0 md:pe-4"
     >
       <div
         v-for="(place, index) in places"
         :key="place.id"
-        class="flex items-start gap-3 py-0.5"
+        class="flex items-start gap-1 md:gap-3 py-0.5"
         :class="dragFrom === index ? 'opacity-40' : ''"
         :draggable="editing"
         @dragstart="startPlaceDrag(index, $event)"
@@ -123,16 +123,25 @@ function dropPlace(index: number) {
       >
         <span
           v-if="!startDate"
-          class="w-8 shrink-0 pt-5 text-right text-lg font-semibold tabular-nums"
+          class="w-2 shrink-0 pt-5 text-right text-lg font-semibold tabular-nums"
         >
           {{ placeIndexes[index] }}
         </span>
         <div
           v-else
-          class="flex shrink-0 flex-col items-center justify-end gap-1.5 rounded-xl p-3 text-sm font-medium whitespace-nowwrap bg-[var(--ui-bg-elevated)]"
+          class="flex shrink-0 flex-col items-center justify-end rounded-xl p-1.5 md:p-2.5 text-xs md:text-sm font-medium whitespace-nowwrap bg-[var(--ui-bg-elevated)]"
         >
-          <UIcon name="i-lucide-calendar" class="size-4 shrink-0" />
-          <span class="text-xs tabular-nums">{{ placeDates[index] }}</span>
+          <!-- <UIcon name="i-lucide-calendar" class="size-4 shrink-0" />
+          <span class="text-xs tabular-nums">{{ placeDates[index] }}</span> -->
+
+          <span
+            class="text-md md:text-lg text-center font-bold tracking-tight leading-none"
+            >{{ placeDates[index]?.split(" ")[1] }}</span
+          >
+          <span
+            class="text-xs md:text-sm text-center font-bold tracking-tight leading-none"
+            >{{ placeDates[index]?.split(" ")[0]?.toUpperCase() ?? "" }}</span
+          >
         </div>
         <UCard
           class="min-w-0 flex-1 cursor-grab transition-colors active:cursor-grabbing"

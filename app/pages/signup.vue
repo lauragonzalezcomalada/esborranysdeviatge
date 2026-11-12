@@ -25,14 +25,19 @@ const handleSignup = async () => {
 
 <template>
   <div class="h-screen w-full flex items-center justify-center">
-    <UCard class="bg-(--app-bg)">
-      <div class="flex flex-col gap-8">
-        <span class="text-(--ui-text-contrast) font-bold">
+    <div
+      class="flex items-center justify-center w-[40vw] h-[40vw] rounded-full bg-(--ui-text) text-(--ui-text-contrast)"
+    >
+      <div class="flex flex-col gap-8 p-20">
+        <span class="text-4xl font-bold tracking-tight">
           Sign up to design your own stories! 🚀
         </span>
 
         <UForm class="flex flex-col gap-2" @submit.prevent="handleSignup">
-          <UFormField label="Email">
+          <UFormField
+            label="Email"
+            :ui="{ label: 'text-(--ui-text-contrast) text-lg tracking-tight' }"
+          >
             <UInput
               v-model="email"
               type="email"
@@ -40,7 +45,10 @@ const handleSignup = async () => {
               class="w-full"
             />
           </UFormField>
-          <UFormField label="Password">
+          <UFormField
+            label="Password"
+            :ui="{ label: 'text-(--ui-text-contrast) text-lg tracking-tight' }"
+          >
             <UInput
               v-model="password"
               type="password"
@@ -50,11 +58,11 @@ const handleSignup = async () => {
           </UFormField>
           <UButton
             type="submit"
-            class="w-fit mt-8 bg-(--ui-text) text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/80"
+            class="w-fit mx-auto mt-8 bg-(--app-bg) text-(--ui-text-contrast) text-2xl font-semibold tracking-tighter hover:bg-(--ui-text-contrast)/80 rounded-full px-10"
             >Sign up</UButton
           >
         </UForm>
       </div>
-    </UCard>
+    </div>
   </div>
 </template>

@@ -1,12 +1,7 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
-@import url('https://fonts.googleapis.com/css2?family=La+Belle+Aurore&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap');
 
-
-  
 @theme static {
-  --font-la-belle-aurore: "La Belle Aurore", cursive;
 
   --color-green-50: #EFFDF5;
   --color-green-100: #D9FBE8;
