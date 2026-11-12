@@ -30,7 +30,7 @@ const handleSignup = async () => {
     >
       <div class="flex flex-col gap-8 p-20">
         <span class="text-4xl font-bold tracking-tight">
-          Sign up to design your own stories! 🚀
+          Regístrate para diseñar tus propias historias! 🚀
         </span>
 
         <UForm class="flex flex-col gap-2" @submit.prevent="handleSignup">
@@ -46,7 +46,7 @@ const handleSignup = async () => {
             />
           </UFormField>
           <UFormField
-            label="Password"
+            label="Contraseña"
             :ui="{ label: 'text-(--ui-text-contrast) text-lg tracking-tight' }"
           >
             <UInput
@@ -58,8 +58,9 @@ const handleSignup = async () => {
           </UFormField>
           <UButton
             type="submit"
-            class="w-fit mx-auto mt-8 bg-(--app-bg) text-(--ui-text-contrast) text-2xl font-semibold tracking-tighter hover:bg-(--ui-text-contrast)/80 rounded-full px-10"
-            >Sign up</UButton
+            :disabled="!password.length || !email.length"
+            class="w-fit mx-auto mt-8 bg-(--app-fg) text-(--ui-text-contrast) text-2xl font-semibold tracking-tighter hover:bg-(--ui-text-contrast)/80 rounded-full px-10"
+            >Mandar mail de confirmación</UButton
           >
         </UForm>
       </div>

@@ -118,7 +118,7 @@ const openOurStories = () => {
           <template #content>
             <div class="p-4 bg-(--ui-text) rounded-md flex flex-col gap-2">
               <div class="text-(--ui-text-contrast)/90 font-semibold">
-                Sign in to design your own stories!
+                Entra para diseñar tus propias historias!
               </div>
               <UForm class="flex flex-col gap-2" @submit.prevent="handleLogin">
                 <UFormField
@@ -133,7 +133,7 @@ const openOurStories = () => {
                   />
                 </UFormField>
                 <UFormField
-                  label="Password"
+                  label="Contraseña"
                   :ui="{ label: 'text-(--ui-text-contrast)/90' }"
                 >
                   <UInput
@@ -157,15 +157,15 @@ const openOurStories = () => {
                 <UButton
                   type="submit"
                   class="w-fit mt-2 bg-(--ui-bg-elevated) text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/80"
-                  >Login</UButton
+                  >Confirmar</UButton
                 >
                 <USeparator />
                 <div class="text-xs text-(--ui-text-contrast)/90 mt-2">
-                  <span class="italic"> Don't you have an account? </span>
+                  <span class="italic"> Aún no tienes una cuenta? </span>
                   <a
                     href="/signup"
                     class="text-(--ui-text-contrast)/90 font-semibold"
-                    >Sign up now!</a
+                    >Regístrate ahora!</a
                   >
                 </div>
               </UForm>
@@ -192,11 +192,10 @@ const openOurStories = () => {
           <template #content>
             <div class="px-2 bg-(--ui-text) rounded-md flex flex-col gap-2">
               <UButton
-                label="Logout"
+                label="Acuérdate de volver! 🫡"
                 variant="link"
-                class="text-(--ui-text-contrast)/70 hover:text-(--ui-text-contrast)"
+                class="text-(--ui-text-contrast) hover:text-(--ui-text-contrast)"
                 @click="handleLogout"
-                icon="i-lucide-log-out"
               />
             </div>
           </template>
