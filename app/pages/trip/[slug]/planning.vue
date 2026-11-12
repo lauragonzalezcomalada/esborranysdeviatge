@@ -251,23 +251,87 @@ async function removeCategory(categoryId, groupId) {
     console.error("Error al eliminar la categoría:", error);
   }
 }
+
+const cardBgColors = ref([
+  "bg-(--ui-primary)/70 text-(--ui-text-contrast)",
+  "bg-(--ui-bg)/70",
+  "bg-(--app-fg)/70",
+]);
 </script>
 
 <template>
   <main
-    class="min-h-screen w-full overflow-hidden bg-(--app-bg) flex flex-col py-4 px-8"
+    class="min-h-screen w-full overflow-hidden bg-(--app-bg) flex flex-col py-2 md:py-4 px-4 md:px-8"
   >
-    <div class="flex flex-col max-w-sm">
-      <UButton
-        class="px-0 text-sm font-medium text-(--ui-bg-elevated) tracking-[0.18em] uppercase hover:font-bold hover:text-(--ui-bg-elevated) transition-all duration-300"
-        variant="link"
-        @click="navigateTo('/')"
-      >
-        Borradores de viaje
-      </UButton>
-      <!-- <TripHeader v-if="trip" :trip="trip" /> -->
-    </div>
-    <div class="flex flex-col">
+    <div class="flex gap-2 w-full justify-between items-center">
+      <div class="flex gap-2 md:gap-8 items-center max-w-[55%] md:w-auto">
+        <div class="flex flex-col gap-0 md:gap-2">
+          <UButton
+            class="text-left px-0 text-sm font-medium text-(--ui-bg-elevated) tracking-[0.18em] uppercase hover:font-bold hover:text-(--ui-bg-elevated) transition-all duration-300"
+            variant="link"
+            @click="navigateTo('/')"
+          >
+            Borradores de viaje
+          </UButton>
+          <p class="font-semibold tracking-tight text-4xl">
+            {{ trip?.name ?? "" }}
+          </p>
+        </div>
+
+        <ColorModeSelect />
+      </div>
+
+      <div class="flex gap-3 items-center">
+        <div class="hidden md:flex flex-wrap gap-2 max-w-[50vw]">
+          <div
+            v-for="(resource, index) in resources"
+            :key="resource.id"
+            class="flex rounded-full px-2.5 py-1.5 h-fit text-sm"
+            :class="cardBgColors[index % cardBgColors.length]"
+          >
+            {{ resource.name }}:
+            {{
+              resource.categories?.reduce((acc, category) => {
+                return (
+                  acc +
+                  category.options?.reduce((acc, option) => {
+                    if (option.selected) {
+                      return acc + option.quantity * option.unit_price;
+                    }
+                    return acc;
+                  }, 0)
+                );
+              }, 0)
+            }}
+            €
+          </div>
+        </div>
+        <div
+          class="flex flex-col md:flex-row gap-1 rounded-full bg-(--ui-text) text-(--ui-text-contrast) font-bold py-2 px-2 md:py-2 md:px-3 whitespace-nowrap"
+        >
+          <span class="hidden md:inline">Total:</span>
+          {{
+            (resources ?? []).reduce((total, resource) => {
+              return (
+                total +
+                (resource.categories ?? []).reduce((subtotal, category) => {
+                  return (
+                    subtotal +
+                    (category.options ?? []).reduce((sum, option) => {
+                      return option.selected
+                        ? sum +
+                            (Number(option.quantity) || 0) *
+                              (Number(option.unit_price) || 0)
+                        : sum;
+                    }, 0)
+                  );
+                }, 0)
+              );
+            }, 0)
+          }}
+          €
+        </div>
+      </div>
       <UModal
         title="Nuevo grupo"
         :ui="{
@@ -276,15 +340,20 @@ async function removeCategory(categoryId, groupId) {
           close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10',
         }"
         :open="addGroupModalOpen"
+        @update:open="addGroupModalOpen = $event"
       >
         <UButton
           icon="i-heroicons-plus"
           label="Nuevo grupo"
           color="neutral"
           variant="subtle"
-          class="w-fit self-end"
+          class="w-fit rounded-full"
           @click="openAddGroupModal"
-        />
+          :ui="{ leadingIcon: 'size-4 md:size-5' }"
+        >
+          <span class="hidden md:inline">Nuevo grupo</span>
+          <span class="inline md:hidden">Grupo</span>
+        </UButton>
 
         <template #body>
           <UForm
@@ -323,19 +392,24 @@ async function removeCategory(categoryId, groupId) {
         </template>
         <template #footer>
           <div class="flex w-full justify-end gap-2">
-            <UButton type="submit" form="add-place-form"> Guardar </UButton>
+            <UButton type="submit" form="add-place-form" class="rounded-full">
+              Guardar
+            </UButton>
           </div>
         </template>
       </UModal>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-4">
+    </div>
+    <div class="flex flex-col">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-8">
         <div
           v-for="resource in resources"
           :key="resource.id"
-          class="p-4 rounded-md bg-(--ui-bg-elevated) flex flex-col gap-4"
+          class="p-2 md:p-4 rounded-md bg-(--ui-bg-elevated) flex flex-col gap-2 md:gap-4 h-fit"
         >
           <div class="flex gap-2 items-center justify-between">
-            <p class="font-semibold text-xl text-(--ui-text) tracking-tight">
+            <p
+              class="font-semibold text-lg md:text-xl text-(--ui-text) tracking-tight"
+            >
               {{ resource.name }}
             </p>
 
@@ -344,8 +418,9 @@ async function removeCategory(categoryId, groupId) {
                 icon="i-heroicons-trash"
                 aria-label="Borrar grupo"
                 variant="solid"
-                class="w-fit self-end text-(--ui-text-contrast) bg-(--ui-text)"
+                class="w-fit self-end text-(--ui-text-contrast) bg-(--ui-text) rounded-full"
                 @click="removeGroup(resource.id)"
+                :ui="{ leadingIcon: 'size-4 md:size-5' }"
               >
                 <span class="hidden md:inline">Borrar grupo</span>
               </UButton>
@@ -364,8 +439,9 @@ async function removeCategory(categoryId, groupId) {
                   icon="i-heroicons-plus"
                   aria-label="Nueva categoría"
                   variant="solid"
-                  class="w-fit self-end"
+                  class="w-fit self-end rounded-full"
                   @click="openAddCategoryModal(resource.id)"
+                  :ui="{ leadingIcon: 'size-4 md:size-5' }"
                 >
                   <span class="hidden md:inline">Nueva categoría</span>
                 </UButton>
@@ -400,71 +476,25 @@ async function removeCategory(categoryId, groupId) {
                     <UButton
                       type="submit"
                       :form="`add-category-form-${resource.id}`"
+                      class="rounded-full"
                     >
                       Añadir
                     </UButton>
                   </div>
                 </template>
               </UModal>
-              <!--   <UModal
-                title="Nueva categoría"
-                :ui="{
-                  title: 'text-(--ui-text-contrast) tracking-tight',
-                  content: ' bg-(--ui-text)',
-                  close:
-                    'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10',
-                }"
-                :open="addCategoryModalOpen"
-              >
-                <UButton
-                  icon="i-heroicons-plus"
-                  variant="solid"
-                  class="w-fit self-end"
-                  @click="openAddCategoryModal(resource.id)"
-                >
-                  <span class="hidden md:inline">Nueva categoría</span>
-                </UButton>
-                <template #body>
-                  <UForm
-                    id="add-place-form"
-                    class="flex flex-col gap-3"
-                    :on-submit="saveCategory"
-                    :state="{ groupId: resource.id }"
-                  >
-                    <UFormField
-                      label="Nombre"
-                      :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
-                    >
-                      <UInput
-                        v-model="categoryName"
-                        placeholder="Ej.: Ropa de baño"
-                        required
-                        :ui="{
-                          base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
-                        }"
-                        class="w-full"
-                      />
-                    </UFormField>
-                  </UForm>
-                </template>
-                <template #footer>
-                  <div class="flex w-full justify-end gap-2">
-                    <UButton type="submit" form="add-place-form">
-                      Añadir
-                    </UButton>
-                  </div>
-                </template>
-              </UModal> -->
             </div>
           </div>
 
           <div
             v-for="category in resource.categories"
             :key="category.id"
-            class="flex flex-col gap-2 rounded-md p-2 bg-(--ui-text-contrast)"
+            class="flex flex-col gap-2 rounded-md p-2 md:p-4 bg-(--ui-text-contrast)"
           >
             <div class="flex gap-2 items-center justify-between">
-              <p class="font-semibold text-lg text-(--ui-text) tracking-tight">
+              <p
+                class="font-semibold text-md md:text-lg text-(--ui-text) tracking-tight"
+              >
                 {{ category.name }}
               </p>
 
@@ -474,7 +504,9 @@ async function removeCategory(categoryId, groupId) {
                   aria-label="Eliminar categoría"
                   variant="solid"
                   color="error"
+                  class="rounded-full"
                   @click="removeCategory(category.id, resource.id)"
+                  :ui="{ leadingIcon: 'size-4 md:size-5' }"
                 >
                   <span class="hidden md:inline">Eliminar</span>
                 </UButton>
@@ -494,8 +526,9 @@ async function removeCategory(categoryId, groupId) {
                   <UButton
                     icon="i-heroicons-plus"
                     variant="solid"
-                    class="w-fit self-end bg-(--ui-text) text-(--ui-text-contrast)"
+                    class="w-fit self-end bg-(--ui-text) text-(--ui-text-contrast) rounded-full"
                     @click="openAddOptionModal(category.id)"
+                    :ui="{ leadingIcon: 'size-4 md:size-5' }"
                   >
                     <span class="hidden md:inline">Nueva opción</span>
                   </UButton>
@@ -574,7 +607,11 @@ async function removeCategory(categoryId, groupId) {
                   </template>
                   <template #footer>
                     <div class="flex w-full justify-end gap-2">
-                      <UButton type="submit" form="add-place-form">
+                      <UButton
+                        type="submit"
+                        form="add-place-form"
+                        class="rounded-full"
+                      >
                         Añadir
                       </UButton>
                     </div>
@@ -585,61 +622,76 @@ async function removeCategory(categoryId, groupId) {
             <div
               v-for="option in category.options"
               :key="option.id"
-              class="flex gap-2 bg-blue-200 rounded-md p-2 items-center justify-between"
+              class="flex items-center gap-2"
             >
-              <div class="flex flex-col">
-                <p class="text-(--ui-text) font-semibold tracking-tight">
-                  {{ option.name }}
-                </p>
-                <p class="text-xs text-(--ui-text) italic">{{ option.link }}</p>
-              </div>
-
-              <p class="text-sm text-(--ui-text)">
-                {{ option.quantity }} x
-                <span class="font-semibold">{{ option.unit_price }}</span
-                >€
-              </p>
               <UCheckbox
                 :model-value="option.selected"
                 @update:model-value="
                   updateOptionSelection(option.id, category.id)
                 "
-                :ui="{ base: 'border-2' }"
-                class="w-fit"
+                :ui="{
+                  base: 'border-2 border-(--ui-bg) data-[state=checked]:border-(--ui-bg)',
+                  indicator: 'bg-(--ui-bg) text-(--ui-text)',
+                }"
+                class="shrink-0"
               />
-              <p class="text-sm text-(--ui-text) font-semibold">
-                {{ option.quantity * option.unit_price }} €
-              </p>
 
-              <!-- <UButton
-                icon="i-heroicons-trash"
-                variant="link"
-                class="w-fit self-end text-(--ui-text-contrast) hover:text-(--ui-text-contrast)/80"
-                @click="removeOption(option.id, category.id)"
-              /> -->
-              <UDropdownMenu
-                :items="[
-                  {
-                    label: 'Editar',
-                    icon: 'i-heroicons-pencil-square',
-                    onSelect: () => openEditOptionModal(option, category.id),
-                  },
-                  {
-                    label: 'Eliminar',
-                    icon: 'i-heroicons-trash',
-                    color: 'error',
-                    onSelect: () => removeOption(option.id, category.id),
-                  },
-                ]"
+              <div
+                class="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md bg-blue-200 p-2"
               >
-                <UButton
-                  icon="i-heroicons-ellipsis-horizontal"
-                  aria-label="Acciones de la opción"
-                  variant="link"
-                  class="w-fit text-(--ui-text) hover:text-(--ui-text)/80"
-                />
-              </UDropdownMenu>
+                <div class="min-w-0 w-1/2 md:w-3/5 shrink-0">
+                  <p class="text-(--ui-text) font-semibold tracking-tight">
+                    {{ option.name }}
+                  </p>
+                  <a
+                    :href="option.link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="block text-[0.35rem] md:text-[0.5rem] leading-tight text-(--ui-text) italic wrap-anywhere hover:underline"
+                  >
+                    {{ option.link }}
+                  </a>
+                </div>
+                <div
+                  class="flex min-w-0 flex-1 items-center justify-end md:gap-10 gap-2"
+                >
+                  <p class="text-xs md:text-sm text-(--ui-text)/70 text-right">
+                    {{ option.quantity }} x {{ option.unit_price }}€
+                  </p>
+
+                  <p
+                    class="text-sm md:text-md text-(--ui-text) font-semibold whitespace-nowrap"
+                  >
+                    {{ option.quantity * option.unit_price }} €
+                  </p>
+
+                  <UDropdownMenu
+                    :items="[
+                      {
+                        label: 'Editar',
+                        icon: 'i-heroicons-pencil-square',
+                        onSelect: () =>
+                          openEditOptionModal(option, category.id),
+                      },
+                      {
+                        label: 'Eliminar',
+                        icon: 'i-heroicons-trash',
+                        color: 'error',
+                        onSelect: () => removeOption(option.id, category.id),
+                      },
+                    ]"
+                  >
+                    <UButton
+                      icon="i-heroicons-ellipsis-horizontal"
+                      aria-label="Acciones de la opción"
+                      variant="link"
+                      class="w-fit text-(--ui-text) hover:text-(--ui-text-contrast)/80 rounded-full"
+                    />
+                  </UDropdownMenu>
+                </div>
+              </div>
             </div>
+
             <div class="text-(--ui-text) font-semibold self-end">
               Total:
               {{
@@ -674,6 +726,30 @@ async function removeCategory(categoryId, groupId) {
           </div>
         </div>
       </div>
+      <!--
+      <p class="text-(--ui-text) font-semibold tracking-tight self-end">
+        Total del viaje:
+        {{
+          resources.reduce((acc, resource) => {
+            return (
+              acc +
+              resource.categories.reduce((acc, category) => {
+                return (
+                  acc +
+                  category.options?.reduce((acc, option) => {
+                    if (option.selected) {
+                      return acc + option.quantity * option.unit_price;
+                    }
+                    return acc;
+                  }, 0)
+                );
+              }, 0)
+            );
+          }, 0)
+        }}
+        €
+      </p>
+      -->
     </div>
 
     <UModal
@@ -749,6 +825,7 @@ async function removeCategory(categoryId, groupId) {
       <template #footer>
         <div class="flex w-full justify-end gap-2">
           <UButton
+            class="rounded-full"
             label="Cancelar"
             color="neutral"
             variant="subtle"
@@ -757,6 +834,7 @@ async function removeCategory(categoryId, groupId) {
           />
 
           <UButton
+            class="rounded-full"
             type="submit"
             form="edit-option-form"
             label="Guardar"
