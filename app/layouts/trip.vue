@@ -127,7 +127,7 @@ watch(
       </div>
     </div>
 
-    <div class="relative min-h-0 flex-1 overflow-y-auto mb-15 md:mb-0">
+    <div class="relative min-h-0 flex-1 overflow-y-auto">
       <slot />
     </div>
 

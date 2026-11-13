@@ -85,8 +85,7 @@ watch(
       return;
     }
     if (!supabaseConfig?.url || !supabaseConfig.key) {
-      pageError.value =
-        t("errors.missingSupabase");
+      pageError.value = t("errors.missingSupabase");
       return;
     }
     try {
@@ -156,7 +155,10 @@ function placeLabel(feature: PhotonFeature) {
   const { name, street, housenumber, city, state, country } =
     feature.properties;
   const title =
-    name || [street, housenumber].filter(Boolean).join(" ") || city || t("places.fallbackName");
+    name ||
+    [street, housenumber].filter(Boolean).join(" ") ||
+    city ||
+    t("places.fallbackName");
   const detail = [city, state, country].filter(
     (part) => part && part !== title,
   );
@@ -322,7 +324,9 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main class="relative h-full min-h-0 overflow-hidden bg-[var(--app-bg)]">
+  <main
+    class="relative h-full min-h-0 overflow-hidden bg-[var(--app-bg)] pb-15 md:pb-0"
+  >
     <div
       v-if="tripId"
       class="flex h-full min-h-0 flex-col md:absolute md:inset-0 md:flex-row"
@@ -581,7 +585,11 @@ onBeforeUnmount(() => {
 
     <UModal
       v-model:open="editPlaceOpen"
-      :title="editingPlace ? t('places.editing', { name: editingPlace.name }) : t('places.edit')"
+      :title="
+        editingPlace
+          ? t('places.editing', { name: editingPlace.name })
+          : t('places.edit')
+      "
       :ui="{
         title: 'text-(--ui-text-contrast) tracking-tight',
         content: ' bg-(--ui-text)',
