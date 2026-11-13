@@ -274,7 +274,7 @@ const openOurStories = () => {
     </div>
 
     <h1
-      class="whitespace-nowrap tracking-tighter text-[12vw] font-bold leading-none expand text-shadow-sm text-shadow-[color:var(--glass-shadow)]"
+      class="pb-10 md:pb-0 whitespace-nowrap tracking-tighter text-[12vw] font-bold leading-none expand text-shadow-sm text-shadow-[color:var(--glass-shadow)]"
     >
       {{ $t("app.wordmark") }}
     </h1>

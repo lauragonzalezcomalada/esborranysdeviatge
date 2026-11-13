@@ -91,9 +91,9 @@ watch(
         </div>
 
         <div
-          class="pointer-events-auto relative mx-auto w-fit md:absolute md:top-8 md:left-1/2 md:-translate-x-1/2"
+          class="pointer-events-auto relative mx-auto flex w-fit items-center gap-2 md:absolute md:top-8 md:left-1/2 md:block md:-translate-x-1/2"
         >
-          <div class="absolute top-0 right-full mr-2 flex items-center gap-2">
+          <div class="flex items-center gap-2 md:absolute md:top-0 md:right-full md:mr-2">
             <LocaleSwitch mobile-side="bottom" />
             <ColorModeSelect mobile-side="bottom" />
           </div>
