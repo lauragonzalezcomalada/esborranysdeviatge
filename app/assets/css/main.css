@@ -30,6 +30,10 @@
   --ui-border-accented: #bc4749;
   --glass-shadow: #80A1C1;
   --ui-text-contrast: #ffeaea;
+  --category-card-bg: #6a994e;
+  --card-text-contrast: #ffeaea;
+
+  --ui-text-inverted: #b93739;
 }
 
 .psico {
@@ -46,6 +50,9 @@
   --ui-border: #00FF37;
   --glass-shadow: #C3FF00;
   --ui-text-contrast: #FF8000;
+  --card-text-contrast: #7540FF;
+  --category-card-bg: #7540FF;
+  --ui-text-inverted: #FF8000;
 }
 
 .mnm {
@@ -62,6 +69,10 @@
   --ui-border: #000000;
   --glass-shadow: #ffc800;
   --ui-text-contrast: #ffc800;
+  --category-card-bg: #FFFEFC;
+  --card-text-contrast: #ffc800;
+
+  --ui-text-inverted: #383838;
 
 }
 

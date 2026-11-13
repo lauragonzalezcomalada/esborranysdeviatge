@@ -73,10 +73,10 @@ const openOurStories = () => {
 <template>
   <!--  bg-[url('/bg_image.jpg')] bg-cover bg-center  -->
   <div
-    class="relative h-screen w-full flex flex-col items-center justify-between py-8 px-[10vw]"
+    class="relative h-dvh w-full flex flex-col items-center justify-between py-8 px-[10vw]"
   >
     <div class="flex flex-col md:flex-row gap-4 items-center">
-      <UColorModeSelect class="w-fit" />
+      <UColorModeSelect class="w-fit" mobile-side="right" />
       <div
         class="rounded-3xl border border-(--ui-border)/10 bg-white/40 py-3 px-6 w-fit backdrop-blur-2xl shadow-[0_8px_32px_color-mix(in_srgb,var(--glass-shadow)_24%,transparent)]"
       >
@@ -156,7 +156,7 @@ const openOurStories = () => {
 
                 <UButton
                   type="submit"
-                  class="w-fit mt-2 bg-(--ui-bg-elevated) text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/80"
+                  class="w-fit mt-2 bg-(--ui-bg-elevated) hover:bg-(--ui-text-contrast)/80"
                   >Confirmar</UButton
                 >
                 <USeparator />
@@ -202,31 +202,39 @@ const openOurStories = () => {
         </UPopover>
       </div>
 
-      <div v-if="user" class="relative">
+      <div
+        v-if="user"
+        class="relative w-max min-w-0 max-w-[90vw] md:max-w-[50vw]"
+      >
         <div
           class="absolute bottom-full left-2 mb-0.5 whitespace-nowrap text-xs font-medium italic tracking-tighter"
         >
           Tus viajes
         </div>
         <div
-          class="rounded-3xl border border-(--ui-border)/10 bg-white/40 py-3 px-6 w-fit backdrop-blur-2xl shadow-[0_8px_32px_color-mix(in_srgb,var(--glass-shadow)_24%,transparent)]"
+          class="w-full rounded-3xl border border-(--ui-border)/10 bg-white/40 py-3 px-6 backdrop-blur-2xl shadow-[0_8px_32px_color-mix(in_srgb,var(--glass-shadow)_24%,transparent)]"
         >
-          <div class="flex gap-4 items-center">
+          <div class="flex w-full items-center gap-4">
             <div
-              v-for="trip in personalTrips"
-              :key="trip.id"
-              class="text-lg font-bold tracking-tighter cursor-pointer hover:underline"
-              @click="openTripDetails(trip)"
+              class="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-2"
             >
-              {{ trip.name }}
+              <div
+                v-for="trip in personalTrips"
+                :key="trip.id"
+                class="whitespace-nowrap text-lg font-bold tracking-tighter cursor-pointer hover:underline"
+                @click="openTripDetails(trip)"
+              >
+                {{ trip.name }}
+              </div>
             </div>
-            <USeparator orientation="vertical" class="h-4" />
+            <USeparator orientation="vertical" class="h-4 shrink-0" />
             <UPopover
+              class="shrink-0"
               :content="{ align: 'start', side: 'bottom', sideOffset: 8 }"
             >
               <UButton
                 variant="link"
-                class="text-(--ui-text)/70 text-lg font-semibold tracking-tighter hover:text-(--ui-text-contrast) px-0 py-0"
+                class="whitespace-nowrap px-0 py-0 text-lg font-semibold tracking-tighter text-(--ui-text)/70 hover:text-(--ui-text-contrast)"
                 >Nuevo viaje</UButton
               >
               <template #content>
@@ -250,6 +258,7 @@ const openOurStories = () => {
                     variant="solid"
                     class="w-fit text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/80 font-semibold tracking-tighter hover:text-(--ui-bg-muted)"
                     @click="startNewTrip"
+                    :disabled="newTripName == null || newTripName == ''"
                     >Crear viaje 🚀</UButton
                   >
                 </div>

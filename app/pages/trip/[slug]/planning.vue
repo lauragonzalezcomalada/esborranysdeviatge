@@ -292,7 +292,7 @@ async function removeCategory(categoryId, groupId) {
 }
 
 const cardBgColors = ref([
-  "bg-(--ui-primary)/70 text-(--ui-text-contrast)",
+  "bg-(--ui-primary)/70 text-(--card-text-contrast)",
   "bg-(--ui-bg)/70",
   "bg-(--app-fg)/70",
 ]);
@@ -514,11 +514,11 @@ const tripTotal = computed(() =>
           <div
             v-for="category in resource.categories"
             :key="category.id"
-            class="flex flex-col gap-2 rounded-md p-2 md:p-4 bg-(--ui-text-contrast)"
+            class="flex flex-col gap-2 rounded-md p-2 md:p-4 bg-(--category-card-bg)"
           >
             <div class="flex gap-2 items-center justify-between">
               <p
-                class="font-semibold text-md md:text-lg text-(--ui-text) tracking-tight"
+                class="font-semibold text-md md:text-lg text-(--ui-text-contrast) tracking-tight"
               >
                 {{ category.name }}
               </p>

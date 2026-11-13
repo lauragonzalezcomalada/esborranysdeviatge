@@ -24,12 +24,14 @@ const handleSignup = async () => {
 </script>
 
 <template>
-  <div class="h-screen w-full flex items-center justify-center">
+  <div
+    class="h-screen w-full flex items-center justify-center overflow-visible"
+  >
     <div
-      class="flex items-center justify-center w-[40vw] h-[40vw] rounded-full bg-(--ui-text) text-(--ui-text-contrast)"
+      class="flex items-center justify-center w-[120vw] md:w-[40vw] aspect-square shrink-0 rounded-full bg-(--ui-text) text-(--ui-text-contrast)"
     >
       <div class="flex flex-col gap-8 p-20">
-        <span class="text-4xl font-bold tracking-tight">
+        <span class="text-3xl md:text-4xl font-bold tracking-tight">
           Regístrate para diseñar tus propias historias! 🚀
         </span>
 
@@ -58,7 +60,9 @@ const handleSignup = async () => {
           </UFormField>
           <UButton
             type="submit"
-            :disabled="!password.length || !email.length"
+            :disabled="
+              password == null || password == '' || email == null || email == ''
+            "
             class="w-fit mx-auto mt-8 bg-(--app-fg) text-(--ui-text-contrast) text-2xl font-semibold tracking-tighter hover:bg-(--ui-text-contrast)/80 rounded-full px-10"
             >Mandar mail de confirmación</UButton
           >

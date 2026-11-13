@@ -92,7 +92,7 @@ watch(
           class="pointer-events-auto relative mx-auto w-fit md:absolute md:top-8 md:left-1/2 md:-translate-x-1/2"
         >
           <div class="absolute top-0 right-full mr-2">
-            <ColorModeSelect />
+            <ColorModeSelect mobile-side="bottom" />
           </div>
           <nav
             aria-label="Navegación del viaje"
