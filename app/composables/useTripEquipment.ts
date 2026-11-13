@@ -1,5 +1,6 @@
 export function useTripEquipment() {
   const supabase = useSupabaseClient<any>();
+  const { t } = useI18n();
 
   async function loadTripEquipment(tripId: string) {
     const { data, error } = await supabase
@@ -29,7 +30,7 @@ export function useTripEquipment() {
       throw tripError;
     }
     if (!trip) {
-      throw new Error("You need to select a valid trip before starting");
+      throw new Error(t("errors.selectTrip"));
     }
 
     const { data, error } = await supabase

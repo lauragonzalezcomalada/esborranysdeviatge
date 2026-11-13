@@ -35,7 +35,7 @@ const ui = computed(() => ({
     menuSide.value === "right" || menuSide.value === "left"
       ? "flex flex-row items-center gap-2 overflow-visible p-1"
       : "flex flex-col items-center gap-2 overflow-visible p-1 md:gap-3",
-  item: "size-10 shrink-0 items-center justify-center overflow-visible rounded-full bg-white p-0 ring-2 ring-black/35 before:hidden",
+  item: "size-10 shrink-0 items-center justify-center overflow-visible rounded-full p-0 ring ring-(--ui-text) before:hidden hover:bg-(--glass-shadow)",
   itemWrapper: "flex-none overflow-visible",
   itemLabel: "overflow-visible text-xl leading-none whitespace-normal",
   itemTrailing: "hidden",
@@ -48,7 +48,7 @@ const ui = computed(() => ({
       v-model="mode"
       :items="items"
       value-key="value"
-      aria-label="Choose color theme"
+      :aria-label="$t('nav.theme')"
       :content="{
         position: 'popper',
         side: menuSide,

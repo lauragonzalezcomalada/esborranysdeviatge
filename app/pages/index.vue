@@ -3,6 +3,7 @@ import { useTripPlaces } from "~/composables/useTripPlaces";
 import UColorModeSelect from "~/components/ColorModeSelect.vue";
 
 const supabase = useSupabaseClient();
+const localePath = useLocalePath();
 const { loadPublicTrips, loadPersonalTrips, insertTrip } = useTripPlaces();
 const publicTrips = ref<Trip[]>([]);
 const personalTrips = ref<Trip[]>([]);
@@ -25,14 +26,16 @@ watch(user, async (newUser) => {
 });
 
 const openTripDetails = (trip: Trip) => {
-  navigateTo(`/trip/${trip.id}`);
+  navigateTo(localePath(`/trip/${trip.id}`));
 };
 const startNewTrip = async () => {
   try {
     const data = await insertTrip({
       name: newTripName.value,
     });
-    navigateTo(`/trip/${(data as unknown as { id: string })?.id ?? ""}`);
+    navigateTo(
+      localePath(`/trip/${(data as unknown as { id: string })?.id ?? ""}`),
+    );
   } catch (error) {
     console.error(error);
   }
@@ -50,7 +53,7 @@ const handleLogin = async () => {
       password: password.value,
     });
     if (error) throw error;
-    navigateTo("/");
+    navigateTo(localePath("/"));
   } catch (error) {
     alert((error as any).error_description || (error as any).message);
   } finally {
@@ -60,7 +63,7 @@ const handleLogin = async () => {
 
 const handleLogout = async () => {
   await supabase.auth.signOut();
-  navigateTo("/");
+  navigateTo(localePath("/"));
 };
 
 const openOurStories = () => {
@@ -76,6 +79,7 @@ const openOurStories = () => {
     class="relative h-dvh w-full flex flex-col items-center justify-between py-8 px-[10vw]"
   >
     <div class="flex flex-col md:flex-row gap-4 items-center">
+      <LocaleSwitch mobile-side="right" />
       <UColorModeSelect class="w-fit" mobile-side="right" />
       <div
         class="rounded-3xl border border-(--ui-border)/10 bg-white/40 py-3 px-6 w-fit backdrop-blur-2xl shadow-[0_8px_32px_color-mix(in_srgb,var(--glass-shadow)_24%,transparent)]"
@@ -86,7 +90,7 @@ const openOurStories = () => {
             class="text-lg font-bold tracking-tighter cursor-pointer hover:underline"
             key="our-stories"
           >
-            Nuestras historias
+            {{ $t("nav.stories") }}
           </div>
           <div
             v-for="trip in publicTrips"
@@ -118,29 +122,29 @@ const openOurStories = () => {
           <template #content>
             <div class="p-4 bg-(--ui-text) rounded-md flex flex-col gap-2">
               <div class="text-(--ui-text-contrast)/90 font-semibold">
-                Entra para diseñar tus propias historias!
+                {{ $t("auth.enter") }}
               </div>
               <UForm class="flex flex-col gap-2" @submit.prevent="handleLogin">
                 <UFormField
-                  label="Email"
+                  :label="$t('common.email')"
                   :ui="{ label: 'text-(--ui-text-contrast)/90' }"
                 >
                   <UInput
                     v-model="email"
                     type="email"
                     class="w-full text-(--ui-text-contrast)"
-                    placeholder="Your email"
+                    :placeholder="$t('common.emailPlaceholder')"
                   />
                 </UFormField>
                 <UFormField
-                  label="Contraseña"
+                  :label="$t('common.password')"
                   :ui="{ label: 'text-(--ui-text-contrast)/90' }"
                 >
                   <UInput
                     v-model="password"
                     :type="showPassword ? 'text' : 'password'"
                     class="w-full"
-                    placeholder="Your password"
+                    :placeholder="$t('common.passwordPlaceholder')"
                   >
                     <template #trailing>
                       <UButton
@@ -157,15 +161,15 @@ const openOurStories = () => {
                 <UButton
                   type="submit"
                   class="w-fit mt-2 bg-(--ui-bg-elevated) hover:bg-(--ui-text-contrast)/80"
-                  >Confirmar</UButton
+                  >{{ $t("auth.confirm") }}</UButton
                 >
                 <USeparator />
                 <div class="text-xs text-(--ui-text-contrast)/90 mt-2">
-                  <span class="italic"> Aún no tienes una cuenta? </span>
-                  <a
-                    href="/signup"
+                  <span class="italic"> {{ $t("auth.noAccount") }} </span>
+                  <NuxtLink
+                    :to="$localePath('/signup')"
                     class="text-(--ui-text-contrast)/90 font-semibold"
-                    >Regístrate ahora!</a
+                    >{{ $t("auth.signupNow") }}</NuxtLink
                   >
                 </div>
               </UForm>
@@ -192,7 +196,7 @@ const openOurStories = () => {
           <template #content>
             <div class="px-2 bg-(--ui-text) rounded-md flex flex-col gap-2">
               <UButton
-                label="Acuérdate de volver! 🫡"
+                :label="$t('auth.comeBack')"
                 variant="link"
                 class="text-(--ui-text-contrast) hover:text-(--ui-text-contrast)"
                 @click="handleLogout"
@@ -209,7 +213,7 @@ const openOurStories = () => {
         <div
           class="absolute bottom-full left-2 mb-0.5 whitespace-nowrap text-xs font-medium italic tracking-tighter"
         >
-          Tus viajes
+          {{ $t("home.yourTrips") }}
         </div>
         <div
           class="w-full rounded-3xl border border-(--ui-border)/10 bg-white/40 py-3 px-6 backdrop-blur-2xl shadow-[0_8px_32px_color-mix(in_srgb,var(--glass-shadow)_24%,transparent)]"
@@ -235,12 +239,12 @@ const openOurStories = () => {
               <UButton
                 variant="link"
                 class="whitespace-nowrap px-0 py-0 text-lg font-semibold tracking-tighter text-(--ui-text)/70 hover:text-(--ui-text-contrast)"
-                >Nuevo viaje</UButton
+                >{{ $t("home.newTrip") }}</UButton
               >
               <template #content>
                 <div class="p-4 bg-(--ui-text) rounded-md flex flex-col gap-2">
                   <UFormField
-                    label="¿Cómo le vas a llamar?"
+                    :label="$t('home.tripNameQuestion')"
                     :ui="{
                       label:
                         'text-(--ui-text-contrast)/90 tracking-tighter font-semibold italic',
@@ -250,7 +254,7 @@ const openOurStories = () => {
                       v-model="newTripName"
                       type="text"
                       class="w-full"
-                      placeholder="Nombre del viaje"
+                      :placeholder="$t('home.tripNamePlaceholder')"
                     />
                   </UFormField>
                   <USeparator class="text-(--ui-text-contrast)/90" />
@@ -259,7 +263,7 @@ const openOurStories = () => {
                     class="w-fit text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/80 font-semibold tracking-tighter hover:text-(--ui-bg-muted)"
                     @click="startNewTrip"
                     :disabled="newTripName == null || newTripName == ''"
-                    >Crear viaje 🚀</UButton
+                    >{{ $t("home.createTrip") }}</UButton
                   >
                 </div>
               </template>
@@ -272,7 +276,7 @@ const openOurStories = () => {
     <h1
       class="whitespace-nowrap tracking-tighter text-[12vw] font-bold leading-none expand text-shadow-sm text-shadow-[color:var(--glass-shadow)]"
     >
-      borradoresdeviaje
+      {{ $t("app.wordmark") }}
     </h1>
   </div>
 </template>

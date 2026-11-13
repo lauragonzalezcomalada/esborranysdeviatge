@@ -75,6 +75,7 @@ function toTrip(row: TripRow): Trip {
 
 export function useTripPlaces() {
   const supabase = useSupabaseClient<Database>();
+  const { t } = useI18n();
 
   async function loadPlaces(tripId: string) {
     const { data, error } = await supabase
@@ -121,7 +122,7 @@ export function useTripPlaces() {
     const user = useSupabaseUser();
     console.log("user", user.value);
     if (!user.value) {
-      throw new Error("You need to be logged in to load your trips");
+      throw new Error(t("errors.loginToLoadTrips"));
     }
     const { data, error } = await supabase
       .from("trips")
@@ -139,7 +140,7 @@ export function useTripPlaces() {
   async function insertTrip(input: { name: string }) {
     const user = useSupabaseUser();
     if (!user.value) {
-      throw new Error("You need to be logged in to insert a trip");
+      throw new Error(t("errors.loginToCreateTrip"));
     }
     const { data, error } = await supabase
       .from("trips")
@@ -177,7 +178,7 @@ export function useTripPlaces() {
       throw tripError;
     }
     if (!trip) {
-      throw new Error("You need to select a valid trip before starting");
+      throw new Error(t("errors.selectTrip"));
     }
 
     const { data, error } = await supabase

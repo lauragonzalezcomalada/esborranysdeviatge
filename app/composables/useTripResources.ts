@@ -9,7 +9,7 @@ export type TripResource = {
 
 const RESOURCES_BUCKET = "resources";
 
-function storageErrorMessage(error: unknown) {
+function storageErrorMessage(error: unknown, fallback: string) {
   if (error instanceof Error) {
     return error.message;
   }
@@ -21,12 +21,13 @@ function storageErrorMessage(error: unknown) {
   ) {
     return error.message;
   }
-  return "No se pudo guardar el recurso.";
+  return fallback;
 }
 
 export function useTripResources() {
   const supabase = useSupabaseClient<any>();
   const user = useSupabaseUser();
+  const { t } = useI18n();
 
   function resourceFileUrl(filePath: string | null) {
     if (!filePath) {
@@ -41,7 +42,7 @@ export function useTripResources() {
   async function uploadResourceFile(tripId: string, file: File) {
     const userId = user.value?.sub;
     if (!userId) {
-      throw new Error("Inicia sesión para subir un archivo.");
+      throw new Error(t("errors.signInToUpload"));
     }
     const safeName =
       file.name
@@ -57,7 +58,7 @@ export function useTripResources() {
         upsert: false,
       });
     if (error) {
-      throw new Error(storageErrorMessage(error));
+      throw new Error(storageErrorMessage(error, t("errors.saveResource")));
     }
     return path;
   }
@@ -100,7 +101,7 @@ export function useTripResources() {
       if (filePath) {
         await supabase.storage.from(RESOURCES_BUCKET).remove([filePath]);
       }
-      throw new Error(storageErrorMessage(error));
+      throw new Error(storageErrorMessage(error, t("errors.saveResource")));
     }
     return data as TripResource;
   }

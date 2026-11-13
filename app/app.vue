@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const { t, locale } = useI18n()
+
 useHead({
   meta: [
     { name: 'viewport', content: 'width=device-width, initial-scale=1' }
@@ -7,14 +9,14 @@ useHead({
     { rel: 'icon', href: '/favicon.ico' }
   ],
   htmlAttrs: {
-    lang: 'es'
+    lang: locale
   }
 })
 
 useAppColorMode()
 
-const title = 'Borradores de viaje'
-const description = 'Un globo para empezar a planear viajes.'
+const title = computed(() => t('app.title'))
+const description = computed(() => t('app.description'))
 
 useSeoMeta({
   title,

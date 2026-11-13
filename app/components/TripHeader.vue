@@ -10,6 +10,9 @@ defineEmits<{
   edit: [];
   goToHome: [];
 }>();
+
+const { t, locale } = useI18n();
+const localePath = useLocalePath();
 </script>
 
 <template>
@@ -18,9 +21,9 @@ defineEmits<{
       <UButton
         class="px-0 text-sm font-medium text-(--ui-bg-elevated) tracking-[0.18em] uppercase hover:font-bold hover:text-(--ui-bg-elevated) transition-all duration-300"
         variant="link"
-        @click="navigateTo('/')"
+        @click="navigateTo(localePath('/'))"
       >
-        Borradores de viaje
+        {{ t("app.title") }}
       </UButton>
       <div class="flex max-w-xl items-start gap-2 max-w-sm">
         <h1 class="text-2xl font-semibold tracking-tight md:text-4xl">
@@ -31,7 +34,7 @@ defineEmits<{
           icon="i-lucide-pencil"
           variant="link"
           class="pointer-events-auto mt-1 cursor-pointer"
-          aria-label="Editar viaje"
+          :aria-label="t('trip.edit')"
           @click="$emit('edit')"
         />
       </div>
@@ -43,7 +46,7 @@ defineEmits<{
       </div>
       <div v-if="trip.startDate" class="flex items-center gap-2 mt-2 text-sm">
         <UIcon name="i-lucide-calendar" class="size-4" />
-        {{ trip.startDate.toLocaleDateString("es-ES") }}
+        {{ trip.startDate.toLocaleDateString(locale) }}
       </div>
     </div>
   </div>

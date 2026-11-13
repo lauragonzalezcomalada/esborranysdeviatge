@@ -24,6 +24,8 @@ function dateToInput(date: Date | null) {
 
 export function useTripShell() {
   const route = useRoute();
+  const { t } = useI18n();
+  const localePath = useLocalePath();
   const trip = useState<Trip | null>("trip-shell", () => null);
   const editMode = useState("trip-shell-editing", () => false);
   const user = useSupabaseUser();
@@ -84,7 +86,7 @@ export function useTripShell() {
       pageError.value = "";
     } catch (error) {
       pageError.value =
-        error instanceof Error ? error.message : "No se pudo guardar el viaje.";
+        error instanceof Error ? error.message : t("errors.saveTrip");
     }
   }
 
@@ -92,11 +94,11 @@ export function useTripShell() {
     if (!trip.value || !canBeEdited.value) {
       return;
     }
-    if (!confirm("¿Estás seguro de querer eliminar este viaje?")) {
+    if (!confirm(t("trip.confirmDelete"))) {
       return;
     }
     await deleteTrip(trip.value.id);
-    navigateTo("/");
+    navigateTo(localePath("/"));
   }
 
   return {

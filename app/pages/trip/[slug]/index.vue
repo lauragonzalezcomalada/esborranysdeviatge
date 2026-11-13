@@ -5,6 +5,8 @@ definePageMeta({
   layout: "trip",
 });
 
+const { t } = useI18n();
+
 type PhotonFeature = {
   geometry: {
     coordinates: [number, number];
@@ -84,14 +86,14 @@ watch(
     }
     if (!supabaseConfig?.url || !supabaseConfig.key) {
       pageError.value =
-        "Añade NUXT_PUBLIC_SUPABASE_URL y NUXT_PUBLIC_SUPABASE_KEY en .env.";
+        t("errors.missingSupabase");
       return;
     }
     try {
       places.value = await loadPlaces(id);
     } catch (error) {
       pageError.value =
-        error instanceof Error ? error.message : "No se pudo cargar el viaje.";
+        error instanceof Error ? error.message : t("errors.loadTrip");
     }
   },
   { immediate: true },
@@ -114,7 +116,7 @@ async function deleteEditedPlace(id: string) {
     return;
   }
   try {
-    if (!confirm("¿Estás seguro de querer eliminar este lugar?")) {
+    if (!confirm(t("places.confirmDelete"))) {
       return;
     }
     await deletePlace(id);
@@ -123,7 +125,7 @@ async function deleteEditedPlace(id: string) {
     pageError.value = "";
   } catch (error) {
     pageError.value =
-      error instanceof Error ? error.message : "No se pudo eliminar el lugar.";
+      error instanceof Error ? error.message : t("errors.deletePlace");
   } finally {
     editPlaceOpen.value = false;
   }
@@ -146,7 +148,7 @@ async function savePlaceOrder(next: Place[]) {
     pageError.value = "";
   } catch (error) {
     pageError.value =
-      error instanceof Error ? error.message : "No se pudo guardar el orden.";
+      error instanceof Error ? error.message : t("errors.saveOrder");
   }
 }
 
@@ -154,7 +156,7 @@ function placeLabel(feature: PhotonFeature) {
   const { name, street, housenumber, city, state, country } =
     feature.properties;
   const title =
-    name || [street, housenumber].filter(Boolean).join(" ") || city || "Lugar";
+    name || [street, housenumber].filter(Boolean).join(" ") || city || t("places.fallbackName");
   const detail = [city, state, country].filter(
     (part) => part && part !== title,
   );
@@ -240,7 +242,7 @@ async function savePlace() {
   const name = placeName.value.trim();
   if (!tripId.value || !location || !name) {
     if (!tripId.value) {
-      pageError.value = "You need to select a valid trip before starting";
+      pageError.value = t("errors.selectTrip");
     }
     return;
   }
@@ -261,7 +263,7 @@ async function savePlace() {
     pageError.value = "";
   } catch (error) {
     pageError.value =
-      error instanceof Error ? error.message : "No se pudo guardar el lugar.";
+      error instanceof Error ? error.message : t("errors.savePlace");
   }
 }
 
@@ -294,7 +296,7 @@ async function saveEditedPlace() {
     pageError.value = "";
   } catch (error) {
     pageError.value =
-      error instanceof Error ? error.message : "No se pudo guardar el lugar.";
+      error instanceof Error ? error.message : t("errors.savePlace");
   }
 }
 
@@ -338,7 +340,7 @@ onBeforeUnmount(() => {
           @click="mobilePane = 'globe'"
         >
           <UIcon name="i-lucide-globe" class="size-4" />
-          Globo
+          {{ t("places.globe") }}
         </button>
         <button
           type="button"
@@ -352,7 +354,7 @@ onBeforeUnmount(() => {
           @click="mobilePane = 'places'"
         >
           <UIcon name="i-lucide-map-pin" class="size-4" />
-          Lugares
+          {{ t("places.places") }}
         </button>
       </div>
 
@@ -382,7 +384,7 @@ onBeforeUnmount(() => {
             >
               <USwitch
                 v-model="editMode"
-                label="Edit mode"
+                :label="t('places.editMode')"
                 :ui="{ label: 'tracking-tight' }"
               />
             </div>
@@ -391,7 +393,7 @@ onBeforeUnmount(() => {
             >
               <USwitch
                 v-model="collapseAll"
-                label="Collapse all"
+                :label="t('places.collapseAll')"
                 :ui="{ label: 'tracking-tight' }"
               />
             </div>
@@ -402,7 +404,7 @@ onBeforeUnmount(() => {
           <UModal
             v-if="editMode"
             v-model:open="addPlaceOpen"
-            title="Añadir lugar"
+            :title="t('places.add')"
             class="mb-2"
             :ui="{
               title: 'text-(--ui-text-contrast) tracking-tight',
@@ -415,7 +417,7 @@ onBeforeUnmount(() => {
               icon="i-lucide-plus"
               class="rounded-full px-4 py-2 text-md tracking-tight text-(--ui-bg-elevated) hover:text-background/80"
             >
-              Añadir lugar
+              {{ t("places.add") }}
             </UButton>
             <template #body>
               <UForm
@@ -424,12 +426,12 @@ onBeforeUnmount(() => {
                 :on-submit="savePlace"
               >
                 <UFormField
-                  label="Buscar lugar"
+                  :label="t('places.search')"
                   :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
                 >
                   <UInput
                     v-model="searchQuery"
-                    placeholder="Ciudad, dirección o sitio"
+                    :placeholder="t('places.searchPlaceholder')"
                     autocomplete="off"
                     class="w-full"
                     :ui="{
@@ -442,13 +444,13 @@ onBeforeUnmount(() => {
                     v-if="searchStatus === 'loading'"
                     class="text-xs text-(--ui-text-contrast)"
                   >
-                    Buscando…
+                    {{ t("places.searching") }}
                   </p>
                   <p
                     v-else-if="searchStatus === 'error'"
                     class="text-xs text-red-300"
                   >
-                    No se pudo buscar. Inténtalo de nuevo.
+                    {{ t("places.searchError") }}
                   </p>
                   <p
                     v-else-if="
@@ -459,7 +461,7 @@ onBeforeUnmount(() => {
                     "
                     class="text-xs text-(--ui-text-contrast)"
                   >
-                    Sin resultados
+                    {{ t("places.noResults") }}
                   </p>
                   <ul
                     v-if="searchResults.length"
@@ -480,12 +482,12 @@ onBeforeUnmount(() => {
                   </ul>
                 </div>
                 <UFormField
-                  label="Nombre"
+                  :label="t('common.name')"
                   :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
                 >
                   <UInput
                     v-model="placeName"
-                    placeholder="Nombre del lugar"
+                    :placeholder="t('places.namePlaceholder')"
                     required
                     :ui="{
                       base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
@@ -494,12 +496,12 @@ onBeforeUnmount(() => {
                   />
                 </UFormField>
                 <UFormField
-                  label="Descripción"
+                  :label="t('common.description')"
                   :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
                 >
                   <UTextarea
                     v-model="placeDescription"
-                    placeholder="Una nota sobre este lugar"
+                    :placeholder="t('places.descriptionPlaceholder')"
                     :rows="3"
                     class="w-full"
                     :ui="{
@@ -508,12 +510,12 @@ onBeforeUnmount(() => {
                   />
                 </UFormField>
                 <UFormField
-                  label="Días"
+                  :label="t('common.days')"
                   :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
                 >
                   <UInput
                     v-model="placeDays"
-                    placeholder="Días"
+                    :placeholder="t('common.days')"
                     class="w-full"
                     type="number"
                     :ui="{
@@ -531,14 +533,14 @@ onBeforeUnmount(() => {
                   class="font-bold text-(--ui-bg-elevated)"
                   @click="addPlaceOpen = false"
                 >
-                  Cancelar
+                  {{ t("common.cancel") }}
                 </UButton>
                 <UButton
                   type="submit"
                   form="add-place-form"
                   :disabled="!canSavePlace"
                 >
-                  Guardar
+                  {{ t("common.save") }}
                 </UButton>
               </div>
             </template>
@@ -566,20 +568,20 @@ onBeforeUnmount(() => {
     >
       <div class="max-w-md">
         <p class="text-lg text-amber-200">
-          You need to select a valid trip before starting
+          {{ t("trip.missing") }}
         </p>
         <NuxtLink
-          to="/"
+          :to="$localePath('/')"
           class="mt-6 inline-block text-sm text-white/70 underline"
         >
-          Back to trips
+          {{ t("trip.back") }}
         </NuxtLink>
       </div>
     </div>
 
     <UModal
       v-model:open="editPlaceOpen"
-      :title="editingPlace ? `Editando: ${editingPlace.name}` : 'Editar lugar'"
+      :title="editingPlace ? t('places.editing', { name: editingPlace.name }) : t('places.edit')"
       :ui="{
         title: 'text-(--ui-text-contrast) tracking-tight',
         content: ' bg-(--ui-text)',
@@ -594,12 +596,12 @@ onBeforeUnmount(() => {
           :on-submit="saveEditedPlace"
         >
           <UFormField
-            label="Nombre"
+            :label="t('common.name')"
             :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
           >
             <UInput
               v-model="editName"
-              placeholder="Nombre del lugar"
+              :placeholder="t('places.namePlaceholder')"
               :ui="{
                 base: 'placeholder:text-(--ui-text-contrast) text-(--ui-text-contrast)',
               }"
@@ -608,12 +610,12 @@ onBeforeUnmount(() => {
             />
           </UFormField>
           <UFormField
-            label="Descripción"
+            :label="t('common.description')"
             :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
           >
             <UTextarea
               v-model="editDescription"
-              placeholder="Una nota sobre este lugar"
+              :placeholder="t('places.descriptionPlaceholder')"
               :ui="{
                 base: 'placeholder:text-(--ui-text-contrast) text-(--ui-text-contrast)',
               }"
@@ -622,7 +624,7 @@ onBeforeUnmount(() => {
             />
           </UFormField>
           <UFormField
-            label="Días"
+            :label="t('common.days')"
             :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
           >
             <UInput
@@ -644,7 +646,7 @@ onBeforeUnmount(() => {
             color="success"
             variant="solid"
             icon="i-lucide-check"
-            >Guardar</UButton
+            >{{ t("common.save") }}</UButton
           >
         </div>
       </template>

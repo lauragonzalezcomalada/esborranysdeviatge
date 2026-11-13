@@ -6,6 +6,7 @@ definePageMeta({
 });
 
 const tripId = useRoute().params.slug;
+const { t } = useI18n();
 
 const { loadTripResources, insertResource, deleteResource, updateResource } =
   useTripResources();
@@ -59,7 +60,7 @@ async function saveResource() {
     }
   } catch (error) {
     saveError.value =
-      error instanceof Error ? error.message : "No se pudo guardar el recurso.";
+      error instanceof Error ? error.message : t("errors.saveResource");
   } finally {
     saving.value = false;
   }
@@ -121,7 +122,7 @@ async function saveEditedResource() {
       <div class="flex gap-2 w-full justify-end">
         <UInput
           v-model="search"
-          placeholder="Buscar recurso"
+          :placeholder="t('resources.search')"
           icon="i-heroicons-magnifying-glass"
           variant="ghost"
           size="lg"
@@ -132,7 +133,7 @@ async function saveEditedResource() {
           }"
         />
         <UModal
-          title="Nuevo recurso"
+          :title="t('resources.new')"
           :ui="{
             title: 'text-(--ui-text-contrast) tracking-tight',
             content: ' bg-(--ui-text)',
@@ -143,15 +144,15 @@ async function saveEditedResource() {
         >
           <UButton
             icon="i-heroicons-plus"
-            label="Nuevo grupo"
+            :label="t('resources.new')"
             color="neutral"
             variant="subtle"
             class="w-fit rounded-full"
             @click="addResourceModalOpen = true"
             :ui="{ leadingIcon: 'size-3 md:size-4' }"
           >
-            <span class="hidden md:inline">Nuevo recurso</span>
-            <span class="inline md:hidden">Recurso</span>
+            <span class="hidden md:inline">{{ t("resources.new") }}</span>
+            <span class="inline md:hidden">{{ t("resources.short") }}</span>
           </UButton>
 
           <template #body>
@@ -161,12 +162,12 @@ async function saveEditedResource() {
               :on-submit="saveResource"
             >
               <UFormField
-                label="Nombre"
+                :label="t('common.name')"
                 :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
               >
                 <UInput
                   v-model="resourceName"
-                  placeholder="Pensarlo"
+                  :placeholder="t('resources.namePlaceholder')"
                   required
                   :ui="{
                     base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
@@ -175,20 +176,21 @@ async function saveEditedResource() {
                 />
               </UFormField>
               <UFormField
-                label="Descripción"
+                :label="t('common.description')"
                 :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
               >
                 <UTextarea
                   v-model="resourceDescription"
                   :rows="2"
                   class="w-full"
+                  :placeholder="t('resources.descriptionPlaceholder')"
                   :ui="{
                     base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
                   }"
                 />
               </UFormField>
               <UFormField
-                label="Link"
+                :label="t('common.link')"
                 :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
               >
                 <UInput
@@ -200,7 +202,7 @@ async function saveEditedResource() {
                 />
               </UFormField>
               <UFormField
-                label="Archivo"
+                :label="t('common.file')"
                 :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
               >
                 <div class="flex items-center gap-3">
@@ -217,10 +219,10 @@ async function saveEditedResource() {
                     class="rounded-full"
                     @click="fileInput?.click()"
                   >
-                    Elegir archivo
+                    {{ t("common.chooseFile") }}
                   </UButton>
                   <span class="truncate text-sm text-(--ui-text-contrast)/80">
-                    {{ resourceFile?.name || "Ningún archivo" }}
+                    {{ resourceFile?.name || t("common.noFile") }}
                   </span>
                 </div>
               </UFormField>
@@ -237,7 +239,7 @@ async function saveEditedResource() {
                 class="rounded-full"
                 :loading="saving"
               >
-                Guardar
+                {{ t("common.save") }}
               </UButton>
             </div>
           </template>
@@ -257,13 +259,13 @@ async function saveEditedResource() {
             <UDropdownMenu
               :items="[
                 {
-                  label: 'Editar',
+                  label: t('common.edit'),
                   icon: 'i-heroicons-pencil-square',
 
                   onSelect: () => openEditResourceModal(resource.id),
                 },
                 {
-                  label: 'Eliminar',
+                  label: t('common.delete'),
                   icon: 'i-heroicons-trash',
                   color: 'error',
                   onSelect: () => removeResource(resource.id),
@@ -277,7 +279,7 @@ async function saveEditedResource() {
             >
               <UButton
                 icon="i-heroicons-ellipsis-horizontal"
-                aria-label="Acciones de la opción"
+                :aria-label="t('common.actions')"
                 variant="link"
                 class="w-fit text-(--ui-text) hover:text-(--ui-text-contrast)/80 rounded-full"
               />
@@ -309,7 +311,7 @@ async function saveEditedResource() {
     </div>
 
     <UModal
-      title="Editar recurso"
+      :title="t('resources.edit')"
       :ui="{
         title: 'text-(--ui-text-contrast) tracking-tight',
         content: 'bg-(--ui-text)',
@@ -325,12 +327,12 @@ async function saveEditedResource() {
           @submit="saveEditedResource()"
         >
           <UFormField
-            label="Nombre"
+            :label="t('common.name')"
             :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
           >
             <UInput
               v-model="editResourceName"
-              placeholder="Pensarlo"
+              :placeholder="t('resources.namePlaceholder')"
               required
               :ui="{
                 base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
@@ -339,7 +341,7 @@ async function saveEditedResource() {
             />
           </UFormField>
           <UFormField
-            label="Descripción"
+            :label="t('common.description')"
             :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
           >
             <UTextarea
@@ -349,7 +351,7 @@ async function saveEditedResource() {
             />
           </UFormField>
           <UFormField
-            label="Link"
+            :label="t('common.link')"
             :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
           >
             <UInput
@@ -364,8 +366,12 @@ async function saveEditedResource() {
       </template>
       <template #footer>
         <div class="flex w-full justify-end gap-2">
-          <UButton @click="closeEditResourceModal">Cancelar</UButton>
-          <UButton type="submit" form="edit-resource-form"> Guardar </UButton>
+          <UButton @click="closeEditResourceModal">{{
+            t("common.cancel")
+          }}</UButton>
+          <UButton type="submit" form="edit-resource-form">
+            {{ t("common.save") }}
+          </UButton>
         </div>
       </template>
     </UModal>

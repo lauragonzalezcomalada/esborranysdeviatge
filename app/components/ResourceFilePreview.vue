@@ -5,11 +5,12 @@ const props = defineProps<{
 }>();
 
 const { resourceFileUrl } = useTripResources();
+const { t } = useI18n();
 const fileUrl = computed(() => resourceFileUrl(props.filePath) ?? "");
 const imageModalOpen = ref(false);
 
 const basename = computed(
-  () => props.filePath.split(/[?#]/)[0]?.split("/").pop() || "archivo",
+  () => props.filePath.split(/[?#]/)[0]?.split("/").pop() || t("common.fileFallback"),
 );
 
 const filename = computed(() => {
@@ -60,7 +61,7 @@ const isImage = computed(() =>
       />
     </template>
     <template #footer>
-      <UButton @click="imageModalOpen = false">Cerrar</UButton>
+      <UButton @click="imageModalOpen = false">{{ t("common.close") }}</UButton>
     </template>
   </UModal>
 </template>

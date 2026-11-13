@@ -20,6 +20,8 @@ const {
   removeTrip,
 } = useTripShell();
 
+const { t } = useI18n();
+
 watch(
   [planning, canBeEdited],
   ([isPlanning, allowed], previous) => {
@@ -60,7 +62,7 @@ watch(
       loadedId.value = id;
     } catch (error) {
       pageError.value =
-        error instanceof Error ? error.message : "No se pudo cargar el viaje.";
+        error instanceof Error ? error.message : t("errors.loadTrip");
     }
   },
   { immediate: true },
@@ -91,11 +93,12 @@ watch(
         <div
           class="pointer-events-auto relative mx-auto w-fit md:absolute md:top-8 md:left-1/2 md:-translate-x-1/2"
         >
-          <div class="absolute top-0 right-full mr-2">
+          <div class="absolute top-0 right-full mr-2 flex items-center gap-2">
+            <LocaleSwitch mobile-side="bottom" />
             <ColorModeSelect mobile-side="bottom" />
           </div>
           <nav
-            aria-label="Navegación del viaje"
+            :aria-label="t('nav.trip')"
             class="flex items-center gap-4 rounded-3xl border border-(--ui-border)/10 bg-white/40 px-4 py-1.5 text-sm shadow-[0_8px_32px_color-mix(in_srgb,var(--glass-shadow)_24%,transparent)] backdrop-blur-2xl md:gap-10 md:px-6 md:py-2 md:text-base"
           >
             <NuxtLink
@@ -103,34 +106,34 @@ watch(
               class="font-bold tracking-tighter hover:underline"
               exact-active-class="underline"
             >
-              Itinerario
+              {{ t("nav.itinerary") }}
             </NuxtLink>
             <NuxtLink
               :to="`/trip/${navTripId}/planning`"
               class="font-bold tracking-tighter hover:underline"
               exact-active-class="underline"
             >
-              Planificación
+              {{ t("nav.planning") }}
             </NuxtLink>
             <NuxtLink
               :to="`/trip/${navTripId}/resources`"
               class="font-bold tracking-tighter hover:underline"
               exact-active-class="underline"
             >
-              Recursos
+              {{ t("nav.resources") }}
             </NuxtLink>
           </nav>
         </div>
       </div>
     </div>
 
-    <div class="relative min-h-0 flex-1 overflow-y-auto mb-20 md:mb-0">
+    <div class="relative min-h-0 flex-1 overflow-y-auto mb-15 md:mb-0">
       <slot />
     </div>
 
     <UModal
       v-model:open="editOpen"
-      title="Editar viaje"
+      :title="t('trip.edit')"
       :ui="{
         title: 'text-(--ui-text-contrast) tracking-tight',
         content: ' bg-(--ui-text)',
@@ -144,7 +147,7 @@ watch(
           :on-submit="saveTripDetails"
         >
           <UFormField
-            label="Nombre"
+            :label="t('common.name')"
             required
             :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
           >
@@ -158,7 +161,7 @@ watch(
             />
           </UFormField>
           <UFormField
-            label="Descripción"
+            :label="t('common.description')"
             :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
           >
             <UTextarea
@@ -171,7 +174,7 @@ watch(
             />
           </UFormField>
           <UFormField
-            label="Inicio"
+            :label="t('common.start')"
             :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
           >
             <UInput
@@ -193,9 +196,11 @@ watch(
             class="font-bold text-(--ui-bg-elevated)"
             @click="removeTrip"
           >
-            Eliminar viaje
+            {{ t("trip.delete") }}
           </UButton>
-          <UButton type="submit" form="edit-trip-form">Guardar</UButton>
+          <UButton type="submit" form="edit-trip-form">{{
+            t("common.save")
+          }}</UButton>
         </div>
       </template>
     </UModal>

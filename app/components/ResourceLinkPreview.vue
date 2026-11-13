@@ -44,7 +44,7 @@ watch(
   <iframe
     v-if="embedUrl"
     :src="embedUrl"
-    title="Vídeo de YouTube"
+    :title="$t('common.youtube')"
     class="mt-2 aspect-video w-full rounded-md"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
     allowfullscreen

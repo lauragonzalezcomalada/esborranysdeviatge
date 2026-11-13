@@ -4,10 +4,10 @@
   >
     <div class="max-w-md">
       <p class="text-lg text-amber-200">
-        You need to select a valid trip before starting
+        {{ $t("trip.missing") }}
       </p>
-      <NuxtLink to="/" class="mt-6 inline-block text-sm text-white/70 underline">
-        Back to trips
+      <NuxtLink :to="$localePath('/')" class="mt-6 inline-block text-sm text-white/70 underline">
+        {{ $t("trip.back") }}
       </NuxtLink>
     </div>
   </main>

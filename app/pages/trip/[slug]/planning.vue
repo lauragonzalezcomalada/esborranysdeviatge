@@ -4,6 +4,7 @@ definePageMeta({
 });
 
 const tripId = useRoute().params.slug;
+const { t } = useI18n();
 
 const { canBeEdited } = useTripShell();
 
@@ -77,7 +78,7 @@ async function saveCategory() {
       (resource) => resource.id === selectedGroupId.value,
     );
 
-    if (!group) throw new Error("No se ha encontrado el grupo");
+    if (!group) throw new Error(t("planning.groupNotFound"));
 
     const category = await insertCategory({
       name: categoryName.value,
@@ -114,7 +115,7 @@ async function saveOption() {
       .flatMap((group) => group.categories ?? [])
       .find((category) => category.id === selectedCategoryId.value);
 
-    if (!category) throw new Error("Category not found");
+    if (!category) throw new Error(t("planning.categoryNotFound"));
 
     const option = await insertOption({
       name: optionName.value,
@@ -160,6 +161,9 @@ async function removeGroup(groupId) {
   if (!canBeEdited.value) {
     return;
   }
+  if (!confirm(t("planning.confirmDeleteGroup"))) {
+    return;
+  }
   try {
     await deleteGroup(groupId);
     resources.value = resources.value.filter((r) => r.id !== groupId);
@@ -170,6 +174,9 @@ async function removeGroup(groupId) {
 
 async function removeOption(optionId, categoryId) {
   if (!canBeEdited.value) {
+    return;
+  }
+  if (!confirm(t("planning.confirmDeleteOption"))) {
     return;
   }
   try {
@@ -255,7 +262,7 @@ async function saveEditedOption() {
       (option) => option.id === editingOptionId.value,
     );
 
-    if (!option) throw new Error("Option not found");
+    if (!option) throw new Error(t("planning.optionNotFound"));
 
     await updateOption({
       id: option.id,
@@ -274,6 +281,9 @@ async function saveEditedOption() {
 
 async function removeCategory(categoryId, groupId) {
   if (!canBeEdited.value) {
+    return;
+  }
+  if (!confirm(t("planning.confirmDeleteCategory"))) {
     return;
   }
   try {
@@ -343,7 +353,7 @@ const tripTotal = computed(() =>
           <div
             class="absolute top-1/2 left-full ml-3 flex -translate-y-1/2 flex-row gap-1 rounded-full bg-(--ui-text) px-3 py-2 font-bold whitespace-nowrap text-(--ui-text-contrast)"
           >
-            <span>Total:</span>
+            <span>{{ t("common.total") }}</span>
             {{ tripTotal.toFixed(2) }}
             €
           </div>
@@ -352,13 +362,13 @@ const tripTotal = computed(() =>
       <div
         class="flex flex-col gap-1 rounded-full bg-(--ui-text) px-2 py-2 font-bold whitespace-nowrap text-(--ui-text-contrast) md:hidden"
       >
-        <span class="hidden md:inline">Total:</span>
+        <span class="hidden md:inline">{{ t("common.total") }}</span>
         {{ tripTotal.toFixed(2) }}
         €
       </div>
       <UModal
         v-if="canBeEdited"
-        title="Nuevo grupo"
+        :title="t('planning.newGroup')"
         :ui="{
           title: 'text-(--ui-text-contrast) tracking-tight',
           content: ' bg-(--ui-text)',
@@ -369,15 +379,15 @@ const tripTotal = computed(() =>
       >
         <UButton
           icon="i-heroicons-plus"
-          label="Nuevo grupo"
+          :label="t('planning.newGroup')"
           color="neutral"
           variant="subtle"
           class="w-fit rounded-full"
           @click="openAddGroupModal"
           :ui="{ leadingIcon: 'size-4 md:size-5' }"
         >
-          <span class="hidden md:inline">Nuevo grupo</span>
-          <span class="inline md:hidden">Grupo</span>
+          <span class="hidden md:inline">{{ t("planning.newGroup") }}</span>
+          <span class="inline md:hidden">{{ t("planning.group") }}</span>
         </UButton>
 
         <template #body>
@@ -387,12 +397,12 @@ const tripTotal = computed(() =>
             :on-submit="saveGroup"
           >
             <UFormField
-              label="Nombre"
+              :label="t('common.name')"
               :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
             >
               <UInput
                 v-model="groupName"
-                placeholder="Ej.: Ropa de baño"
+                :placeholder="t('common.exampleName')"
                 required
                 :ui="{
                   base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
@@ -418,7 +428,7 @@ const tripTotal = computed(() =>
         <template #footer>
           <div class="flex w-full justify-end gap-2">
             <UButton type="submit" form="add-place-form" class="rounded-full">
-              Guardar
+              {{ t("common.save") }}
             </UButton>
           </div>
         </template>
@@ -441,16 +451,18 @@ const tripTotal = computed(() =>
             <div v-if="canBeEdited" class="flex gap-2 items-center">
               <UButton
                 icon="i-heroicons-trash"
-                aria-label="Borrar grupo"
+                :aria-label="t('planning.deleteGroup')"
                 variant="solid"
                 class="w-fit self-end text-(--ui-text-contrast) bg-(--ui-text) rounded-full"
                 @click="removeGroup(resource.id)"
                 :ui="{ leadingIcon: 'size-4 md:size-5' }"
               >
-                <span class="hidden md:inline">Borrar grupo</span>
+                <span class="hidden md:inline">{{
+                  t("planning.deleteGroup")
+                }}</span>
               </UButton>
               <UModal
-                title="Nueva categoría"
+                :title="t('planning.newCategory')"
                 :open="addCategoryModalOpen && selectedGroupId === resource.id"
                 @update:open="addCategoryModalOpen = $event"
                 :ui="{
@@ -462,13 +474,15 @@ const tripTotal = computed(() =>
               >
                 <UButton
                   icon="i-heroicons-plus"
-                  aria-label="Nueva categoría"
+                  :aria-label="t('planning.newCategory')"
                   variant="solid"
-                  class="w-fit self-end rounded-full"
+                  class="w-fit self-end rounded-full text-(--ui-text-contrast)"
                   @click="openAddCategoryModal(resource.id)"
                   :ui="{ leadingIcon: 'size-4 md:size-5' }"
                 >
-                  <span class="hidden md:inline">Nueva categoría</span>
+                  <span class="hidden md:inline">{{
+                    t("planning.newCategory")
+                  }}</span>
                 </UButton>
 
                 <template #body>
@@ -479,13 +493,13 @@ const tripTotal = computed(() =>
                     @submit="saveCategory"
                   >
                     <UFormField
-                      label="Nombre"
+                      :label="t('common.name')"
                       name="name"
                       :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
                     >
                       <UInput
                         v-model="categoryName"
-                        placeholder="Ej.: Ropa de baño"
+                        :placeholder="t('common.exampleName')"
                         required
                         :ui="{
                           base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
@@ -501,9 +515,9 @@ const tripTotal = computed(() =>
                     <UButton
                       type="submit"
                       :form="`add-category-form-${resource.id}`"
-                      class="rounded-full"
+                      class="rounded-full text-(--ui-text-contrast)"
                     >
-                      Añadir
+                      {{ t("common.add") }}
                     </UButton>
                   </div>
                 </template>
@@ -526,20 +540,22 @@ const tripTotal = computed(() =>
               <div v-if="canBeEdited" class="flex items-center gap-2">
                 <UButton
                   icon="i-heroicons-trash"
-                  aria-label="Eliminar categoría"
+                  :aria-label="t('planning.deleteCategory')"
                   variant="solid"
                   class="rounded-full text-(--ui-text-contrast) bg-(--ui-primary)"
                   @click="removeCategory(category.id, resource.id)"
                   :ui="{ leadingIcon: 'size-4 md:size-5' }"
                 >
-                  <span class="hidden md:inline">Borrar categoría</span>
+                  <span class="hidden md:inline">{{
+                    t("planning.deleteCategory")
+                  }}</span>
                 </UButton>
 
                 <UModal
                   :open="
                     addOptionModalOpen && selectedCategoryId === category.id
                   "
-                  title="Nueva opción"
+                  :title="t('planning.newOption')"
                   :ui="{
                     title: 'text-(--ui-text-contrast) tracking-tight',
                     content: ' bg-(--ui-text)',
@@ -554,7 +570,9 @@ const tripTotal = computed(() =>
                     @click="openAddOptionModal(category.id)"
                     :ui="{ leadingIcon: 'size-4 md:size-5' }"
                   >
-                    <span class="hidden md:inline">Nueva opción</span>
+                    <span class="hidden md:inline">{{
+                      t("planning.newOption")
+                    }}</span>
                   </UButton>
 
                   <template #body>
@@ -564,14 +582,14 @@ const tripTotal = computed(() =>
                       :on-submit="saveOption"
                     >
                       <UFormField
-                        label="Nombre"
+                        :label="t('common.name')"
                         :ui="{
                           label: 'font-semibold text-(--ui-text-contrast)',
                         }"
                       >
                         <UInput
                           v-model="optionName"
-                          placeholder="Ej.: Ropa de baño"
+                          :placeholder="t('common.exampleName')"
                           required
                           :ui="{
                             base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
@@ -580,7 +598,7 @@ const tripTotal = computed(() =>
                         />
                       </UFormField>
                       <UFormField
-                        label="Precio"
+                        :label="t('common.price')"
                         :ui="{
                           label: 'font-semibold text-(--ui-text-contrast)',
                         }"
@@ -596,7 +614,7 @@ const tripTotal = computed(() =>
                         />
                       </UFormField>
                       <UFormField
-                        label="Enlace"
+                        :label="t('common.url')"
                         :ui="{
                           label: 'font-semibold text-(--ui-text-contrast)',
                         }"
@@ -612,7 +630,7 @@ const tripTotal = computed(() =>
                         />
                       </UFormField>
                       <UFormField
-                        label="Cantidad"
+                        :label="t('common.quantity')"
                         :ui="{
                           label: 'font-semibold text-(--ui-text-contrast)',
                         }"
@@ -634,9 +652,9 @@ const tripTotal = computed(() =>
                       <UButton
                         type="submit"
                         form="add-place-form"
-                        class="rounded-full"
+                        class="rounded-full text-(--ui-text-contrast)"
                       >
-                        Añadir
+                        {{ t("common.add") }}
                       </UButton>
                     </div>
                   </template>
@@ -694,14 +712,14 @@ const tripTotal = computed(() =>
                     v-if="canBeEdited"
                     :items="[
                       {
-                        label: 'Editar',
+                        label: t('common.edit'),
                         icon: 'i-heroicons-pencil-square',
 
                         onSelect: () =>
                           openEditOptionModal(option, category.id),
                       },
                       {
-                        label: 'Eliminar',
+                        label: t('common.delete'),
                         icon: 'i-heroicons-trash',
                         color: 'error',
                         onSelect: () => removeOption(option.id, category.id),
@@ -716,7 +734,7 @@ const tripTotal = computed(() =>
                   >
                     <UButton
                       icon="i-heroicons-ellipsis-horizontal"
-                      aria-label="Acciones de la opción"
+                      :aria-label="t('common.actions')"
                       variant="link"
                       class="w-fit text-(--ui-text) hover:text-(--ui-text-contrast)/80 rounded-full"
                     />
@@ -726,7 +744,7 @@ const tripTotal = computed(() =>
             </div>
 
             <div class="text-(--ui-text) font-semibold self-end">
-              Total:
+              {{ t("common.total") }}
               {{
                 category.options?.reduce((acc, option) => {
                   if (option.selected) {
@@ -740,7 +758,7 @@ const tripTotal = computed(() =>
           </div>
           <div class="flex gap-2 items-center justify-end">
             <p class="text-(--ui-text) font-bold tracking-tight">
-              Total:
+              {{ t("common.total") }}
               {{
                 resource?.categories?.reduce((acc, category) => {
                   return (
@@ -787,7 +805,7 @@ const tripTotal = computed(() =>
 
     <UModal
       v-model:open="editOptionModalOpen"
-      title="Editar opción"
+      :title="t('planning.editOption')"
       :dismissible="!editOptionSaving"
       :close="!editOptionSaving"
       :ui="{
@@ -804,7 +822,7 @@ const tripTotal = computed(() =>
           @submit="saveEditedOption"
         >
           <UFormField
-            label="Nombre"
+            :label="t('common.name')"
             name="name"
             :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
           >
@@ -812,7 +830,7 @@ const tripTotal = computed(() =>
           </UFormField>
 
           <UFormField
-            label="Precio"
+            :label="t('common.price')"
             name="price"
             :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
           >
@@ -827,7 +845,7 @@ const tripTotal = computed(() =>
           </UFormField>
 
           <UFormField
-            label="Enlace"
+            :label="t('common.url')"
             name="link"
             :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
           >
@@ -835,7 +853,7 @@ const tripTotal = computed(() =>
           </UFormField>
 
           <UFormField
-            label="Cantidad"
+            :label="t('common.quantity')"
             name="quantity"
             :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
           >
@@ -859,7 +877,7 @@ const tripTotal = computed(() =>
         <div class="flex w-full justify-end gap-2">
           <UButton
             class="rounded-full"
-            label="Cancelar"
+            :label="t('common.cancel')"
             color="neutral"
             variant="subtle"
             :disabled="editOptionSaving"
@@ -870,7 +888,7 @@ const tripTotal = computed(() =>
             class="rounded-full"
             type="submit"
             form="edit-option-form"
-            label="Guardar"
+            :label="t('common.save')"
             :loading="editOptionSaving"
           />
         </div>

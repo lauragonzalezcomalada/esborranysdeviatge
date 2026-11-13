@@ -1,0 +1,123 @@
+{
+  "app": {
+    "title": "Borradores de viaje",
+    "description": "Un globus per començar a planejar viatges.",
+    "wordmark": "borradoresdeviaje"
+  },
+  "nav": {
+    "language": "Idioma",
+    "trip": "Navegació del viatge",
+    "itinerary": "Itinerari",
+    "planning": "Planificació",
+    "resources": "Recursos",
+    "stories": "Les nostres històries",
+    "theme": "Tria el tema de color"
+  },
+  "common": {
+    "name": "Nom",
+    "description": "Descripció",
+    "link": "Enllaç",
+    "url": "Enllaç",
+    "save": "Desa",
+    "cancel": "Cancel·la",
+    "close": "Tanca",
+    "edit": "Edita",
+    "delete": "Elimina",
+    "add": "Afegeix",
+    "email": "Correu",
+    "password": "Contrasenya",
+    "emailPlaceholder": "El teu correu",
+    "passwordPlaceholder": "La teva contrasenya",
+    "days": "Dies",
+    "daysCount": "{count} dia | {count} dies",
+    "total": "Total:",
+    "file": "Fitxer",
+    "fileFallback": "fitxer",
+    "chooseFile": "Tria un fitxer",
+    "noFile": "Cap fitxer",
+    "actions": "Accions de l'opció",
+    "price": "Preu",
+    "quantity": "Quantitat",
+    "start": "Inici",
+    "exampleName": "p. ex. Roba de bany",
+    "youtube": "Vídeo de YouTube"
+  },
+  "auth": {
+    "login": "Inicia la sessió",
+    "enter": "Entra per dissenyar les teves pròpies històries!",
+    "confirm": "Confirma",
+    "noAccount": "Encara no tens un compte? ",
+    "signupNow": "Registra't ara!",
+    "comeBack": "Recorda tornar! 🫡",
+    "signupTitle": "Registra't per dissenyar les teves pròpies històries! 🚀",
+    "sendConfirmation": "Envia el correu de confirmació"
+  },
+  "home": {
+    "yourTrips": "Els teus viatges",
+    "newTrip": "Nou viatge",
+    "tripNameQuestion": "Com li diràs?",
+    "tripNamePlaceholder": "Nom del viatge",
+    "createTrip": "Crea el viatge 🚀"
+  },
+  "trip": {
+    "edit": "Edita el viatge",
+    "delete": "Elimina el viatge",
+    "confirmDelete": "Segur que vols eliminar aquest viatge?",
+    "missing": "Has de triar un viatge vàlid abans de començar",
+    "back": "Torna als viatges"
+  },
+  "places": {
+    "list": "Llocs del viatge",
+    "globe": "Globus",
+    "places": "Llocs",
+    "add": "Afegeix un lloc",
+    "search": "Cerca un lloc",
+    "searchPlaceholder": "Ciutat, adreça o lloc",
+    "searching": "Cercant…",
+    "searchError": "No s'ha pogut cercar. Torna-ho a provar.",
+    "noResults": "Sense resultats",
+    "namePlaceholder": "Nom del lloc",
+    "descriptionPlaceholder": "Una nota sobre aquest lloc",
+    "edit": "Edita el lloc",
+    "editing": "Editant: {name}",
+    "delete": "Elimina el lloc",
+    "remove": "Treu el lloc",
+    "confirmDelete": "Segur que vols eliminar aquest lloc?",
+    "editMode": "Editar",
+    "collapseAll": "Amagar detalls",
+    "fallbackName": "Lloc"
+  },
+  "planning": {
+    "newGroup": "Nou grup",
+    "group": "Grup",
+    "deleteGroup": "Esborra el grup",
+    "newCategory": "Nova categoria",
+    "deleteCategory": "Esborra la categoria",
+    "newOption": "Nova opció",
+    "editOption": "Edita l'opció",
+    "groupNotFound": "No s'ha trobat el grup",
+    "categoryNotFound": "No s'ha trobat la categoria",
+    "optionNotFound": "No s'ha trobat l'opció"
+  },
+  "resources": {
+    "search": "Cerca un recurs",
+    "new": "Nou recurs",
+    "short": "Recurs",
+    "namePlaceholder": "Ex. Guia de viatge",
+    "descriptionPlaceholder": "Ex. Guia que hem trobat a la llibreria...",
+    "edit": "Edita el recurs"
+  },
+  "errors": {
+    "loadTrip": "No s'ha pogut carregar el viatge.",
+    "saveTrip": "No s'ha pogut desar el viatge.",
+    "savePlace": "No s'ha pogut desar el lloc.",
+    "deletePlace": "No s'ha pogut eliminar el lloc.",
+    "saveOrder": "No s'ha pogut desar l'ordre.",
+    "missingSupabase": "Afegeix NUXT_PUBLIC_SUPABASE_URL i NUXT_PUBLIC_SUPABASE_KEY a .env.",
+    "saveResource": "No s'ha pogut desar el recurs.",
+    "signInToUpload": "Inicia la sessió per pujar un fitxer.",
+    "loginToLoadTrips": "Has d'iniciar la sessió per carregar els teus viatges",
+    "loginToCreateTrip": "Has d'iniciar la sessió per crear un viatge",
+    "selectTrip": "Has de triar un viatge vàlid abans de començar"
+  }
+}

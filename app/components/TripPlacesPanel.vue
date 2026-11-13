@@ -18,11 +18,20 @@ const emit = defineEmits<{
 
 const dragFrom = ref<number | null>(null);
 const collapsedPlaceIds = ref(new Set<string>());
+const { t, locale } = useI18n();
 
-const visitDateFormat = new Intl.DateTimeFormat("en", {
-  month: "short",
-  day: "numeric",
-});
+function formatVisitDate(date: Date) {
+  const parts = new Intl.DateTimeFormat(locale.value, {
+    month: "short",
+    day: "numeric",
+  }).formatToParts(date);
+  return {
+    day: parts.find((part) => part.type === "day")?.value ?? "",
+    month: (
+      parts.find((part) => part.type === "month")?.value ?? ""
+    ).toUpperCase(),
+  };
+}
 
 function placeStep(place: Place) {
   const days = Number(place.days);
@@ -44,11 +53,11 @@ const placeIndexes = computed(() => {
 const placeDates = computed(() => {
   const start = props.startDate;
   if (!start) {
-    return props.places.map(() => "");
+    return props.places.map(() => ({ day: "", month: "" }));
   }
   let cursor = new Date(start.getFullYear(), start.getMonth(), start.getDate());
   return props.places.map((place) => {
-    const label = visitDateFormat.format(cursor);
+    const label = formatVisitDate(cursor);
     const next = new Date(
       cursor.getFullYear(),
       cursor.getMonth(),
@@ -102,7 +111,7 @@ function dropPlace(index: number) {
 
 <template>
   <section
-    aria-label="Lugares del viaje"
+    :aria-label="t('places.list')"
     class="relative flex min-h-0 w-full flex-1 flex-col items-stretch justify-start gap-4 overflow-hidden md:items-end"
     :class="places.length > 0 ? 'md:w-[min(26rem,42vw)]' : 'md:w-0'"
   >
@@ -131,16 +140,13 @@ function dropPlace(index: number) {
           v-else
           class="flex shrink-0 flex-col items-center justify-end rounded-xl p-1.5 md:p-2.5 text-xs md:text-sm font-medium whitespace-nowwrap bg-[var(--ui-bg-elevated)]"
         >
-          <!-- <UIcon name="i-lucide-calendar" class="size-4 shrink-0" />
-          <span class="text-xs tabular-nums">{{ placeDates[index] }}</span> -->
-
           <span
             class="text-md md:text-lg text-center font-bold tracking-tight leading-none"
-            >{{ placeDates[index]?.split(" ")[1] }}</span
+            >{{ placeDates[index]?.day }}</span
           >
           <span
             class="text-xs md:text-sm text-center font-bold tracking-tight leading-none"
-            >{{ placeDates[index]?.split(" ")[0]?.toUpperCase() ?? "" }}</span
+            >{{ placeDates[index]?.month }}</span
           >
         </div>
         <UCard
@@ -165,13 +171,15 @@ function dropPlace(index: number) {
                 <h2 class="text-xl font-semibold tracking-tight">
                   {{ place.name }}
                 </h2>
-                <p v-if="place.days" class="text-sm">{{ place.days }} días</p>
+                <p v-if="place.days" class="text-sm">
+                  {{ t("common.daysCount", place.days) }}
+                </p>
               </div>
               <div v-if="editing" class="flex items-center gap-2">
                 <UButton
                   variant="link"
                   color="success"
-                  aria-label="Editar lugar"
+                  :aria-label="t('places.edit')"
                   @click="emit('edit-place', place.id)"
                 >
                   <UIcon
@@ -184,13 +192,13 @@ function dropPlace(index: number) {
                   icon="i-lucide-trash"
                   variant="link"
                   class="text-(--ui-bg-accented)"
-                  aria-label="Eliminar lugar"
+                  :aria-label="t('places.delete')"
                   @click="emit('delete-place', place.id)"
                 />
                 <!--   <UButton
                   variant="link"
                   color="error"
-                  aria-label="Quitar lugar"
+                  :aria-label="t('places.remove')"
                   @click="emit('remove-place', place.id)"
                 >
                   <UIcon name="i-lucide-x" class="size-5" />

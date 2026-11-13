@@ -1,0 +1,123 @@
+{
+  "app": {
+    "title": "Borradores de viaje",
+    "description": "A globe for starting to plan trips.",
+    "wordmark": "borradoresdeviaje"
+  },
+  "nav": {
+    "language": "Language",
+    "trip": "Trip navigation",
+    "itinerary": "Itinerary",
+    "planning": "Planning",
+    "resources": "Resources",
+    "stories": "Our stories",
+    "theme": "Choose color theme"
+  },
+  "common": {
+    "name": "Name",
+    "description": "Description",
+    "link": "Link",
+    "url": "Link",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "email": "Email",
+    "password": "Password",
+    "emailPlaceholder": "Your email",
+    "passwordPlaceholder": "Your password",
+    "days": "Days",
+    "daysCount": "{count} day | {count} days",
+    "total": "Total:",
+    "file": "File",
+    "fileFallback": "file",
+    "chooseFile": "Choose file",
+    "noFile": "No file",
+    "actions": "Option actions",
+    "price": "Price",
+    "quantity": "Quantity",
+    "start": "Start",
+    "exampleName": "e.g. Swimwear",
+    "youtube": "YouTube video"
+  },
+  "auth": {
+    "login": "Log in",
+    "enter": "Sign in to design your own stories!",
+    "confirm": "Confirm",
+    "noAccount": "Don't have an account yet? ",
+    "signupNow": "Sign up now!",
+    "comeBack": "Remember to come back! 🫡",
+    "signupTitle": "Sign up to design your own stories! 🚀",
+    "sendConfirmation": "Send confirmation email"
+  },
+  "home": {
+    "yourTrips": "Your trips",
+    "newTrip": "New trip",
+    "tripNameQuestion": "What are you going to call it?",
+    "tripNamePlaceholder": "Trip name",
+    "createTrip": "Create trip 🚀"
+  },
+  "trip": {
+    "edit": "Edit trip",
+    "delete": "Delete trip",
+    "confirmDelete": "Are you sure you want to delete this trip?",
+    "missing": "You need to select a valid trip before starting",
+    "back": "Back to trips"
+  },
+  "places": {
+    "list": "Trip places",
+    "globe": "Globe",
+    "places": "Places",
+    "add": "Add place",
+    "search": "Search place",
+    "searchPlaceholder": "City, address or site",
+    "searching": "Searching…",
+    "searchError": "The search failed. Try again.",
+    "noResults": "No results",
+    "namePlaceholder": "Place name",
+    "descriptionPlaceholder": "A note about this place",
+    "edit": "Edit place",
+    "editing": "Editing: {name}",
+    "delete": "Delete place",
+    "remove": "Remove place",
+    "confirmDelete": "Are you sure you want to delete this place?",
+    "editMode": "Edit mode",
+    "collapseAll": "Collapse all",
+    "fallbackName": "Place"
+  },
+  "planning": {
+    "newGroup": "New group",
+    "group": "Group",
+    "deleteGroup": "Delete group",
+    "newCategory": "New category",
+    "deleteCategory": "Delete category",
+    "newOption": "New option",
+    "editOption": "Edit option",
+    "groupNotFound": "Group not found",
+    "categoryNotFound": "Category not found",
+    "optionNotFound": "Option not found"
+  },
+  "resources": {
+    "search": "Search resource",
+    "new": "New resource",
+    "short": "Resource",
+    "namePlaceholder": "Ex. Travel guide",
+    "descriptionPlaceholder": "Ex. Found in the library...",
+    "edit": "Edit resource"
+  },
+  "errors": {
+    "loadTrip": "The trip could not be loaded.",
+    "saveTrip": "The trip could not be saved.",
+    "savePlace": "The place could not be saved.",
+    "deletePlace": "The place could not be deleted.",
+    "saveOrder": "The order could not be saved.",
+    "missingSupabase": "Add NUXT_PUBLIC_SUPABASE_URL and NUXT_PUBLIC_SUPABASE_KEY to .env.",
+    "saveResource": "The resource could not be saved.",
+    "signInToUpload": "Sign in to upload a file.",
+    "loginToLoadTrips": "You need to be logged in to load your trips",
+    "loginToCreateTrip": "You need to be logged in to insert a trip",
+    "selectTrip": "You need to select a valid trip before starting"
+  }
+}
