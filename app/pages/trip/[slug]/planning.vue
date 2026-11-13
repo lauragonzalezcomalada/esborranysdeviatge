@@ -8,7 +8,7 @@ const tripId = useRoute().params.slug;
 const { canBeEdited } = useTripShell();
 
 const {
-  loadTripResources,
+  loadTripEquipment,
   insertGroup,
   deleteGroup,
   insertCategory,
@@ -17,7 +17,7 @@ const {
   updateOptionSelected,
   deleteOption,
   deleteCategory,
-} = useTripResources();
+} = useTripEquipment();
 
 const resources = ref([]);
 
@@ -43,7 +43,7 @@ function openAddGroupModal() {
   addGroupModalOpen.value = true;
 }
 onMounted(async () => {
-  resources.value = await loadTripResources(tripId);
+  resources.value = await loadTripEquipment(tripId);
 });
 
 async function saveGroup() {

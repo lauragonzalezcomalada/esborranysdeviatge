@@ -1,163 +1,153 @@
+export type TripResource = {
+  id: string;
+  name: string;
+  description: string;
+  link: string | null;
+  trip_id: string;
+  file_path: string | null;
+};
+
+const RESOURCES_BUCKET = "resources";
+
+function storageErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (
+    error &&
+    typeof error === "object" &&
+    "message" in error &&
+    typeof error.message === "string"
+  ) {
+    return error.message;
+  }
+  return "No se pudo guardar el recurso.";
+}
+
 export function useTripResources() {
   const supabase = useSupabaseClient<any>();
+  const user = useSupabaseUser();
 
-  async function loadTripResources(tripId: string) {
-    const { data, error } = await supabase
-      .from("groups")
-      .select(
-        `
-    *,
-    categories (
-      *,
-      options (*)
-    )
-  `,
-      )
-      .eq("trip_id", tripId);
-
-    return data;
+  function resourceFileUrl(filePath: string | null) {
+    if (!filePath) {
+      return null;
+    }
+    const { data } = supabase.storage
+      .from(RESOURCES_BUCKET)
+      .getPublicUrl(filePath);
+    return data.publicUrl;
   }
-  async function insertGroup(input: { name: string; tripId: string }) {
-    const { data: trip, error: tripError } = await supabase
-      .from("trips")
-      .select("id")
-      .eq("id", input.tripId)
-      .maybeSingle();
 
-    if (tripError) {
-      console.log("tripError", tripError);
-      throw tripError;
+  async function uploadResourceFile(tripId: string, file: File) {
+    const userId = user.value?.sub;
+    if (!userId) {
+      throw new Error("Inicia sesión para subir un archivo.");
     }
-    if (!trip) {
-      throw new Error("You need to select a valid trip before starting");
+    const safeName =
+      file.name
+        .normalize("NFKD")
+        .replace(/[^\w.\-]+/g, "_")
+        .replace(/_+/g, "_")
+        .slice(0, 80) || "archivo";
+    const path = `${userId}/${tripId}/${crypto.randomUUID()}-${safeName}`;
+    const { error } = await supabase.storage
+      .from(RESOURCES_BUCKET)
+      .upload(path, file, {
+        contentType: file.type || undefined,
+        upsert: false,
+      });
+    if (error) {
+      throw new Error(storageErrorMessage(error));
     }
+    return path;
+  }
 
+  async function loadTripResources(input: { tripId: string }) {
     const { data, error } = await supabase
-      .from("groups")
-      .insert({
-        name: input.name,
-        trip_id: trip.id,
-      })
-      .select()
-      .single();
+      .from("resources")
+      .select("*")
+      .eq("trip_id", input.tripId);
 
     if (error) throw error;
-    return data;
+    return (data ?? []) as TripResource[];
   }
 
-  async function insertCategory(input: { name: string; groupId: string }) {
-    const { data, error } = await supabase
-      .from("categories")
-      .insert({
-        name: input.name,
-        group_id: input.groupId,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
-  }
-
-  async function insertOption(input: {
+  async function insertResource(input: {
+    tripId: string;
     name: string;
-    price: string;
+    description: string;
     link: string;
-    quantity: string;
-    categoryId: string;
+    file: File | null;
   }) {
+    let filePath: string | null = null;
+    if (input.file) {
+      filePath = await uploadResourceFile(input.tripId, input.file);
+    }
+
     const { data, error } = await supabase
-      .from("options")
+      .from("resources")
       .insert({
         name: input.name,
-        unit_price: input.price,
+        description: input.description,
         link: input.link,
-        quantity: input.quantity,
-        category_id: input.categoryId,
+        trip_id: input.tripId,
+        ...(filePath ? { file_path: filePath } : {}),
       })
       .select()
       .single();
 
-    if (error) throw error;
-    return data;
+    if (error) {
+      if (filePath) {
+        await supabase.storage.from(RESOURCES_BUCKET).remove([filePath]);
+      }
+      throw new Error(storageErrorMessage(error));
+    }
+    return data as TripResource;
   }
 
-  async function updateOptionSelected(input: {
-    id: string;
-    selected: boolean;
-  }) {
-    const { data, error } = await supabase
-      .from("options")
-      .update({ selected: input.selected })
-      .eq("id", input.id)
-      .select();
+  async function deleteResource(resourceId: string) {
+    const { data: resourceData, error: resourceError } = await supabase
+      .from("resources")
+      .select("file_path")
+      .eq("id", resourceId)
+      .single();
+    if (resourceError) throw resourceError;
+    if (resourceData?.file_path) {
+      await supabase.storage
+        .from(RESOURCES_BUCKET)
+        .remove([resourceData.file_path]);
+    }
 
-    if (error) throw error;
-    return data;
+    const { error: deleteError } = await supabase
+      .from("resources")
+      .delete()
+      .eq("id", resourceId);
+    if (deleteError) throw deleteError;
   }
-
-  async function updateOption({
-    id,
-    ...changes
-  }: {
-    id: string;
-    name: string;
-    price: string;
-    link: string;
-    quantity: string;
-  }) {
-    const { data, error } = await supabase
-      .from("options")
-      .update(changes)
-      .eq("id", id)
+  async function updateResource(
+    resourceId: string,
+    input: {
+      name: string;
+      description: string;
+      link: string;
+    },
+  ) {
+    console.log(input);
+    const { data, error: updateError } = await supabase
+      .from("resources")
+      .update(input)
+      .eq("id", resourceId)
       .select()
       .single();
-
-    if (error) throw error;
-
-    return data;
-  }
-
-  async function deleteGroup(groupId: string) {
-    const { data, error } = await supabase
-      .from("groups")
-      .delete()
-      .eq("id", groupId);
-    if (error) throw error;
-    return data;
-  }
-
-  async function deleteOption(optionId: string) {
-    const { data, error } = await supabase
-      .from("options")
-      .delete()
-      .eq("id", optionId);
-    if (error) throw error;
-    return data;
-  }
-
-  async function deleteCategory(categoryId: string) {
-    const { data, error } = await supabase
-      .from("categories")
-      .delete()
-      .eq("id", categoryId)
-      .select("id")
-      .single();
-
-    if (error) throw error;
-
-    return data;
+    if (updateError) throw updateError;
+    return data as TripResource;
   }
 
   return {
     loadTripResources,
-    insertGroup,
-    insertCategory,
-    insertOption,
-    updateOptionSelected,
-    updateOption,
-    deleteGroup,
-    deleteOption,
-    deleteCategory,
+    insertResource,
+    resourceFileUrl,
+    deleteResource,
+    updateResource,
   };
 }

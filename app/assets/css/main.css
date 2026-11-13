@@ -32,7 +32,8 @@
   --ui-text-contrast: #ffeaea;
   --category-card-bg: #6a994e;
   --card-text-contrast: #ffeaea;
-
+  --resource-card-bg: #6bb640;
+  --resource-card-text: #b93739;
   --ui-text-inverted: #b93739;
 }
 
@@ -53,6 +54,8 @@
   --card-text-contrast: #7540FF;
   --category-card-bg: #7540FF;
   --ui-text-inverted: #FF8000;
+  --resource-card-bg: #00FF37;
+  --resource-card-text: #7540FF;
 }
 
 .mnm {
@@ -71,7 +74,8 @@
   --ui-text-contrast: #ffc800;
   --category-card-bg: #FFFEFC;
   --card-text-contrast: #ffc800;
-
+  --resource-card-bg: #ffc800;
+  --resource-card-text: #383838;
   --ui-text-inverted: #383838;
 
 }

@@ -112,12 +112,19 @@ watch(
             >
               Planificación
             </NuxtLink>
+            <NuxtLink
+              :to="`/trip/${navTripId}/resources`"
+              class="font-bold tracking-tighter hover:underline"
+              exact-active-class="underline"
+            >
+              Recursos
+            </NuxtLink>
           </nav>
         </div>
       </div>
     </div>
 
-    <div class="relative min-h-0 flex-1 overflow-y-auto">
+    <div class="relative min-h-0 flex-1 overflow-y-auto mb-20 md:mb-0">
       <slot />
     </div>
 
