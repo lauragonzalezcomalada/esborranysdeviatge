@@ -1,6 +1,6 @@
 <script setup lang="ts">
-const route = useRoute();
-const navTripId = computed(() => String(route.params.slug ?? ""));
+const route = useRoute()
+const navTripId = computed(() => String(route.params.slug ?? ''))
 
 const {
   tripId,
@@ -17,56 +17,56 @@ const {
   refreshTrip,
   openEditor,
   saveTripDetails,
-  removeTrip,
-} = useTripShell();
+  removeTrip
+} = useTripShell()
 
-const { t } = useI18n();
+const { t } = useI18n()
 
 watch(
   [planning, canBeEdited],
   ([isPlanning, allowed], previous) => {
     if (!allowed) {
-      editMode.value = false;
-      editOpen.value = false;
-      return;
+      editMode.value = false
+      editOpen.value = false
+      return
     }
     if (isPlanning) {
-      editMode.value = true;
-      return;
+      editMode.value = true
+      return
     }
     if (previous?.[0]) {
-      editMode.value = false;
+      editMode.value = false
     }
   },
-  { immediate: true },
-);
+  { immediate: true }
+)
 
 watch(
   tripId,
   async (id) => {
     if (loadedId.value === id && trip.value) {
-      return;
+      return
     }
-    trip.value = null;
-    editOpen.value = false;
-    pageError.value = "";
-    loadedId.value = "";
+    trip.value = null
+    editOpen.value = false
+    pageError.value = ''
+    loadedId.value = ''
     if (!planning.value) {
-      editMode.value = false;
+      editMode.value = false
     }
     if (!id) {
-      return;
+      return
     }
     try {
-      await refreshTrip(id);
-      loadedId.value = id;
+      await refreshTrip(id)
+      loadedId.value = id
     } catch (error) {
-      pageError.value =
-        error instanceof Error ? error.message : t("errors.loadTrip");
+      pageError.value
+        = error instanceof Error ? error.message : t('errors.loadTrip')
     }
   },
-  { immediate: true },
-);
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -139,7 +139,10 @@ watch(
             @edit="openEditor"
           />
 
-          <p v-if="pageError" class="mt-2 max-w-xs text-xs text-red-300">
+          <p
+            v-if="pageError"
+            class="mt-2 max-w-xs text-xs text-red-300"
+          >
             {{ pageError }}
           </p>
         </div>
@@ -153,7 +156,7 @@ watch(
       :ui="{
         title: 'text-(--ui-text-contrast) tracking-tight',
         content: ' bg-(--ui-text)',
-        close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10',
+        close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
       }"
     >
       <template #body>
@@ -172,7 +175,7 @@ watch(
               required
               class="w-full"
               :ui="{
-                base: 'placeholder:text-(--ui-text-contrast) text-(--ui-text-contrast)',
+                base: 'placeholder:text-(--ui-text-contrast) text-(--ui-text-contrast)'
               }"
             />
           </UFormField>
@@ -185,7 +188,7 @@ watch(
               :rows="3"
               class="w-full"
               :ui="{
-                base: 'placeholder:text-(--ui-text-contrast) text-(--ui-text-contrast)',
+                base: 'placeholder:text-(--ui-text-contrast) text-(--ui-text-contrast)'
               }"
             />
           </UFormField>
@@ -198,7 +201,7 @@ watch(
               type="date"
               class="w-full"
               :ui="{
-                base: 'placeholder:text-(--ui-text-contrast) text-(--ui-text-contrast)',
+                base: 'placeholder:text-(--ui-text-contrast) text-(--ui-text-contrast)'
               }"
             />
           </UFormField>
@@ -214,9 +217,14 @@ watch(
           >
             {{ t("trip.delete") }}
           </UButton>
-          <UButton type="submit" form="edit-trip-form">{{
-            t("common.save")
-          }}</UButton>
+          <UButton
+            type="submit"
+            form="edit-trip-form"
+          >
+            {{
+              t("common.save")
+            }}
+          </UButton>
         </div>
       </template>
     </UModal>

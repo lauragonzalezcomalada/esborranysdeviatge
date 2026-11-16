@@ -1,57 +1,57 @@
 export const colorModes = {
-  "wild-nature": "🌳",
-  psico: "📀",
-  mnm: "🌚",
-} as const;
+  'wild-nature': '🌳',
+  'psico': '📀',
+  'mnm': '🌚'
+} as const
 
-export type AppColorMode = keyof typeof colorModes;
+export type AppColorMode = keyof typeof colorModes
 
-const defaultMode: AppColorMode = "wild-nature";
-const replacedModes = ["light", "dark", ...Object.keys(colorModes)];
+const defaultMode: AppColorMode = 'wild-nature'
+const replacedModes = ['light', 'dark', ...Object.keys(colorModes)]
 
 function isAppColorMode(value: string): value is AppColorMode {
-  return Object.hasOwn(colorModes, value);
+  return Object.hasOwn(colorModes, value)
 }
 
 function applyColorMode(mode: AppColorMode) {
-  if (!import.meta.client) return;
+  if (!import.meta.client) return
 
-  const root = document.documentElement;
-  root.classList.remove(...replacedModes);
-  root.classList.add(mode);
+  const root = document.documentElement
+  root.classList.remove(...replacedModes)
+  root.classList.add(mode)
 }
 
 export function useAppColorMode() {
-  const colorMode = useColorMode();
+  const colorMode = useColorMode()
 
   const mode = computed<AppColorMode>({
     get: () =>
       isAppColorMode(colorMode.preference) ? colorMode.preference : defaultMode,
 
     set: (value) => {
-      colorMode.preference = value;
-      applyColorMode(value);
-    },
-  });
+      colorMode.preference = value
+      applyColorMode(value)
+    }
+  })
 
   onMounted(() => {
     if (!isAppColorMode(colorMode.preference)) {
-      colorMode.preference = defaultMode;
+      colorMode.preference = defaultMode
     }
 
-    applyColorMode(mode.value);
-  });
+    applyColorMode(mode.value)
+  })
 
   if (import.meta.client) {
     watch(
       () => colorMode.preference,
       (value) => {
         if (isAppColorMode(value)) {
-          applyColorMode(value);
+          applyColorMode(value)
         }
-      },
-    );
+      }
+    )
   }
 
-  return { mode, modes: colorModes };
+  return { mode, modes: colorModes }
 }

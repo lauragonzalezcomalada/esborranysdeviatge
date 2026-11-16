@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import type { Trip } from "~/composables/useTripPlaces";
+import type { Trip } from '~/composables/useTripPlaces'
 
 defineProps<{
-  trip: Trip;
-  editMode: boolean;
-}>();
+  trip: Trip
+  editMode: boolean
+}>()
 
 defineEmits<{
-  edit: [];
-  goToHome: [];
-}>();
+  edit: []
+  goToHome: []
+}>()
 
-const { t, locale } = useI18n();
-const localePath = useLocalePath();
+const { t, locale } = useI18n()
+const localePath = useLocalePath()
 </script>
 
 <template>
@@ -44,8 +44,14 @@ const localePath = useLocalePath();
       >
         {{ trip.description }}
       </div>
-      <div v-if="trip.startDate" class="flex items-center gap-2 mt-2 text-sm">
-        <UIcon name="i-lucide-calendar" class="size-4" />
+      <div
+        v-if="trip.startDate"
+        class="flex items-center gap-2 mt-2 text-sm"
+      >
+        <UIcon
+          name="i-lucide-calendar"
+          class="size-4"
+        />
         {{ trip.startDate.toLocaleDateString(locale) }}
       </div>
     </div>

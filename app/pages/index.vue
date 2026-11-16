@@ -1,78 +1,79 @@
 <script setup lang="ts">
-import { useTripPlaces } from "~/composables/useTripPlaces";
-import UColorModeSelect from "~/components/ColorModeSelect.vue";
+import { useTripPlaces } from '~/composables/useTripPlaces'
+import UColorModeSelect from '~/components/ColorModeSelect.vue'
 
-const supabase = useSupabaseClient();
-const localePath = useLocalePath();
-const { loadPublicTrips, loadPersonalTrips, insertTrip } = useTripPlaces();
-const publicTrips = ref<Trip[]>([]);
-const personalTrips = ref<Trip[]>([]);
-const showPassword = ref(false);
-const newTripName = ref("");
-const user = useSupabaseUser();
+const supabase = useSupabaseClient()
+const localePath = useLocalePath()
+const { loadPublicTrips, loadPersonalTrips, insertTrip } = useTripPlaces()
+const publicTrips = ref<Trip[]>([])
+const personalTrips = ref<Trip[]>([])
+const showPassword = ref(false)
+const newTripName = ref('')
+const user = useSupabaseUser()
 
 onMounted(async () => {
   // true stands for only open trips
-  publicTrips.value = await loadPublicTrips();
+  publicTrips.value = await loadPublicTrips()
   if (user.value) {
-    personalTrips.value = await loadPersonalTrips();
+    personalTrips.value = await loadPersonalTrips()
   }
-});
+})
 
 watch(user, async (newUser) => {
   if (newUser) {
-    personalTrips.value = await loadPersonalTrips();
+    personalTrips.value = await loadPersonalTrips()
   }
-});
+})
 
 const openTripDetails = (trip: Trip) => {
-  navigateTo(localePath(`/trip/${trip.id}`));
-};
+  navigateTo(localePath(`/trip/${trip.id}`))
+}
 const startNewTrip = async () => {
   try {
     const data = await insertTrip({
-      name: newTripName.value,
-    });
+      name: newTripName.value
+    })
     navigateTo(
-      localePath(`/trip/${(data as unknown as { id: string })?.id ?? ""}`),
-    );
+      localePath(`/trip/${(data as unknown as { id: string })?.id ?? ''}`)
+    )
   } catch (error) {
-    console.error(error);
+    console.error(error)
   }
-};
+}
 
-const loading = ref(false);
-const email = ref("");
-const password = ref("");
+const loading = ref(false)
+const email = ref('')
+const password = ref('')
 
 const handleLogin = async () => {
   try {
-    loading.value = true;
+    loading.value = true
     const { error } = await supabase.auth.signInWithPassword({
       email: email.value,
-      password: password.value,
-    });
-    if (error) throw error;
-    navigateTo(localePath("/"));
+      password: password.value
+    })
+    if (error) throw error
+    navigateTo(localePath('/'))
   } catch (error) {
-    alert((error as any).error_description || (error as any).message);
+    alert((error as any).error_description || (error as any).message)
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
 const handleLogout = async () => {
-  await supabase.auth.signOut();
-  navigateTo(localePath("/"));
-};
+  await supabase.auth.signOut()
+  navigateTo(localePath('/'))
+}
 
 const openOurStories = () => {
   window.open(
-    "https://lauragonzalezcomalada.github.io/borradoresdeviaje/",
-    "_blank",
-  );
-};
+    'https://lauragonzalezcomalada.github.io/borradoresdeviaje/',
+    '_blank'
+  )
+}
 </script>
+
 <template>
   <!--  bg-[url('/bg_image.jpg')] bg-cover bg-center  -->
   <div
@@ -80,15 +81,18 @@ const openOurStories = () => {
   >
     <div class="flex flex-col md:flex-row gap-4 items-center">
       <LocaleSwitch mobile-side="right" />
-      <UColorModeSelect class="w-fit" mobile-side="right" />
+      <UColorModeSelect
+        class="w-fit"
+        mobile-side="right"
+      />
       <div
         class="rounded-3xl border border-(--ui-border)/10 bg-white/40 py-3 px-6 w-fit backdrop-blur-2xl shadow-[0_8px_32px_color-mix(in_srgb,var(--glass-shadow)_24%,transparent)]"
       >
         <div class="flex gap-10 items-center">
           <div
-            @click="openOurStories()"
-            class="text-lg font-bold tracking-tighter cursor-pointer hover:underline"
             key="our-stories"
+            class="text-lg font-bold tracking-tighter cursor-pointer hover:underline"
+            @click="openOurStories()"
           >
             {{ $t("nav.stories") }}
           </div>
@@ -110,7 +114,7 @@ const openOurStories = () => {
           :content="{
             align: 'start',
             side: 'bottom',
-            sideOffset: 8,
+            sideOffset: 8
           }"
         >
           <UButton
@@ -124,7 +128,10 @@ const openOurStories = () => {
               <div class="text-(--ui-text-contrast)/90 font-semibold">
                 {{ $t("auth.enter") }}
               </div>
-              <UForm class="flex flex-col gap-2" @submit.prevent="handleLogin">
+              <UForm
+                class="flex flex-col gap-2"
+                @submit.prevent="handleLogin"
+              >
                 <UFormField
                   :label="$t('common.email')"
                   :ui="{ label: 'text-(--ui-text-contrast)/90' }"
@@ -154,23 +161,24 @@ const openOurStories = () => {
                           showPassword ? 'i-lucide-eye' : 'i-lucide-eye-off'
                         "
                         @click="showPassword = !showPassword"
-                      /> </template
-                  ></UInput>
+                      />
+                    </template>
+                  </UInput>
                 </UFormField>
 
                 <UButton
                   type="submit"
                   class="w-fit mt-2 bg-(--ui-bg-elevated) hover:bg-(--ui-text-contrast)/80"
-                  >{{ $t("auth.confirm") }}</UButton
                 >
+                  {{ $t("auth.confirm") }}
+                </UButton>
                 <USeparator />
                 <div class="text-xs text-(--ui-text-contrast)/90 mt-2">
                   <span class="italic"> {{ $t("auth.noAccount") }} </span>
                   <NuxtLink
                     :to="$localePath('/signup')"
                     class="text-(--ui-text-contrast)/90 font-semibold"
-                    >{{ $t("auth.signupNow") }}</NuxtLink
-                  >
+                  >{{ $t("auth.signupNow") }}</NuxtLink>
                 </div>
               </UForm>
             </div>
@@ -185,7 +193,7 @@ const openOurStories = () => {
           :content="{
             align: 'center',
             side: 'bottom',
-            sideOffset: 8,
+            sideOffset: 8
           }"
         >
           <UButton
@@ -231,7 +239,10 @@ const openOurStories = () => {
                 {{ trip.name }}
               </div>
             </div>
-            <USeparator orientation="vertical" class="h-4 shrink-0" />
+            <USeparator
+              orientation="vertical"
+              class="h-4 shrink-0"
+            />
             <UPopover
               class="shrink-0"
               :content="{ align: 'start', side: 'bottom', sideOffset: 8 }"
@@ -239,15 +250,16 @@ const openOurStories = () => {
               <UButton
                 variant="link"
                 class="whitespace-nowrap px-0 py-0 text-lg font-semibold tracking-tighter text-(--ui-text)/70 hover:text-(--ui-text-contrast)"
-                >{{ $t("home.newTrip") }}</UButton
               >
+                {{ $t("home.newTrip") }}
+              </UButton>
               <template #content>
                 <div class="p-4 bg-(--ui-text) rounded-md flex flex-col gap-2">
                   <UFormField
                     :label="$t('home.tripNameQuestion')"
                     :ui="{
                       label:
-                        'text-(--ui-text-contrast)/90 tracking-tighter font-semibold italic',
+                        'text-(--ui-text-contrast)/90 tracking-tighter font-semibold italic'
                     }"
                   >
                     <UInput
@@ -261,10 +273,11 @@ const openOurStories = () => {
                   <UButton
                     variant="solid"
                     class="w-fit text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/80 font-semibold tracking-tighter hover:text-(--ui-bg-muted)"
-                    @click="startNewTrip"
                     :disabled="newTripName == null || newTripName == ''"
-                    >{{ $t("home.createTrip") }}</UButton
+                    @click="startNewTrip"
                   >
+                    {{ $t("home.createTrip") }}
+                  </UButton>
                 </div>
               </template>
             </UPopover>

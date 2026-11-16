@@ -1,5 +1,6 @@
+import type { Database } from "~/types/database.types";
 export function useTripEquipment() {
-  const supabase = useSupabaseClient<any>();
+  const supabase = useSupabaseClient<Database>();
   const { t } = useI18n();
 
   async function loadTripEquipment(tripId: string) {
@@ -51,7 +52,7 @@ export function useTripEquipment() {
       .from("categories")
       .insert({
         name: input.name,
-        group_id: input.groupId,
+        group_id: Number(input.groupId),
       })
       .select()
       .single();
@@ -71,10 +72,10 @@ export function useTripEquipment() {
       .from("options")
       .insert({
         name: input.name,
-        unit_price: input.price,
+        unit_price: Number(input.price),
         link: input.link,
-        quantity: input.quantity,
-        category_id: input.categoryId,
+        quantity: Number(input.quantity),
+        category_id: Number(input.categoryId),
       })
       .select()
       .single();
@@ -89,8 +90,8 @@ export function useTripEquipment() {
   }) {
     const { data, error } = await supabase
       .from("options")
-      .update({ selected: input.selected })
-      .eq("id", input.id)
+      .update({ selected: input.selected as boolean })
+      .eq("id", Number(input.id))
       .select();
 
     if (error) throw error;
@@ -109,8 +110,13 @@ export function useTripEquipment() {
   }) {
     const { data, error } = await supabase
       .from("options")
-      .update(changes)
-      .eq("id", id)
+      .update({
+        name: changes.name,
+        unit_price: Number(changes.price),
+        link: changes.link,
+        quantity: Number(changes.quantity),
+      })
+      .eq("id", Number(id))
       .select()
       .single();
 
@@ -123,7 +129,7 @@ export function useTripEquipment() {
     const { data, error } = await supabase
       .from("groups")
       .delete()
-      .eq("id", groupId);
+      .eq("id", Number(groupId));
     if (error) throw error;
     return data;
   }
@@ -132,7 +138,7 @@ export function useTripEquipment() {
     const { data, error } = await supabase
       .from("options")
       .delete()
-      .eq("id", optionId);
+      .eq("id", Number(optionId));
     if (error) throw error;
     return data;
   }
@@ -141,7 +147,7 @@ export function useTripEquipment() {
     const { data, error } = await supabase
       .from("categories")
       .delete()
-      .eq("id", categoryId)
+      .eq("id", Number(categoryId))
       .select("id")
       .single();
 

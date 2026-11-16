@@ -8,17 +8,17 @@ export function youtubeEmbedUrl(url: string): string | null {
     return null
   }
 
-  const host = parsed.hostname.replace(/^www\./, "")
+  const host = parsed.hostname.replace(/^www\./, '')
   let id: string | null = null
 
-  if (host === "youtu.be") {
-    id = parsed.pathname.split("/").filter(Boolean)[0] ?? null
-  } else if (host === "youtube.com" || host === "youtube-nocookie.com" || host === "m.youtube.com") {
-    if (parsed.pathname === "/watch") {
-      id = parsed.searchParams.get("v")
+  if (host === 'youtu.be') {
+    id = parsed.pathname.split('/').filter(Boolean)[0] ?? null
+  } else if (host === 'youtube.com' || host === 'youtube-nocookie.com' || host === 'm.youtube.com') {
+    if (parsed.pathname === '/watch') {
+      id = parsed.searchParams.get('v')
     } else {
-      const [kind, value] = parsed.pathname.split("/").filter(Boolean)
-      if (kind === "embed" || kind === "shorts" || kind === "live") {
+      const [kind, value] = parsed.pathname.split('/').filter(Boolean)
+      if (kind === 'embed' || kind === 'shorts' || kind === 'live') {
         id = value ?? null
       }
     }
@@ -38,7 +38,7 @@ export function directImageUrl(url: string): string | null {
   } catch {
     return null
   }
-  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
     return null
   }
   return IMAGE_EXTENSION.test(parsed.pathname) ? url : null

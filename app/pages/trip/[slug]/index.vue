@@ -1,326 +1,326 @@
 <script setup lang="ts">
-import type { Place } from "~/composables/useTripPlaces";
+import type { Place } from '~/composables/useTripPlaces'
 
 definePageMeta({
-  layout: "trip",
-});
+  layout: 'trip'
+})
 
-const { t } = useI18n();
+const { t } = useI18n()
 
 type PhotonFeature = {
   geometry: {
-    coordinates: [number, number];
-  };
+    coordinates: [number, number]
+  }
   properties: {
-    osm_id?: number;
-    name?: string;
-    street?: string;
-    housenumber?: string;
-    city?: string;
-    state?: string;
-    country?: string;
-  };
-};
+    osm_id?: number
+    name?: string
+    street?: string
+    housenumber?: string
+    city?: string
+    state?: string
+    country?: string
+  }
+}
 
 type PhotonResponse = {
-  features: PhotonFeature[];
-};
+  features: PhotonFeature[]
+}
 
 type DraftLocation = {
-  label: string;
-  coordinates: [number, number];
-};
+  label: string
+  coordinates: [number, number]
+}
 
-useAppColorMode();
-const { loadPlaces, insertPlace, updatePlace, deletePlace, saveOrder } =
-  useTripPlaces();
-const { trip, tripId, editMode, canBeEdited } = useTripShell();
+useAppColorMode()
+const { loadPlaces, insertPlace, updatePlace, deletePlace, saveOrder }
+  = useTripPlaces()
+const { trip, tripId, editMode, canBeEdited } = useTripShell()
 
-const places = ref<Place[]>([]);
-const focusedPlaceId = ref<string | null>(null);
-const collapseAll = ref(false);
-const pageError = ref("");
-const mobilePane = ref<"globe" | "places">("globe");
+const places = ref<Place[]>([])
+const focusedPlaceId = ref<string | null>(null)
+const collapseAll = ref(false)
+const pageError = ref('')
+const mobilePane = ref<'globe' | 'places'>('globe')
 
-const addPlaceOpen = ref(false);
-const placeName = ref("");
-const placeDescription = ref("");
-const placeDays = ref(0);
-const searchQuery = ref("");
-const searchResults = ref<PhotonFeature[]>([]);
-const searchStatus = ref<"idle" | "loading" | "error">("idle");
-const settledQuery = ref("");
-const selectedLocation = ref<DraftLocation | null>(null);
+const addPlaceOpen = ref(false)
+const placeName = ref('')
+const placeDescription = ref('')
+const placeDays = ref(0)
+const searchQuery = ref('')
+const searchResults = ref<PhotonFeature[]>([])
+const searchStatus = ref<'idle' | 'loading' | 'error'>('idle')
+const settledQuery = ref('')
+const selectedLocation = ref<DraftLocation | null>(null)
 
-const editPlaceOpen = ref(false);
-const editingPlace = ref<Place | null>(null);
-const editName = ref("");
-const editDescription = ref("");
-const editDays = ref<number>();
+const editPlaceOpen = ref(false)
+const editingPlace = ref<Place | null>(null)
+const editName = ref('')
+const editDescription = ref('')
+const editDays = ref<number>()
 
-let searchTimer: ReturnType<typeof setTimeout> | undefined;
-let searchGeneration = 0;
+let searchTimer: ReturnType<typeof setTimeout> | undefined
+let searchGeneration = 0
 
 const preview = computed<[number, number] | null>(
-  () => selectedLocation.value?.coordinates ?? null,
-);
+  () => selectedLocation.value?.coordinates ?? null
+)
 
 const canSavePlace = computed(
-  () => placeName.value.trim().length > 0 && selectedLocation.value !== null,
-);
+  () => placeName.value.trim().length > 0 && selectedLocation.value !== null
+)
 
 const supabaseConfig = useRuntimeConfig().public.supabase as
-  | { url?: string; key?: string }
-  | undefined;
+  | { url?: string, key?: string }
+  | undefined
 
 watch(
   tripId,
   async (id) => {
-    places.value = [];
-    focusedPlaceId.value = null;
-    addPlaceOpen.value = false;
-    editPlaceOpen.value = false;
-    pageError.value = "";
+    places.value = []
+    focusedPlaceId.value = null
+    addPlaceOpen.value = false
+    editPlaceOpen.value = false
+    pageError.value = ''
     if (!id) {
-      return;
+      return
     }
     if (!supabaseConfig?.url || !supabaseConfig.key) {
-      pageError.value = t("errors.missingSupabase");
-      return;
+      pageError.value = t('errors.missingSupabase')
+      return
     }
     try {
-      places.value = await loadPlaces(id);
+      places.value = await loadPlaces(id)
     } catch (error) {
-      pageError.value =
-        error instanceof Error ? error.message : t("errors.loadTrip");
+      pageError.value
+        = error instanceof Error ? error.message : t('errors.loadTrip')
     }
   },
-  { immediate: true },
-);
+  { immediate: true }
+)
 
 watch(editMode, (on) => {
   if (on) {
-    return;
+    return
   }
-  addPlaceOpen.value = false;
-  editPlaceOpen.value = false;
-});
+  addPlaceOpen.value = false
+  editPlaceOpen.value = false
+})
 
 async function deleteEditedPlace(id: string) {
   if (!id) {
-    return;
+    return
   }
 
   if (!canBeEdited.value) {
-    return;
+    return
   }
   try {
-    if (!confirm(t("places.confirmDelete"))) {
-      return;
+    if (!confirm(t('places.confirmDelete'))) {
+      return
     }
-    await deletePlace(id);
+    await deletePlace(id)
 
-    places.value = places.value.filter((place) => place.id !== id);
-    pageError.value = "";
+    places.value = places.value.filter(place => place.id !== id)
+    pageError.value = ''
   } catch (error) {
-    pageError.value =
-      error instanceof Error ? error.message : t("errors.deletePlace");
+    pageError.value
+      = error instanceof Error ? error.message : t('errors.deletePlace')
   } finally {
-    editPlaceOpen.value = false;
+    editPlaceOpen.value = false
   }
 }
 
 async function savePlaceOrder(next: Place[]) {
   if (!canBeEdited.value) {
-    return;
+    return
   }
-  const weights = next.map((place) => place.orderWeight).sort((a, b) => a - b);
+  const weights = next.map(place => place.orderWeight).sort((a, b) => a - b)
   next.forEach((place, index) => {
-    place.orderWeight = weights[index] ?? index;
-  });
+    place.orderWeight = weights[index] ?? index
+  })
   places.value = [...places.value].sort(
-    (a, b) => a.orderWeight - b.orderWeight,
-  );
+    (a, b) => a.orderWeight - b.orderWeight
+  )
 
   try {
-    await saveOrder(places.value);
-    pageError.value = "";
+    await saveOrder(places.value)
+    pageError.value = ''
   } catch (error) {
-    pageError.value =
-      error instanceof Error ? error.message : t("errors.saveOrder");
+    pageError.value
+      = error instanceof Error ? error.message : t('errors.saveOrder')
   }
 }
 
 function placeLabel(feature: PhotonFeature) {
-  const { name, street, housenumber, city, state, country } =
-    feature.properties;
-  const title =
-    name ||
-    [street, housenumber].filter(Boolean).join(" ") ||
-    city ||
-    t("places.fallbackName");
+  const { name, street, housenumber, city, state, country }
+    = feature.properties
+  const title
+    = name
+      || [street, housenumber].filter(Boolean).join(' ')
+      || city
+      || t('places.fallbackName')
   const detail = [city, state, country].filter(
-    (part) => part && part !== title,
-  );
-  return [title, ...detail].join(", ");
+    part => part && part !== title
+  )
+  return [title, ...detail].join(', ')
 }
 
 function resultKey(feature: PhotonFeature, index: number) {
-  return `${feature.properties.osm_id ?? "lugar"}-${index}`;
+  return `${feature.properties.osm_id ?? 'lugar'}-${index}`
 }
 
 async function searchPlaces(query: string) {
-  const generation = ++searchGeneration;
-  const trimmed = query.trim();
+  const generation = ++searchGeneration
+  const trimmed = query.trim()
   if (trimmed.length < 2 || trimmed === selectedLocation.value?.label) {
-    searchResults.value = [];
-    searchStatus.value = "idle";
-    settledQuery.value = "";
-    return;
+    searchResults.value = []
+    searchStatus.value = 'idle'
+    settledQuery.value = ''
+    return
   }
-  searchStatus.value = "loading";
+  searchStatus.value = 'loading'
   try {
-    const data = await $fetch<PhotonResponse>("/api/places/search", {
-      query: { q: trimmed },
-    });
+    const data = await $fetch<PhotonResponse>('/api/places/search', {
+      query: { q: trimmed }
+    })
     if (generation !== searchGeneration) {
-      return;
+      return
     }
-    searchResults.value = data.features ?? [];
-    searchStatus.value = "idle";
-    settledQuery.value = trimmed;
+    searchResults.value = data.features ?? []
+    searchStatus.value = 'idle'
+    settledQuery.value = trimmed
   } catch {
     if (generation !== searchGeneration) {
-      return;
+      return
     }
-    searchResults.value = [];
-    searchStatus.value = "error";
-    settledQuery.value = trimmed;
+    searchResults.value = []
+    searchStatus.value = 'error'
+    settledQuery.value = trimmed
   }
 }
 
 watch(searchQuery, (query) => {
   if (selectedLocation.value && query.trim() !== selectedLocation.value.label) {
-    selectedLocation.value = null;
+    selectedLocation.value = null
   }
-  clearTimeout(searchTimer);
+  clearTimeout(searchTimer)
   searchTimer = setTimeout(() => {
-    searchPlaces(query);
-  }, 300);
-});
+    searchPlaces(query)
+  }, 300)
+})
 
 function chooseResult(feature: PhotonFeature) {
-  const [lng, lat] = feature.geometry.coordinates;
-  const label = placeLabel(feature);
-  selectedLocation.value = { label, coordinates: [lng, lat] };
-  searchResults.value = [];
-  searchQuery.value = label;
+  const [lng, lat] = feature.geometry.coordinates
+  const label = placeLabel(feature)
+  selectedLocation.value = { label, coordinates: [lng, lat] }
+  searchResults.value = []
+  searchQuery.value = label
   if (!placeName.value.trim()) {
-    placeName.value = feature.properties.name || label;
+    placeName.value = feature.properties.name || label
   }
 }
 
 function resetPlaceDraft() {
-  placeName.value = "";
-  placeDescription.value = "";
-  placeDays.value = 0;
-  searchQuery.value = "";
-  searchResults.value = [];
-  searchStatus.value = "idle";
-  settledQuery.value = "";
-  selectedLocation.value = null;
-  clearTimeout(searchTimer);
-  searchGeneration += 1;
+  placeName.value = ''
+  placeDescription.value = ''
+  placeDays.value = 0
+  searchQuery.value = ''
+  searchResults.value = []
+  searchStatus.value = 'idle'
+  settledQuery.value = ''
+  selectedLocation.value = null
+  clearTimeout(searchTimer)
+  searchGeneration += 1
 }
 
 watch(addPlaceOpen, (open) => {
   if (!open) {
-    resetPlaceDraft();
+    resetPlaceDraft()
   }
-});
+})
 
 async function savePlace() {
-  const location = selectedLocation.value;
-  const name = placeName.value.trim();
+  const location = selectedLocation.value
+  const name = placeName.value.trim()
   if (!tripId.value || !location || !name) {
     if (!tripId.value) {
-      pageError.value = t("errors.selectTrip");
+      pageError.value = t('errors.selectTrip')
     }
-    return;
+    return
   }
   if (!canBeEdited.value) {
-    return;
+    return
   }
-  const days = Number(placeDays.value);
+  const days = Number(placeDays.value)
   try {
     const newPlace = await insertPlace(tripId.value, {
       name,
       description: placeDescription.value.trim(),
       days: Number.isFinite(days) && days > 0 ? days : undefined,
       coordinates: location.coordinates,
-      orderWeight: places.value.length,
-    });
-    places.value.push(newPlace);
-    addPlaceOpen.value = false;
-    pageError.value = "";
+      orderWeight: places.value.length
+    })
+    places.value.push(newPlace)
+    addPlaceOpen.value = false
+    pageError.value = ''
   } catch (error) {
-    pageError.value =
-      error instanceof Error ? error.message : t("errors.savePlace");
+    pageError.value
+      = error instanceof Error ? error.message : t('errors.savePlace')
   }
 }
 
 function openPlaceEditor(id: string) {
-  const place = places.value.find((item) => item.id === id) ?? null;
-  editingPlace.value = place;
+  const place = places.value.find(item => item.id === id) ?? null
+  editingPlace.value = place
   if (!place) {
-    return;
+    return
   }
-  editName.value = place.name;
-  editDescription.value = place.description;
-  editDays.value = place.days;
-  editPlaceOpen.value = true;
+  editName.value = place.name
+  editDescription.value = place.description
+  editDays.value = place.days
+  editPlaceOpen.value = true
 }
 
 async function saveEditedPlace() {
-  const place = editingPlace.value;
-  const name = editName.value.trim();
+  const place = editingPlace.value
+  const name = editName.value.trim()
   if (!place || !name || !canBeEdited.value) {
-    return;
+    return
   }
-  place.name = name;
-  place.description = editDescription.value.trim();
-  const days = Number(editDays.value);
-  place.days = Number.isFinite(days) && days > 0 ? days : undefined;
-  editPlaceOpen.value = false;
-  editingPlace.value = null;
+  place.name = name
+  place.description = editDescription.value.trim()
+  const days = Number(editDays.value)
+  place.days = Number.isFinite(days) && days > 0 ? days : undefined
+  editPlaceOpen.value = false
+  editingPlace.value = null
   try {
-    await updatePlace(place);
-    pageError.value = "";
+    await updatePlace(place)
+    pageError.value = ''
   } catch (error) {
-    pageError.value =
-      error instanceof Error ? error.message : t("errors.savePlace");
+    pageError.value
+      = error instanceof Error ? error.message : t('errors.savePlace')
   }
 }
 
 function unfocusOutsideGlobe(event: MouseEvent) {
-  const target = event.target;
+  const target = event.target
   if (!(target instanceof Element)) {
-    return;
+    return
   }
-  if (target.closest(".maplibregl-map")) {
-    return;
+  if (target.closest('.maplibregl-map')) {
+    return
   }
-  focusedPlaceId.value = null;
+  focusedPlaceId.value = null
 }
 
 onMounted(() => {
-  window.addEventListener("click", unfocusOutsideGlobe);
-});
+  window.addEventListener('click', unfocusOutsideGlobe)
+})
 
 onBeforeUnmount(() => {
-  clearTimeout(searchTimer);
-  window.removeEventListener("click", unfocusOutsideGlobe);
-});
+  clearTimeout(searchTimer)
+  window.removeEventListener('click', unfocusOutsideGlobe)
+})
 </script>
 
 <template>
@@ -341,7 +341,10 @@ onBeforeUnmount(() => {
           :aria-pressed="mobilePane === 'globe'"
           @click="mobilePane = 'globe'"
         >
-          <UIcon name="i-lucide-globe" class="size-4" />
+          <UIcon
+            name="i-lucide-globe"
+            class="size-4"
+          />
           {{ t("places.globe") }}
         </button>
         <button
@@ -355,7 +358,10 @@ onBeforeUnmount(() => {
           :aria-pressed="mobilePane === 'places'"
           @click="mobilePane = 'places'"
         >
-          <UIcon name="i-lucide-map-pin" class="size-4" />
+          <UIcon
+            name="i-lucide-map-pin"
+            class="size-4"
+          />
           {{ t("places.places") }}
         </button>
       </div>
@@ -417,9 +423,12 @@ onBeforeUnmount(() => {
                 :ui="{ label: 'tracking-tight' }"
               />
             </div>
-            <!--  </div>-->
+            <!--  </div> -->
           </div>
-          <p v-if="pageError" class="max-w-xs text-right text-xs text-red-300">
+          <p
+            v-if="pageError"
+            class="max-w-xs text-right text-xs text-red-300"
+          >
             {{ pageError }}
           </p>
           <UModal
@@ -431,7 +440,7 @@ onBeforeUnmount(() => {
               title: 'text-(--ui-text-contrast) tracking-tight',
               content: 'bg-(--ui-text)',
               close:
-                'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10',
+                'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
             }"
           >
             <UButton
@@ -456,7 +465,7 @@ onBeforeUnmount(() => {
                     autocomplete="off"
                     class="w-full"
                     :ui="{
-                      base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                      base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)'
                     }"
                   />
                 </UFormField>
@@ -475,10 +484,10 @@ onBeforeUnmount(() => {
                   </p>
                   <p
                     v-else-if="
-                      searchQuery.trim().length >= 2 &&
-                      settledQuery === searchQuery.trim() &&
-                      searchResults.length === 0 &&
-                      !selectedLocation
+                      searchQuery.trim().length >= 2
+                        && settledQuery === searchQuery.trim()
+                        && searchResults.length === 0
+                        && !selectedLocation
                     "
                     class="text-xs text-(--ui-text-contrast)"
                   >
@@ -511,7 +520,7 @@ onBeforeUnmount(() => {
                     :placeholder="t('places.namePlaceholder')"
                     required
                     :ui="{
-                      base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                      base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)'
                     }"
                     class="w-full"
                   />
@@ -526,7 +535,7 @@ onBeforeUnmount(() => {
                     :rows="3"
                     class="w-full"
                     :ui="{
-                      base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                      base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)'
                     }"
                   />
                 </UFormField>
@@ -540,7 +549,7 @@ onBeforeUnmount(() => {
                     class="w-full"
                     type="number"
                     :ui="{
-                      base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                      base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)'
                     }"
                   />
                 </UFormField>
@@ -610,7 +619,7 @@ onBeforeUnmount(() => {
       :ui="{
         title: 'text-(--ui-text-contrast) tracking-tight',
         content: ' bg-(--ui-text)',
-        close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10',
+        close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
       }"
     >
       <template #body>
@@ -628,7 +637,7 @@ onBeforeUnmount(() => {
               v-model="editName"
               :placeholder="t('places.namePlaceholder')"
               :ui="{
-                base: 'placeholder:text-(--ui-text-contrast) text-(--ui-text-contrast)',
+                base: 'placeholder:text-(--ui-text-contrast) text-(--ui-text-contrast)'
               }"
               required
               class="w-full"
@@ -642,7 +651,7 @@ onBeforeUnmount(() => {
               v-model="editDescription"
               :placeholder="t('places.descriptionPlaceholder')"
               :ui="{
-                base: 'placeholder:text-(--ui-text-contrast) text-(--ui-text-contrast)',
+                base: 'placeholder:text-(--ui-text-contrast) text-(--ui-text-contrast)'
               }"
               :rows="3"
               class="w-full"
@@ -657,7 +666,7 @@ onBeforeUnmount(() => {
               type="number"
               class="w-full"
               :ui="{
-                base: 'placeholder:text-(--ui-text-contrast) text-(--ui-text-contrast)',
+                base: 'placeholder:text-(--ui-text-contrast) text-(--ui-text-contrast)'
               }"
             />
           </UFormField>
@@ -671,8 +680,9 @@ onBeforeUnmount(() => {
             color="success"
             variant="solid"
             icon="i-lucide-check"
-            >{{ t("common.save") }}</UButton
           >
+            {{ t("common.save") }}
+          </UButton>
         </div>
       </template>
     </UModal>

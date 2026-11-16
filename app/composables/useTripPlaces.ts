@@ -1,4 +1,4 @@
-import type { Database, PlaceRow, TripRow } from "~/types/database.types";
+import type { Database } from "~/types/database.types";
 
 export type Place = {
   id: string;
@@ -250,7 +250,7 @@ export function useTripPlaces() {
         description: place.description,
         days: place.days ?? null,
       })
-      .eq("id", place.id);
+      .eq("id", Number(place.id));
     if (error) {
       throw error;
     }
@@ -262,7 +262,7 @@ export function useTripPlaces() {
         supabase
           .from("places")
           .update({ order_weight: index })
-          .eq("id", place.id),
+          .eq("id", Number(place.id)),
       ),
     );
     const failed = results.find((result) => result.error);
@@ -275,7 +275,10 @@ export function useTripPlaces() {
   }
 
   async function deletePlace(id: string) {
-    const { error } = await supabase.from("places").delete().eq("id", id);
+    const { error } = await supabase
+      .from("places")
+      .delete()
+      .eq("id", Number(id));
     if (error) {
       throw error;
     }

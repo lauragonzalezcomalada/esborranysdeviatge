@@ -1,43 +1,43 @@
 <script setup lang="ts">
-import { instantLinkPreview, youtubeEmbedUrl } from "~/utils/linkPreview";
+import { instantLinkPreview, youtubeEmbedUrl } from '~/utils/linkPreview'
 
 const props = defineProps<{
-  url: string;
-}>();
+  url: string
+}>()
 
-const embedUrl = computed(() => youtubeEmbedUrl(props.url));
-const image = ref<string | null>(null);
+const embedUrl = computed(() => youtubeEmbedUrl(props.url))
+const image = ref<string | null>(null)
 
 watch(
   () => props.url,
   async (url) => {
     if (youtubeEmbedUrl(url)) {
-      image.value = null;
-      return;
+      image.value = null
+      return
     }
 
-    const immediate = instantLinkPreview(url);
+    const immediate = instantLinkPreview(url)
     if (immediate) {
-      image.value = immediate;
-      return;
+      image.value = immediate
+      return
     }
 
-    image.value = null;
+    image.value = null
     try {
-      const preview = await $fetch<{ image: string | null }>("/api/link-preview", {
-        query: { url },
-      });
+      const preview = await $fetch<{ image: string | null }>('/api/link-preview', {
+        query: { url }
+      })
       if (props.url === url) {
-        image.value = preview.image;
+        image.value = preview.image
       }
     } catch {
       if (props.url === url) {
-        image.value = null;
+        image.value = null
       }
     }
   },
-  { immediate: true },
-);
+  { immediate: true }
+)
 </script>
 
 <template>

@@ -1,12 +1,12 @@
 <script setup>
 definePageMeta({
-  layout: "trip",
-});
+  layout: 'trip'
+})
 
-const tripId = useRoute().params.slug;
-const { t } = useI18n();
+const tripId = useRoute().params.slug
+const { t } = useI18n()
 
-const { canBeEdited } = useTripShell();
+const { canBeEdited } = useTripShell()
 
 const {
   loadTripEquipment,
@@ -17,316 +17,316 @@ const {
   updateOption,
   updateOptionSelected,
   deleteOption,
-  deleteCategory,
-} = useTripEquipment();
+  deleteCategory
+} = useTripEquipment()
 
-const resources = ref([]);
+const resources = ref([])
 
-const groupName = ref("");
-const categoryName = ref("");
-const addGroupModalOpen = ref(false);
+const groupName = ref('')
+const categoryName = ref('')
+const addGroupModalOpen = ref(false)
 
-const selectedGroupId = ref(null);
-const addCategoryModalOpen = ref(false);
+const selectedGroupId = ref(null)
+const addCategoryModalOpen = ref(false)
 
-const selectedCategoryId = ref(null);
-const addOptionModalOpen = ref(false);
+const selectedCategoryId = ref(null)
+const addOptionModalOpen = ref(false)
 
-const optionName = ref("");
-const optionPrice = ref("");
-const optionLink = ref("");
-const optionQuantity = ref(1);
+const optionName = ref('')
+const optionPrice = ref('')
+const optionLink = ref('')
+const optionQuantity = ref(1)
 
 function openAddGroupModal() {
   if (!canBeEdited.value) {
-    return;
+    return
   }
-  addGroupModalOpen.value = true;
+  addGroupModalOpen.value = true
 }
 onMounted(async () => {
-  resources.value = await loadTripEquipment(tripId);
-});
+  resources.value = await loadTripEquipment(tripId)
+})
 
 async function saveGroup() {
   if (!canBeEdited.value) {
-    return;
+    return
   }
   try {
-    const group = await insertGroup({ name: groupName.value, tripId: tripId });
-    resources.value.push(group);
-    addGroupModalOpen.value = false;
-    groupName.value = "";
+    const group = await insertGroup({ name: groupName.value, tripId: tripId })
+    resources.value.push(group)
+    addGroupModalOpen.value = false
+    groupName.value = ''
   } catch (error) {
-    console.error(error);
+    console.error(error)
   }
 }
 
 function openAddCategoryModal(groupId) {
   if (!canBeEdited.value) {
-    return;
+    return
   }
-  selectedGroupId.value = groupId;
-  addCategoryModalOpen.value = true;
+  selectedGroupId.value = groupId
+  addCategoryModalOpen.value = true
 }
 
 async function saveCategory() {
   if (!canBeEdited.value) {
-    return;
+    return
   }
   try {
     const group = resources.value.find(
-      (resource) => resource.id === selectedGroupId.value,
-    );
+      resource => resource.id === selectedGroupId.value
+    )
 
-    if (!group) throw new Error(t("planning.groupNotFound"));
+    if (!group) throw new Error(t('planning.groupNotFound'))
 
     const category = await insertCategory({
       name: categoryName.value,
-      groupId: group.id,
-    });
+      groupId: group.id
+    })
 
-    group.categories ??= [];
+    group.categories ??= []
     group.categories.push({
       ...category,
-      options: category.options ?? [],
-    });
+      options: category.options ?? []
+    })
 
-    addCategoryModalOpen.value = false;
-    categoryName.value = "";
+    addCategoryModalOpen.value = false
+    categoryName.value = ''
   } catch (error) {
-    console.error("Error al guardar la categoría:", error);
+    console.error('Error al guardar la categoría:', error)
   }
 }
 
 function openAddOptionModal(categoryId) {
   if (!canBeEdited.value) {
-    return;
+    return
   }
-  selectedCategoryId.value = categoryId;
-  addOptionModalOpen.value = true;
+  selectedCategoryId.value = categoryId
+  addOptionModalOpen.value = true
 }
 
 async function saveOption() {
   if (!canBeEdited.value) {
-    return;
+    return
   }
   try {
     const category = resources.value
-      .flatMap((group) => group.categories ?? [])
-      .find((category) => category.id === selectedCategoryId.value);
+      .flatMap(group => group.categories ?? [])
+      .find(category => category.id === selectedCategoryId.value)
 
-    if (!category) throw new Error(t("planning.categoryNotFound"));
+    if (!category) throw new Error(t('planning.categoryNotFound'))
 
     const option = await insertOption({
       name: optionName.value,
       price: optionPrice.value,
       link: optionLink.value,
       quantity: optionQuantity.value,
-      categoryId: category.id,
-    });
+      categoryId: category.id
+    })
 
-    category.options ??= [];
-    category.options.push(option);
+    category.options ??= []
+    category.options.push(option)
 
-    addOptionModalOpen.value = false;
-    optionName.value = "";
-    optionPrice.value = "";
-    optionLink.value = "";
-    optionQuantity.value = "";
+    addOptionModalOpen.value = false
+    optionName.value = ''
+    optionPrice.value = ''
+    optionLink.value = ''
+    optionQuantity.value = ''
   } catch (error) {
-    console.error(error);
+    console.error(error)
   }
 }
 
 async function updateOptionSelection(optionId, categoryId) {
   if (!canBeEdited.value) {
-    return;
+    return
   }
   const option = resources.value
-    .flatMap((group) => group.categories ?? [])
-    .find((category) => category.id === categoryId)
-    .options.find((o) => o.id === optionId);
-  option.selected = !option.selected;
+    .flatMap(group => group.categories ?? [])
+    .find(category => category.id === categoryId)
+    .options.find(o => o.id === optionId)
+  option.selected = !option.selected
   try {
     await updateOptionSelected({
       id: optionId,
-      selected: option.selected,
-    });
+      selected: option.selected
+    })
   } catch (error) {
-    console.error(error);
+    console.error(error)
   }
 }
 
 async function removeGroup(groupId) {
   if (!canBeEdited.value) {
-    return;
+    return
   }
-  if (!confirm(t("planning.confirmDeleteGroup"))) {
-    return;
+  if (!confirm(t('planning.confirmDeleteGroup'))) {
+    return
   }
   try {
-    await deleteGroup(groupId);
-    resources.value = resources.value.filter((r) => r.id !== groupId);
+    await deleteGroup(groupId)
+    resources.value = resources.value.filter(r => r.id !== groupId)
   } catch (error) {
-    console.error(error);
+    console.error(error)
   }
 }
 
 async function removeOption(optionId, categoryId) {
   if (!canBeEdited.value) {
-    return;
+    return
   }
-  if (!confirm(t("planning.confirmDeleteOption"))) {
-    return;
+  if (!confirm(t('planning.confirmDeleteOption'))) {
+    return
   }
   try {
-    await deleteOption(optionId);
+    await deleteOption(optionId)
     resources.value
-      .flatMap((group) => group.categories ?? [])
-      .find((category) => category.id === categoryId).options = resources.value
-      .flatMap((group) => group.categories ?? [])
-      .find((category) => category.id === categoryId)
-      .options.filter((o) => o.id !== optionId);
+      .flatMap(group => group.categories ?? [])
+      .find(category => category.id === categoryId).options = resources.value
+        .flatMap(group => group.categories ?? [])
+        .find(category => category.id === categoryId)
+        .options.filter(o => o.id !== optionId)
   } catch (error) {
-    console.error(error);
+    console.error(error)
   }
 }
 
-const editOptionModalOpen = ref(false);
-const editOptionSaving = ref(false);
-const editOptionError = ref("");
-const editingOptionId = ref(null);
-const editingCategoryId = ref(null);
+const editOptionModalOpen = ref(false)
+const editOptionSaving = ref(false)
+const editOptionError = ref('')
+const editingOptionId = ref(null)
+const editingCategoryId = ref(null)
 
 const editOptionForm = reactive({
-  name: "",
-  price: "",
-  link: "",
-  quantity: "",
-});
+  name: '',
+  price: '',
+  link: '',
+  quantity: ''
+})
 
 function openEditOptionModal(option, categoryId) {
   if (!canBeEdited.value) {
-    return;
+    return
   }
-  editingOptionId.value = option.id;
-  editingCategoryId.value = categoryId;
-  editOptionError.value = "";
+  editingOptionId.value = option.id
+  editingCategoryId.value = categoryId
+  editOptionError.value = ''
 
   Object.assign(editOptionForm, {
     name: option.name,
-    price: String(option.unit_price ?? ""),
-    link: option.link ?? "",
-    quantity: String(option.quantity ?? ""),
-  });
+    price: String(option.unit_price ?? ''),
+    link: option.link ?? '',
+    quantity: String(option.quantity ?? '')
+  })
 
-  editOptionModalOpen.value = true;
+  editOptionModalOpen.value = true
 }
 
 async function saveEditedOption() {
   if (!canBeEdited.value) {
-    return;
+    return
   }
-  if (editOptionSaving.value) return;
+  if (editOptionSaving.value) return
 
-  editOptionError.value = "";
+  editOptionError.value = ''
 
   const changes = {
     name: editOptionForm.name.trim(),
     unit_price: Number(editOptionForm.price),
     link: editOptionForm.link.trim(),
-    quantity: Number(editOptionForm.quantity),
-  };
-
-  if (
-    !changes.name ||
-    editOptionForm.price === "" ||
-    editOptionForm.quantity === "" ||
-    !Number.isFinite(changes.unit_price) ||
-    changes.unit_price < 0 ||
-    !Number.isInteger(changes.quantity) ||
-    changes.quantity < 1
-  ) {
-    editOptionError.value = "Revisa el nombre, el precio y la cantidad.";
-    return;
+    quantity: Number(editOptionForm.quantity)
   }
 
-  editOptionSaving.value = true;
+  if (
+    !changes.name
+    || editOptionForm.price === ''
+    || editOptionForm.quantity === ''
+    || !Number.isFinite(changes.unit_price)
+    || changes.unit_price < 0
+    || !Number.isInteger(changes.quantity)
+    || changes.quantity < 1
+  ) {
+    editOptionError.value = 'Revisa el nombre, el precio y la cantidad.'
+    return
+  }
+
+  editOptionSaving.value = true
 
   try {
     const category = resources.value
-      .flatMap((group) => group.categories ?? [])
-      .find((category) => category.id === editingCategoryId.value);
+      .flatMap(group => group.categories ?? [])
+      .find(category => category.id === editingCategoryId.value)
 
     const option = category?.options?.find(
-      (option) => option.id === editingOptionId.value,
-    );
+      option => option.id === editingOptionId.value
+    )
 
-    if (!option) throw new Error(t("planning.optionNotFound"));
+    if (!option) throw new Error(t('planning.optionNotFound'))
 
     await updateOption({
       id: option.id,
-      ...changes,
-    });
+      ...changes
+    })
 
-    Object.assign(option, changes);
-    editOptionModalOpen.value = false;
+    Object.assign(option, changes)
+    editOptionModalOpen.value = false
   } catch (error) {
-    console.error(error);
-    editOptionError.value = "No se ha podido guardar la opción.";
+    console.error(error)
+    editOptionError.value = 'No se ha podido guardar la opción.'
   } finally {
-    editOptionSaving.value = false;
+    editOptionSaving.value = false
   }
 }
 
 async function removeCategory(categoryId, groupId) {
   if (!canBeEdited.value) {
-    return;
+    return
   }
-  if (!confirm(t("planning.confirmDeleteCategory"))) {
-    return;
+  if (!confirm(t('planning.confirmDeleteCategory'))) {
+    return
   }
   try {
-    await deleteCategory(categoryId);
+    await deleteCategory(categoryId)
 
-    const group = resources.value.find((resource) => resource.id === groupId);
+    const group = resources.value.find(resource => resource.id === groupId)
 
     if (group) {
       group.categories = group.categories.filter(
-        (category) => category.id !== categoryId,
-      );
+        category => category.id !== categoryId
+      )
     }
   } catch (error) {
-    console.error("Error al eliminar la categoría:", error);
+    console.error('Error al eliminar la categoría:', error)
   }
 }
 
 const cardBgColors = ref([
-  "bg-(--ui-primary)/70 text-(--card-text-contrast)",
-  "bg-(--ui-bg)/70",
-  "bg-(--app-fg)/70",
-]);
+  'bg-(--ui-primary)/70 text-(--card-text-contrast)',
+  'bg-(--ui-bg)/70',
+  'bg-(--app-fg)/70'
+])
 
 function selectedCost(resource) {
   return (resource.categories ?? []).reduce((subtotal, category) => {
     return (
-      subtotal +
-      (category.options ?? []).reduce((sum, option) => {
+      subtotal
+      + (category.options ?? []).reduce((sum, option) => {
         return option.selected
-          ? sum +
-              (Number(option.quantity) || 0) * (Number(option.unit_price) || 0)
-          : sum;
+          ? sum
+          + (Number(option.quantity) || 0) * (Number(option.unit_price) || 0)
+          : sum
       }, 0)
-    );
-  }, 0);
+    )
+  }, 0)
 }
 
 const tripTotal = computed(() =>
   (resources.value ?? []).reduce(
     (total, resource) => total + selectedCost(resource),
-    0,
-  ),
-);
+    0
+  )
+)
 </script>
 
 <template>
@@ -372,7 +372,7 @@ const tripTotal = computed(() =>
         :ui="{
           title: 'text-(--ui-text-contrast) tracking-tight',
           content: ' bg-(--ui-text)',
-          close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10',
+          close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
         }"
         :open="addGroupModalOpen"
         @update:open="addGroupModalOpen = $event"
@@ -383,8 +383,8 @@ const tripTotal = computed(() =>
           color="neutral"
           variant="subtle"
           class="w-fit rounded-full"
-          @click="openAddGroupModal"
           :ui="{ leadingIcon: 'size-4 md:size-5' }"
+          @click="openAddGroupModal"
         >
           <span class="hidden md:inline">{{ t("planning.newGroup") }}</span>
           <span class="inline md:hidden">{{ t("planning.group") }}</span>
@@ -405,12 +405,12 @@ const tripTotal = computed(() =>
                 :placeholder="t('common.exampleName')"
                 required
                 :ui="{
-                  base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                  base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)'
                 }"
                 class="w-full"
               />
             </UFormField>
-            <!--<UFormField
+            <!-- <UFormField
               label="Descripción"
               :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
             >
@@ -427,7 +427,11 @@ const tripTotal = computed(() =>
         </template>
         <template #footer>
           <div class="flex w-full justify-end gap-2">
-            <UButton type="submit" form="add-place-form" class="rounded-full">
+            <UButton
+              type="submit"
+              form="add-place-form"
+              class="rounded-full"
+            >
               {{ t("common.save") }}
             </UButton>
           </div>
@@ -448,14 +452,17 @@ const tripTotal = computed(() =>
               {{ resource.name }}
             </p>
 
-            <div v-if="canBeEdited" class="flex gap-2 items-center">
+            <div
+              v-if="canBeEdited"
+              class="flex gap-2 items-center"
+            >
               <UButton
                 icon="i-heroicons-trash"
                 :aria-label="t('planning.deleteGroup')"
                 variant="solid"
                 class="w-fit self-end text-(--ui-text-contrast) bg-(--ui-text) rounded-full"
-                @click="removeGroup(resource.id)"
                 :ui="{ leadingIcon: 'size-4 md:size-5' }"
+                @click="removeGroup(resource.id)"
               >
                 <span class="hidden md:inline">{{
                   t("planning.deleteGroup")
@@ -464,21 +471,21 @@ const tripTotal = computed(() =>
               <UModal
                 :title="t('planning.newCategory')"
                 :open="addCategoryModalOpen && selectedGroupId === resource.id"
-                @update:open="addCategoryModalOpen = $event"
                 :ui="{
                   title: 'text-(--ui-text-contrast) tracking-tight',
                   content: 'bg-(--ui-text)',
                   close:
-                    'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10',
+                    'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
                 }"
+                @update:open="addCategoryModalOpen = $event"
               >
                 <UButton
                   icon="i-heroicons-plus"
                   :aria-label="t('planning.newCategory')"
                   variant="solid"
                   class="w-fit self-end rounded-full text-(--ui-text-contrast)"
-                  @click="openAddCategoryModal(resource.id)"
                   :ui="{ leadingIcon: 'size-4 md:size-5' }"
+                  @click="openAddCategoryModal(resource.id)"
                 >
                   <span class="hidden md:inline">{{
                     t("planning.newCategory")
@@ -502,7 +509,7 @@ const tripTotal = computed(() =>
                         :placeholder="t('common.exampleName')"
                         required
                         :ui="{
-                          base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                          base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)'
                         }"
                         class="w-full"
                       />
@@ -537,14 +544,17 @@ const tripTotal = computed(() =>
                 {{ category.name }}
               </p>
 
-              <div v-if="canBeEdited" class="flex items-center gap-2">
+              <div
+                v-if="canBeEdited"
+                class="flex items-center gap-2"
+              >
                 <UButton
                   icon="i-heroicons-trash"
                   :aria-label="t('planning.deleteCategory')"
                   variant="solid"
                   class="rounded-full text-(--ui-text-contrast) bg-(--ui-primary)"
-                  @click="removeCategory(category.id, resource.id)"
                   :ui="{ leadingIcon: 'size-4 md:size-5' }"
+                  @click="removeCategory(category.id, resource.id)"
                 >
                   <span class="hidden md:inline">{{
                     t("planning.deleteCategory")
@@ -560,15 +570,15 @@ const tripTotal = computed(() =>
                     title: 'text-(--ui-text-contrast) tracking-tight',
                     content: ' bg-(--ui-text)',
                     close:
-                      'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10',
+                      'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
                   }"
                 >
                   <UButton
                     icon="i-heroicons-plus"
                     variant="solid"
                     class="w-fit self-end bg-(--ui-text) text-(--ui-text-contrast) rounded-full"
-                    @click="openAddOptionModal(category.id)"
                     :ui="{ leadingIcon: 'size-4 md:size-5' }"
+                    @click="openAddOptionModal(category.id)"
                   >
                     <span class="hidden md:inline">{{
                       t("planning.newOption")
@@ -584,7 +594,7 @@ const tripTotal = computed(() =>
                       <UFormField
                         :label="t('common.name')"
                         :ui="{
-                          label: 'font-semibold text-(--ui-text-contrast)',
+                          label: 'font-semibold text-(--ui-text-contrast)'
                         }"
                       >
                         <UInput
@@ -592,7 +602,7 @@ const tripTotal = computed(() =>
                           :placeholder="t('common.exampleName')"
                           required
                           :ui="{
-                            base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                            base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)'
                           }"
                           class="w-full"
                         />
@@ -600,7 +610,7 @@ const tripTotal = computed(() =>
                       <UFormField
                         :label="t('common.price')"
                         :ui="{
-                          label: 'font-semibold text-(--ui-text-contrast)',
+                          label: 'font-semibold text-(--ui-text-contrast)'
                         }"
                       >
                         <UInput
@@ -608,7 +618,7 @@ const tripTotal = computed(() =>
                           placeholder="20.00"
                           required
                           :ui="{
-                            base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                            base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)'
                           }"
                           class="w-full"
                         />
@@ -616,7 +626,7 @@ const tripTotal = computed(() =>
                       <UFormField
                         :label="t('common.url')"
                         :ui="{
-                          label: 'font-semibold text-(--ui-text-contrast)',
+                          label: 'font-semibold text-(--ui-text-contrast)'
                         }"
                       >
                         <UInput
@@ -624,7 +634,7 @@ const tripTotal = computed(() =>
                           placeholder="https://www.google.com"
                           required
                           :ui="{
-                            base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                            base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)'
                           }"
                           class="w-full"
                         />
@@ -632,7 +642,7 @@ const tripTotal = computed(() =>
                       <UFormField
                         :label="t('common.quantity')"
                         :ui="{
-                          label: 'font-semibold text-(--ui-text-contrast)',
+                          label: 'font-semibold text-(--ui-text-contrast)'
                         }"
                       >
                         <UInput
@@ -640,7 +650,7 @@ const tripTotal = computed(() =>
                           placeholder="1"
                           required
                           :ui="{
-                            base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                            base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)'
                           }"
                           class="w-full"
                         />
@@ -669,14 +679,14 @@ const tripTotal = computed(() =>
               <UCheckbox
                 :model-value="option.selected"
                 :disabled="!canBeEdited"
+                :ui="{
+                  base: 'border-2 border-(--ui-bg) data-[state=checked]:border-(--ui-bg)',
+                  indicator: 'bg-(--ui-bg) text-(--ui-text)'
+                }"
+                class="shrink-0"
                 @update:model-value="
                   updateOptionSelection(option.id, category.id)
                 "
-                :ui="{
-                  base: 'border-2 border-(--ui-bg) data-[state=checked]:border-(--ui-bg)',
-                  indicator: 'bg-(--ui-bg) text-(--ui-text)',
-                }"
-                class="shrink-0"
               />
 
               <div
@@ -716,20 +726,20 @@ const tripTotal = computed(() =>
                         icon: 'i-heroicons-pencil-square',
 
                         onSelect: () =>
-                          openEditOptionModal(option, category.id),
+                          openEditOptionModal(option, category.id)
                       },
                       {
                         label: t('common.delete'),
                         icon: 'i-heroicons-trash',
                         color: 'error',
-                        onSelect: () => removeOption(option.id, category.id),
-                      },
+                        onSelect: () => removeOption(option.id, category.id)
+                      }
                     ]"
                     :ui="{
                       content: 'bg-(--ui-text) rounded-xl',
                       item: 'text-(--ui-text-contrast) rounded-xl hover:bg-(--ui-text-contrast)/10',
                       itemLabel: 'text-(--ui-text-contrast)',
-                      itemLeading: 'text-(--ui-text-contrast)',
+                      itemLeading: 'text-(--ui-text-contrast)'
                     }"
                   >
                     <UButton
@@ -762,8 +772,8 @@ const tripTotal = computed(() =>
               {{
                 resource?.categories?.reduce((acc, category) => {
                   return (
-                    acc +
-                    category.options?.reduce((acc, option) => {
+                    acc
+                    + category.options?.reduce((acc, option) => {
                       if (option.selected) {
                         return acc + option.quantity * option.unit_price;
                       }
@@ -811,7 +821,7 @@ const tripTotal = computed(() =>
       :ui="{
         title: 'text-(--ui-text-contrast) tracking-tight',
         content: 'bg-(--ui-text)',
-        close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10',
+        close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
       }"
     >
       <template #body>
@@ -826,7 +836,11 @@ const tripTotal = computed(() =>
             name="name"
             :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
           >
-            <UInput v-model="editOptionForm.name" required class="w-full" />
+            <UInput
+              v-model="editOptionForm.name"
+              required
+              class="w-full"
+            />
           </UFormField>
 
           <UFormField
@@ -849,7 +863,10 @@ const tripTotal = computed(() =>
             name="link"
             :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
           >
-            <UInput v-model="editOptionForm.link" class="w-full" />
+            <UInput
+              v-model="editOptionForm.link"
+              class="w-full"
+            />
           </UFormField>
 
           <UFormField
@@ -867,7 +884,11 @@ const tripTotal = computed(() =>
             />
           </UFormField>
 
-          <p v-if="editOptionError" role="alert" class="text-sm text-red-500">
+          <p
+            v-if="editOptionError"
+            role="alert"
+            class="text-sm text-red-500"
+          >
             {{ editOptionError }}
           </p>
         </UForm>

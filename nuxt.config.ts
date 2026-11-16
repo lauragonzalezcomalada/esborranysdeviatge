@@ -7,21 +7,6 @@ export default defineNuxtConfig({
     '@nuxtjs/i18n'
   ],
 
-  i18n: {
-    defaultLocale: 'es',
-    strategy: 'prefix_except_default',
-    detectBrowserLanguage: false,
-    locales: [
-      { code: 'es', language: 'es-ES', name: 'Español', file: 'es.json' },
-      { code: 'en', language: 'en', name: 'English', file: 'en.json' },
-      { code: 'ca', language: 'ca', name: 'Català', file: 'ca.json' }
-    ]
-  },
-
-  supabase: {
-    redirect: false
-  },
-
   devtools: {
     enabled: true
   },
@@ -47,5 +32,20 @@ export default defineNuxtConfig({
         braceStyle: '1tbs'
       }
     }
+  },
+
+  i18n: {
+    defaultLocale: 'es',
+    strategy: 'prefix_except_default',
+    detectBrowserLanguage: false,
+    locales: [
+      { code: 'es', language: 'es-ES', name: 'Español', file: 'es.json' },
+      { code: 'en', language: 'en', name: 'English', file: 'en.json' },
+      { code: 'ca', language: 'ca', name: 'Català', file: 'ca.json' }
+    ]
+  },
+
+  supabase: {
+    redirect: false
   }
 })

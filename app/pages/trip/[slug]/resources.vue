@@ -1,113 +1,113 @@
 <script setup lang="ts">
-import type { TripResource } from "~/composables/useTripResources";
+import type { TripResource } from '~/composables/useTripResources'
 
 definePageMeta({
-  layout: "trip",
-});
+  layout: 'trip'
+})
 
-const tripId = useRoute().params.slug;
-const { t } = useI18n();
+const tripId = useRoute().params.slug
+const { t } = useI18n()
 
-const { loadTripResources, insertResource, deleteResource, updateResource } =
-  useTripResources();
+const { loadTripResources, insertResource, deleteResource, updateResource }
+  = useTripResources()
 
-const resources = ref<TripResource[]>([]);
+const resources = ref<TripResource[]>([])
 
-const search = ref("");
-const addResourceModalOpen = ref(false);
-const resourceName = ref("");
-const resourceDescription = ref("");
-const resourceLink = ref("");
-const resourceFile = ref<File | null>(null);
-const fileInput = ref<HTMLInputElement | null>(null);
-const saving = ref(false);
-const saveError = ref("");
+const search = ref('')
+const addResourceModalOpen = ref(false)
+const resourceName = ref('')
+const resourceDescription = ref('')
+const resourceLink = ref('')
+const resourceFile = ref<File | null>(null)
+const fileInput = ref<HTMLInputElement | null>(null)
+const saving = ref(false)
+const saveError = ref('')
 
-const editResourceModalOpen = ref(false);
-const editResourceId = ref("");
-const editResourceName = ref("");
-const editResourceDescription = ref("");
-const editResourceLink = ref("");
+const editResourceModalOpen = ref(false)
+const editResourceId = ref('')
+const editResourceName = ref('')
+const editResourceDescription = ref('')
+const editResourceLink = ref('')
 
 onMounted(async () => {
-  resources.value = await loadTripResources({ tripId: tripId as string });
-});
+  resources.value = await loadTripResources({ tripId: tripId as string })
+})
 
 function onFileChange(event: Event) {
-  const input = event.target as HTMLInputElement;
-  resourceFile.value = input.files?.[0] ?? null;
+  const input = event.target as HTMLInputElement
+  resourceFile.value = input.files?.[0] ?? null
 }
 
 async function saveResource() {
-  saving.value = true;
-  saveError.value = "";
+  saving.value = true
+  saveError.value = ''
   try {
     const newResource = await insertResource({
       tripId: tripId as string,
       name: resourceName.value,
       description: resourceDescription.value,
       link: resourceLink.value,
-      file: resourceFile.value,
-    });
-    resources.value.push(newResource);
-    addResourceModalOpen.value = false;
-    resourceName.value = "";
-    resourceDescription.value = "";
-    resourceLink.value = "";
-    resourceFile.value = null;
+      file: resourceFile.value
+    })
+    resources.value.push(newResource)
+    addResourceModalOpen.value = false
+    resourceName.value = ''
+    resourceDescription.value = ''
+    resourceLink.value = ''
+    resourceFile.value = null
     if (fileInput.value) {
-      fileInput.value.value = "";
+      fileInput.value.value = ''
     }
   } catch (error) {
-    saveError.value =
-      error instanceof Error ? error.message : t("errors.saveResource");
+    saveError.value
+      = error instanceof Error ? error.message : t('errors.saveResource')
   } finally {
-    saving.value = false;
+    saving.value = false
   }
 }
 const filteredResources = computed(() => {
-  return resources.value.filter((resource) =>
-    resource.name.toLowerCase().includes(search.value.toLowerCase()),
-  );
-});
+  return resources.value.filter(resource =>
+    resource.name.toLowerCase().includes(search.value.toLowerCase())
+  )
+})
 
 function openEditResourceModal(resourceId: string) {
-  const resource =
-    resources.value.find((resource) => resource.id === resourceId) ?? null;
+  const resource
+    = resources.value.find(resource => resource.id === resourceId) ?? null
   if (resource) {
-    editResourceId.value = resource.id;
-    editResourceName.value = resource.name;
-    editResourceDescription.value = resource.description ?? "";
-    editResourceLink.value = resource.link ?? "";
+    editResourceId.value = resource.id
+    editResourceName.value = resource.name
+    editResourceDescription.value = resource.description ?? ''
+    editResourceLink.value = resource.link ?? ''
   }
-  editResourceModalOpen.value = true;
+  editResourceModalOpen.value = true
 }
 
 const closeEditResourceModal = () => {
-  editResourceModalOpen.value = false;
-  editResourceName.value = "";
-  editResourceDescription.value = "";
-  editResourceLink.value = "";
-};
+  editResourceModalOpen.value = false
+  editResourceName.value = ''
+  editResourceDescription.value = ''
+  editResourceLink.value = ''
+}
 
 const removeResource = async (resourceId: string) => {
-  await deleteResource(resourceId);
+  await deleteResource(resourceId)
   resources.value = resources.value.filter(
-    (resource) => resource.id !== resourceId,
-  );
-};
+    resource => resource.id !== resourceId
+  )
+}
 
 async function saveEditedResource() {
   const updatedResource = await updateResource(editResourceId.value, {
     name: editResourceName.value,
     description: editResourceDescription.value,
-    link: editResourceLink.value,
-  });
+    link: editResourceLink.value
+  })
   if (updatedResource) {
-    resources.value = resources.value.map((resource) =>
-      resource.id === updatedResource.id ? updatedResource : resource,
-    );
-    closeEditResourceModal();
+    resources.value = resources.value.map(resource =>
+      resource.id === updatedResource.id ? updatedResource : resource
+    )
+    closeEditResourceModal()
   }
 }
 </script>
@@ -129,7 +129,7 @@ async function saveEditedResource() {
           class="w-full max-w-md"
           :ui="{
             base: 'rounded-full border-2 border-(--ui-bg-elevated) py-2 ps-11 pe-4 text-(--ui-bg-elevated) placeholder:text-(--ui-bg-elevated)/90 ring-0 focus-visible:ring-2 focus-visible:ring-(--ui-text)/30 focus-visible:bg-(--ui-text)/80 hover:bg-(--ui-text)/80',
-            leadingIcon: 'size-5 text-(--ui-bg-elevated)/90',
+            leadingIcon: 'size-5 text-(--ui-bg-elevated)/90'
           }"
         />
         <UModal
@@ -137,7 +137,7 @@ async function saveEditedResource() {
           :ui="{
             title: 'text-(--ui-text-contrast) tracking-tight',
             content: ' bg-(--ui-text)',
-            close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10',
+            close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
           }"
           :open="addResourceModalOpen"
           @update:open="addResourceModalOpen = $event"
@@ -148,8 +148,8 @@ async function saveEditedResource() {
             color="neutral"
             variant="subtle"
             class="w-fit rounded-full"
-            @click="addResourceModalOpen = true"
             :ui="{ leadingIcon: 'size-3 md:size-4' }"
+            @click="addResourceModalOpen = true"
           >
             <span class="hidden md:inline">{{ t("resources.new") }}</span>
             <span class="inline md:hidden">{{ t("resources.short") }}</span>
@@ -170,7 +170,7 @@ async function saveEditedResource() {
                   :placeholder="t('resources.namePlaceholder')"
                   required
                   :ui="{
-                    base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                    base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)'
                   }"
                   class="w-full"
                 />
@@ -185,7 +185,7 @@ async function saveEditedResource() {
                   class="w-full"
                   :placeholder="t('resources.descriptionPlaceholder')"
                   :ui="{
-                    base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                    base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)'
                   }"
                 />
               </UFormField>
@@ -197,7 +197,7 @@ async function saveEditedResource() {
                   v-model="resourceLink"
                   class="w-full"
                   :ui="{
-                    base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                    base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)'
                   }"
                 />
               </UFormField>
@@ -211,7 +211,7 @@ async function saveEditedResource() {
                     type="file"
                     class="sr-only"
                     @change="onFileChange"
-                  />
+                  >
                   <UButton
                     type="button"
                     color="neutral"
@@ -226,7 +226,10 @@ async function saveEditedResource() {
                   </span>
                 </div>
               </UFormField>
-              <p v-if="saveError" class="text-sm text-red-200">
+              <p
+                v-if="saveError"
+                class="text-sm text-red-200"
+              >
                 {{ saveError }}
               </p>
             </UForm>
@@ -262,19 +265,19 @@ async function saveEditedResource() {
                   label: t('common.edit'),
                   icon: 'i-heroicons-pencil-square',
 
-                  onSelect: () => openEditResourceModal(resource.id),
+                  onSelect: () => openEditResourceModal(resource.id)
                 },
                 {
                   label: t('common.delete'),
                   icon: 'i-heroicons-trash',
                   color: 'error',
-                  onSelect: () => removeResource(resource.id),
-                },
+                  onSelect: () => removeResource(resource.id)
+                }
               ]"
               :ui="{
                 content: 'bg-(--ui-text) rounded-xl',
                 item: 'text-(--ui-text-contrast) rounded-xl hover:bg-(--ui-text-contrast)/10',
-                itemLabel: 'text-(--ui-text-contrast)',
+                itemLabel: 'text-(--ui-text-contrast)'
               }"
             >
               <UButton
@@ -292,7 +295,10 @@ async function saveEditedResource() {
           >
             {{ resource.description }}
           </p>
-          <ResourceLinkPreview v-if="resource.link" :url="resource.link" />
+          <ResourceLinkPreview
+            v-if="resource.link"
+            :url="resource.link"
+          />
           <ResourceFilePreview
             v-if="resource.file_path"
             :file-path="resource.file_path"
@@ -304,8 +310,7 @@ async function saveEditedResource() {
             target="_blank"
             rel="noopener noreferrer"
             class="text-(--resource-card-text)/70 text-xs mt-2 break-all hover:text-(--resource-card-text)/90"
-            >{{ resource.link }}</a
-          >
+          >{{ resource.link }}</a>
         </article>
       </div>
     </div>
@@ -315,7 +320,7 @@ async function saveEditedResource() {
       :ui="{
         title: 'text-(--ui-text-contrast) tracking-tight',
         content: 'bg-(--ui-text)',
-        close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10',
+        close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
       }"
       :open="editResourceModalOpen"
       @update:open="editResourceModalOpen = $event"
@@ -335,7 +340,7 @@ async function saveEditedResource() {
               :placeholder="t('resources.namePlaceholder')"
               required
               :ui="{
-                base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)'
               }"
               class="w-full"
             />
@@ -358,7 +363,7 @@ async function saveEditedResource() {
               v-model="editResourceLink"
               class="w-full"
               :ui="{
-                base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)',
+                base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)'
               }"
             />
           </UFormField>
@@ -366,10 +371,15 @@ async function saveEditedResource() {
       </template>
       <template #footer>
         <div class="flex w-full justify-end gap-2">
-          <UButton @click="closeEditResourceModal">{{
-            t("common.cancel")
-          }}</UButton>
-          <UButton type="submit" form="edit-resource-form">
+          <UButton @click="closeEditResourceModal">
+            {{
+              t("common.cancel")
+            }}
+          </UButton>
+          <UButton
+            type="submit"
+            form="edit-resource-form"
+          >
             {{ t("common.save") }}
           </UButton>
         </div>

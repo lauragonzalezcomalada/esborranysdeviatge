@@ -32,7 +32,7 @@ async function readPreviewHtml(url: string, redirectsLeft: number): Promise<{ ht
     redirect: 'manual',
     signal: AbortSignal.timeout(5000),
     headers: {
-      accept: 'text/html,application/xhtml+xml,image/*;q=0.8',
+      'accept': 'text/html,application/xhtml+xml,image/*;q=0.8',
       'user-agent': 'borradoresdeviaje-link-preview'
     }
   })

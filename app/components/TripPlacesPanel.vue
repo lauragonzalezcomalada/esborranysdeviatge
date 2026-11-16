@@ -1,111 +1,111 @@
 <script setup lang="ts">
-import type { Place } from "~/composables/useTripPlaces";
+import type { Place } from '~/composables/useTripPlaces'
 
 const props = defineProps<{
-  places: Place[];
-  startDate: Date | null;
-  editing?: boolean;
-  collapseAll?: boolean;
-  focusedPlaceId?: string | null;
-}>();
+  places: Place[]
+  startDate: Date | null
+  editing?: boolean
+  collapseAll?: boolean
+  focusedPlaceId?: string | null
+}>()
 
 const emit = defineEmits<{
-  "focus-place": [id: string];
-  reorder: [places: Place[]];
-  "edit-place": [id: string];
-  "delete-place": [id: string];
-}>();
+  'focus-place': [id: string]
+  'reorder': [places: Place[]]
+  'edit-place': [id: string]
+  'delete-place': [id: string]
+}>()
 
-const dragFrom = ref<number | null>(null);
-const collapsedPlaceIds = ref(new Set<string>());
-const { t, locale } = useI18n();
+const dragFrom = ref<number | null>(null)
+const collapsedPlaceIds = ref(new Set<string>())
+const { t, locale } = useI18n()
 
 function formatVisitDate(date: Date) {
   const parts = new Intl.DateTimeFormat(locale.value, {
-    month: "short",
-    day: "numeric",
-  }).formatToParts(date);
+    month: 'short',
+    day: 'numeric'
+  }).formatToParts(date)
   return {
-    day: parts.find((part) => part.type === "day")?.value ?? "",
+    day: parts.find(part => part.type === 'day')?.value ?? '',
     month: (
-      parts.find((part) => part.type === "month")?.value ?? ""
-    ).toUpperCase(),
-  };
+      parts.find(part => part.type === 'month')?.value ?? ''
+    ).toUpperCase()
+  }
 }
 
 function placeStep(place: Place) {
-  const days = Number(place.days);
+  const days = Number(place.days)
   if (!Number.isFinite(days) || days <= 0) {
-    return 1;
+    return 1
   }
-  return days;
+  return days
 }
 
 const placeIndexes = computed(() => {
-  let day = 1;
+  let day = 1
   return props.places.map((place) => {
-    const index = day;
-    day += placeStep(place);
-    return index;
-  });
-});
+    const index = day
+    day += placeStep(place)
+    return index
+  })
+})
 
 const placeDates = computed(() => {
-  const start = props.startDate;
+  const start = props.startDate
   if (!start) {
-    return props.places.map(() => ({ day: "", month: "" }));
+    return props.places.map(() => ({ day: '', month: '' }))
   }
-  let cursor = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+  let cursor = new Date(start.getFullYear(), start.getMonth(), start.getDate())
   return props.places.map((place) => {
-    const label = formatVisitDate(cursor);
+    const label = formatVisitDate(cursor)
     const next = new Date(
       cursor.getFullYear(),
       cursor.getMonth(),
-      cursor.getDate() + placeStep(place),
-    );
-    cursor = next;
-    return label;
-  });
-});
+      cursor.getDate() + placeStep(place)
+    )
+    cursor = next
+    return label
+  })
+})
 
 function isPlaceCollapsed(id: string) {
-  return props.collapseAll || collapsedPlaceIds.value.has(id);
+  return props.collapseAll || collapsedPlaceIds.value.has(id)
 }
 
 function togglePlaceContent(id: string) {
   if (props.collapseAll) {
-    return;
+    return
   }
-  const next = new Set(collapsedPlaceIds.value);
+  const next = new Set(collapsedPlaceIds.value)
   if (next.has(id)) {
-    next.delete(id);
+    next.delete(id)
   } else {
-    next.add(id);
+    next.add(id)
   }
-  collapsedPlaceIds.value = next;
+  collapsedPlaceIds.value = next
 }
 
 function startPlaceDrag(index: number, event: DragEvent) {
-  dragFrom.value = index;
-  event.dataTransfer?.setData("text/plain", String(index));
+  dragFrom.value = index
+  event.dataTransfer?.setData('text/plain', String(index))
   if (event.dataTransfer) {
-    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.effectAllowed = 'move'
   }
 }
 
 function dropPlace(index: number) {
-  const from = dragFrom.value;
-  dragFrom.value = null;
+  const from = dragFrom.value
+  dragFrom.value = null
   if (from === null || from === index) {
-    return;
+    return
   }
-  const next = props.places.slice();
-  const [moved] = next.splice(from, 1);
+  const next = props.places.slice()
+  const [moved] = next.splice(from, 1)
   if (!moved) {
-    return;
+    return
   }
-  next.splice(index, 0, moved);
-  emit("reorder", next);
+  next.splice(index, 0, moved)
+  emit('reorder', next)
 }
 </script>
 
@@ -142,12 +142,10 @@ function dropPlace(index: number) {
         >
           <span
             class="text-md md:text-lg text-center font-bold tracking-tight leading-none"
-            >{{ placeDates[index]?.day }}</span
-          >
+          >{{ placeDates[index]?.day }}</span>
           <span
             class="text-xs md:text-sm text-center font-bold tracking-tight leading-none"
-            >{{ placeDates[index]?.month }}</span
-          >
+          >{{ placeDates[index]?.month }}</span>
         </div>
         <UCard
           class="min-w-0 flex-1 cursor-grab transition-colors active:cursor-grabbing"
@@ -171,11 +169,17 @@ function dropPlace(index: number) {
                 <h2 class="text-xl font-semibold tracking-tight">
                   {{ place.name }}
                 </h2>
-                <p v-if="place.days" class="text-sm">
+                <p
+                  v-if="place.days"
+                  class="text-sm"
+                >
                   {{ t("common.daysCount", place.days) }}
                 </p>
               </div>
-              <div v-if="editing" class="flex items-center gap-2">
+              <div
+                v-if="editing"
+                class="flex items-center gap-2"
+              >
                 <UButton
                   variant="link"
                   color="success"

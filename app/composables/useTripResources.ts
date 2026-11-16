@@ -1,3 +1,5 @@
+import type { Database } from "~/types/database.types";
+
 export type TripResource = {
   id: string;
   name: string;
@@ -25,7 +27,7 @@ function storageErrorMessage(error: unknown, fallback: string) {
 }
 
 export function useTripResources() {
-  const supabase = useSupabaseClient<any>();
+  const supabase = useSupabaseClient<Database>();
   const user = useSupabaseUser();
   const { t } = useI18n();
 
