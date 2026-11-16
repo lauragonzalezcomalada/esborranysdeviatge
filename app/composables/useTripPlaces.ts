@@ -18,7 +18,32 @@ export type Trip = {
   startDate: Date | null;
   public: boolean;
   ownerId: string;
+  publicToken: string;
 };
+
+function generatePublicToken(length = 6): string {
+  if (typeof crypto === "undefined") {
+    throw new Error("crypto is not available");
+  }
+  const alphabet =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  let token = "";
+
+  while (token.length < length) {
+    const bytes = crypto.getRandomValues(new Uint8Array(16));
+
+    for (const byte of bytes) {
+      if (byte >= 248) continue;
+
+      token += alphabet[byte % alphabet.length];
+
+      if (token.length === length) break;
+    }
+  }
+
+  return token as string;
+}
 
 function parseCalendarDate(value: string | null): Date | null {
   if (!value) {
@@ -70,7 +95,8 @@ function toTrip(row: TripRow): Trip {
     startDate: parseCalendarDate(row.start_date),
     public: row.public ?? false,
     ownerId: row.owner_id,
-  };
+    publicToken: row.public_token as string,
+  } as Trip;
 }
 
 export function useTripPlaces() {
@@ -147,6 +173,7 @@ export function useTripPlaces() {
       .insert({
         name: input.name,
         owner_id: user.value.sub as never,
+        public_token: generatePublicToken(),
       })
       .select("*")
       .single();

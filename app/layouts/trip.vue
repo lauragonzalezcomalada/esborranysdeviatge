@@ -73,9 +73,9 @@ watch(
   <div class="relative flex h-dvh flex-col">
     <div class="z-30 shrink-0 md:h-0 0">
       <div
-        class="flex flex-col gap-3 px-4 pt-3 pb-2 md:pointer-events-none md:fixed md:inset-x-0 md:top-0 md:block md:p-0"
+        class="flex flex-col gap-3 px-4 pt-3 pb-2 md:pointer-events-none md:block md:p-0"
       >
-        <div class="pointer-events-auto md:absolute md:top-0 md:left-0 md:p-8">
+        <div class="pointer-events-auto md:hidden">
           <TripHeader
             v-if="trip"
             :trip="trip"
@@ -91,9 +91,11 @@ watch(
         </div>
 
         <div
-          class="pointer-events-auto relative mx-auto flex w-fit items-center gap-2 md:absolute md:top-8 md:left-1/2 md:block md:-translate-x-1/2"
+          class="pointer-events-auto relative mx-auto flex w-fit items-center gap-2 md:fixed md:top-8 md:left-1/2 md:block md:-translate-x-1/2"
         >
-          <div class="flex items-center gap-2 md:absolute md:top-0 md:right-full md:mr-2">
+          <div
+            class="flex items-center gap-2 md:absolute md:top-0 md:right-full md:mr-2"
+          >
             <LocaleSwitch mobile-side="bottom" />
             <ColorModeSelect mobile-side="bottom" />
           </div>
@@ -128,9 +130,23 @@ watch(
     </div>
 
     <div class="relative min-h-0 flex-1 overflow-y-auto">
-      <slot />
-    </div>
+      <div class="relative h-full min-h-0">
+        <div class="absolute top-0 left-0 z-20 hidden p-8 md:block">
+          <TripHeader
+            v-if="trip"
+            :trip="trip"
+            :edit-mode="editMode"
+            @edit="openEditor"
+          />
 
+          <p v-if="pageError" class="mt-2 max-w-xs text-xs text-red-300">
+            {{ pageError }}
+          </p>
+        </div>
+
+        <slot />
+      </div>
+    </div>
     <UModal
       v-model:open="editOpen"
       :title="t('trip.edit')"

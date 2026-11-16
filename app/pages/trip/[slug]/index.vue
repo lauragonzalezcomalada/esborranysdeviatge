@@ -324,9 +324,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main
-    class="relative h-full min-h-0 overflow-hidden bg-[var(--app-bg)] pb-15 md:pb-0"
-  >
+  <main class="relative h-full min-h-0 overflow-hidden bg-[var(--app-bg)]">
     <div
       v-if="tripId"
       class="flex h-full min-h-0 flex-col md:absolute md:inset-0 md:flex-row"
@@ -375,12 +373,30 @@ onBeforeUnmount(() => {
       </div>
 
       <div
-        class="flex min-h-0 flex-col overflow-hidden max-md:flex-1 md:h-full md:shrink-0 md:pt-24"
+        class="flex min-h-0 flex-col overflow-hidden max-md:flex-1 md:h-full md:shrink-0 md:pt-24 pb-15 md:pb-5"
         :class="mobilePane !== 'places' && 'max-md:hidden'"
       >
         <div
           class="flex w-full shrink-0 flex-col items-end gap-2 px-4 py-2 md:px-0 md:pe-4"
         >
+          <!-- <div class="flex flex-col gap-2">
+            <UModal
+              :title="t('places.shareQuestion')"
+              :ui="{
+                content: 'bg-(--ui-text)',
+              }"
+              class="w-fit"
+            >
+              <UButton
+                icon="i-lucide-share-2"
+                class="rounded-full text-sm tracking-tighter hover:text-background/80 font-bold w-fit icon-size-3 self-end bg-(--ui-text) text-(--ui-text-contrast)/90"
+              >
+                {{ t("places.share") }}
+              </UButton>
+              <template #body>
+                <div class="text-white">{{ t("places.shareDescription") }}</div>
+              </template>
+            </UModal> -->
           <div class="flex items-center gap-2">
             <div
               v-if="canBeEdited"
@@ -401,6 +417,7 @@ onBeforeUnmount(() => {
                 :ui="{ label: 'tracking-tight' }"
               />
             </div>
+            <!--  </div>-->
           </div>
           <p v-if="pageError" class="max-w-xs text-right text-xs text-red-300">
             {{ pageError }}

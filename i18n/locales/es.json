@@ -70,6 +70,8 @@
     "list": "Lugares del viaje",
     "globe": "Globo",
     "places": "Lugares",
+    "share": "Compartir viaje",
+    "shareQuestion": "¿Quieres compartir este viaje?",
     "add": "Añadir lugar",
     "search": "Buscar lugar",
     "searchPlaceholder": "Ciudad, dirección o sitio",

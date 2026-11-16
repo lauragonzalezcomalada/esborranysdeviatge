@@ -331,7 +331,7 @@ const tripTotal = computed(() =>
 
 <template>
   <main
-    class="min-h-screen w-full overflow-hidden bg-(--app-bg) flex flex-col py-2 md:py-4 px-4 md:px-8 pb-15 md:pb-0"
+    class="min-h-screen w-full overflow-hidden bg-(--app-bg) flex flex-col py-2 md:py-4 px-4 md:px-8 pb-15 md:pb-5"
   >
     <div
       class="relative mt-4 flex w-full items-center justify-end gap-3 md:mt-24"

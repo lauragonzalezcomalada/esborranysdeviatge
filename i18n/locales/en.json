@@ -70,6 +70,8 @@
     "list": "Trip places",
     "globe": "Globe",
     "places": "Places",
+    "share": "Share",
+    "shareQuestion": "Do you want to share this trip?",
     "add": "Add place",
     "search": "Search place",
     "searchPlaceholder": "City, address or site",
