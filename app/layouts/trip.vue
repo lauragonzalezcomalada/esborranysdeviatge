@@ -124,6 +124,13 @@ watch(
             >
               {{ t("nav.resources") }}
             </NuxtLink>
+            <NuxtLink
+              :to="`/trip/${navTripId}/lists`"
+              class="font-bold tracking-tighter hover:underline"
+              exact-active-class="underline"
+            >
+              {{ t("nav.lists") }}
+            </NuxtLink>
           </nav>
         </div>
       </div>

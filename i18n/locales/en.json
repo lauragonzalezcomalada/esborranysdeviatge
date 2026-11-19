@@ -10,6 +10,7 @@
     "itinerary": "Itinerary",
     "planning": "Planning",
     "resources": "Resources",
+    "lists": "Lists",
     "stories": "Our stories",
     "theme": "Choose color theme"
   },
@@ -99,7 +100,23 @@
     "editOption": "Edit option",
     "groupNotFound": "Group not found",
     "categoryNotFound": "Category not found",
-    "optionNotFound": "Option not found"
+    "optionNotFound": "Option not found",
+    "members": "Members",
+    "addMember": "Add member",
+    "memberPlaceholder": "Name",
+    "member": "Member",
+    "unassigned": "Unassigned"
+  },
+  "lists": {
+    "search": "Search a list or item",
+    "new": "New list",
+    "addItem": "Add item",
+    "saveAndAdd": "Save and add another",
+    "noItems": "No items yet",
+    "empty": "No lists yet",
+    "noResults": "No lists match",
+    "loadError": "Lists could not be loaded",
+    "saveError": "Could not save"
   },
   "resources": {
     "search": "Search resource",

@@ -19,8 +19,11 @@ const {
   deleteOption,
   deleteCategory
 } = useTripEquipment()
+const { loadMembers, insertMember, deleteMember } = useTripMembers()
 
 const resources = ref([])
+const members = ref([])
+const memberNameInput = ref('')
 
 const groupName = ref('')
 const categoryName = ref('')
@@ -44,8 +47,58 @@ function openAddGroupModal() {
   addGroupModalOpen.value = true
 }
 onMounted(async () => {
-  resources.value = await loadTripEquipment(tripId)
+  const [equipment, tripMembers] = await Promise.all([
+    loadTripEquipment(tripId),
+    loadMembers(tripId).catch(() => [])
+  ])
+  resources.value = equipment
+  members.value = tripMembers
 })
+
+const memberOptions = computed(() => [
+  { label: t('planning.unassigned'), value: '' },
+  ...members.value.map(member => ({
+    label: member.name,
+    value: String(member.id)
+  }))
+])
+
+function memberName(option) {
+  if (option.member_id == null) return ''
+  return members.value.find(member => String(member.id) === String(option.member_id))?.name ?? ''
+}
+
+function memberTotals(category) {
+  const totals = new Map()
+
+  for (const option of category.options ?? []) {
+    if (!option.selected || option.member_id == null) continue
+    const amount = (Number(option.quantity) || 0) * (Number(option.unit_price) || 0)
+    totals.set(option.member_id, (totals.get(option.member_id) || 0) + amount)
+  }
+
+  return [...totals.entries()].map(([id, total]) => ({
+    id,
+    name: members.value.find(member => String(member.id) === String(id))?.name ?? '',
+    total
+  })).filter(bubble => bubble.name)
+}
+
+async function addMember() {
+  const name = memberNameInput.value.trim()
+  if (!canBeEdited.value || !name) return
+
+  const member = await insertMember({ tripId, name })
+  members.value.push(member)
+  members.value.sort((a, b) => a.name.localeCompare(b.name))
+  memberNameInput.value = ''
+}
+
+async function removeMember(memberId) {
+  if (!canBeEdited.value) return
+  await deleteMember(memberId)
+  members.value = members.value.filter(member => member.id !== memberId)
+}
 
 async function saveGroup() {
   if (!canBeEdited.value) {
@@ -202,7 +255,8 @@ const editOptionForm = reactive({
   name: '',
   price: '',
   link: '',
-  quantity: ''
+  quantity: '',
+  memberId: ''
 })
 
 function openEditOptionModal(option, categoryId) {
@@ -217,7 +271,8 @@ function openEditOptionModal(option, categoryId) {
     name: option.name,
     price: String(option.unit_price ?? ''),
     link: option.link ?? '',
-    quantity: String(option.quantity ?? '')
+    quantity: String(option.quantity ?? ''),
+    memberId: option.member_id == null ? '' : String(option.member_id)
   })
 
   editOptionModalOpen.value = true
@@ -264,12 +319,20 @@ async function saveEditedOption() {
 
     if (!option) throw new Error(t('planning.optionNotFound'))
 
+    const memberId = editOptionForm.memberId === ''
+      ? null
+      : Number(editOptionForm.memberId)
+
     await updateOption({
-      id: option.id,
-      ...changes
+      id: String(option.id),
+      name: changes.name,
+      price: editOptionForm.price,
+      link: changes.link,
+      quantity: String(changes.quantity),
+      memberId
     })
 
-    Object.assign(option, changes)
+    Object.assign(option, changes, { member_id: memberId })
     editOptionModalOpen.value = false
   } catch (error) {
     console.error(error)
@@ -439,6 +502,44 @@ const tripTotal = computed(() =>
       </UModal>
     </div>
     <div class="flex flex-col">
+      <div class="mt-8 flex flex-col gap-2">
+        <p class="text-(--ui-text) font-semibold tracking-tight">
+          {{ t('planning.members') }}
+        </p>
+        <div class="flex flex-wrap items-center gap-2">
+          <span
+            v-for="member in members"
+            :key="member.id"
+            class="inline-flex items-center gap-1 rounded-full bg-(--ui-text) px-3 py-1 text-xs font-bold text-(--ui-text-contrast)"
+          >
+            {{ member.name }}
+            <button
+              v-if="canBeEdited"
+              type="button"
+              class="leading-none"
+              :aria-label="t('common.delete')"
+              @click="removeMember(member.id)"
+            >
+              ×
+            </button>
+          </span>
+          <form
+            v-if="canBeEdited"
+            class="flex gap-2"
+            @submit.prevent="addMember"
+          >
+            <UInput
+              v-model="memberNameInput"
+              :placeholder="t('planning.memberPlaceholder')"
+            />
+            <UButton
+              type="submit"
+              class="rounded-full"
+              :label="t('planning.addMember')"
+            />
+          </form>
+        </div>
+      </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-8">
         <div
           v-for="resource in resources"
@@ -676,18 +777,25 @@ const tripTotal = computed(() =>
               :key="option.id"
               class="flex items-center gap-2"
             >
-              <UCheckbox
-                :model-value="option.selected"
-                :disabled="!canBeEdited"
-                :ui="{
-                  base: 'border-2 border-(--ui-bg) data-[state=checked]:border-(--ui-bg)',
-                  indicator: 'bg-(--ui-bg) text-(--ui-text)'
-                }"
-                class="shrink-0"
-                @update:model-value="
-                  updateOptionSelection(option.id, category.id)
-                "
-              />
+              <div class="flex shrink-0 flex-col items-center gap-1">
+                <UCheckbox
+                  :model-value="option.selected"
+                  :disabled="!canBeEdited"
+                  :ui="{
+                    base: 'border-2 border-(--ui-bg) data-[state=checked]:border-(--ui-bg)',
+                    indicator: 'bg-(--ui-bg) text-(--ui-text)'
+                  }"
+                  @update:model-value="
+                    updateOptionSelection(option.id, category.id)
+                  "
+                />
+                <span
+                  v-if="memberName(option)"
+                  class="max-w-16 text-center text-[0.6rem] font-semibold leading-tight text-(--ui-text)"
+                >
+                  {{ memberName(option) }}
+                </span>
+              </div>
 
               <div
                 class="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md bg-blue-200 p-2"
@@ -753,17 +861,31 @@ const tripTotal = computed(() =>
               </div>
             </div>
 
-            <div class="text-(--ui-text) font-semibold self-end">
-              {{ t("common.total") }}
-              {{
-                category.options?.reduce((acc, option) => {
-                  if (option.selected) {
-                    return acc + option.quantity * option.unit_price;
-                  }
-                  return acc;
-                }, 0)
-              }}
-              €
+            <div class="flex flex-col items-end gap-2">
+              <div class="text-(--ui-text) font-semibold">
+                {{ t("common.total") }}
+                {{
+                  category.options?.reduce((acc, option) => {
+                    if (option.selected) {
+                      return acc + option.quantity * option.unit_price;
+                    }
+                    return acc;
+                  }, 0)
+                }}
+                €
+              </div>
+              <div
+                v-if="memberTotals(category).length"
+                class="flex flex-wrap justify-end gap-1"
+              >
+                <span
+                  v-for="bubble in memberTotals(category)"
+                  :key="bubble.id"
+                  class="rounded-full bg-(--ui-text) px-2.5 py-1 text-[0.65rem] font-bold text-(--ui-text-contrast)"
+                >
+                  {{ bubble.name }} {{ bubble.total }} €
+                </span>
+              </div>
             </div>
           </div>
           <div class="flex gap-2 items-center justify-end">
@@ -880,6 +1002,19 @@ const tripTotal = computed(() =>
               min="1"
               step="1"
               required
+              class="w-full"
+            />
+          </UFormField>
+
+          <UFormField
+            :label="t('planning.member')"
+            name="memberId"
+            :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
+          >
+            <USelect
+              v-model="editOptionForm.memberId"
+              :items="memberOptions"
+              value-key="value"
               class="w-full"
             />
           </UFormField>

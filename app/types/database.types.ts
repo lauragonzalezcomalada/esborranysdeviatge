@@ -91,6 +91,7 @@ export type Database = {
           name: string;
           position: number;
           quantity: number;
+          member_id: number | null;
           selected: boolean;
           unit_price: number | null;
         };
@@ -100,6 +101,7 @@ export type Database = {
           currency?: string;
           id?: never;
           link?: string | null;
+          member_id?: number | null;
           name: string;
           position?: number;
           quantity?: number;
@@ -112,6 +114,7 @@ export type Database = {
           currency?: string;
           id?: never;
           link?: string | null;
+          member_id?: number | null;
           name?: string;
           position?: number;
           quantity?: number;
@@ -124,6 +127,106 @@ export type Database = {
             columns: ["category_id"];
             isOneToOne: false;
             referencedRelation: "categories";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "options_member_id_fkey";
+            columns: ["member_id"];
+            isOneToOne: false;
+            referencedRelation: "members";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      members: {
+        Row: {
+          created_at: string;
+          id: number;
+          name: string;
+          trip_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: never;
+          name: string;
+          trip_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: never;
+          name?: string;
+          trip_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "members_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      lists: {
+        Row: {
+          created_at: string;
+          description: string | null;
+          id: string;
+          name: string;
+          trip_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          name: string;
+          trip_id: string;
+        };
+        Update: {
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          name?: string;
+          trip_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lists_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      list_items: {
+        Row: {
+          created_at: string;
+          id: string;
+          list_id: string;
+          name: string;
+          selected: boolean;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          list_id: string;
+          name: string;
+          selected?: boolean;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          list_id?: string;
+          name?: string;
+          selected?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "list_items_list_id_fkey";
+            columns: ["list_id"];
+            isOneToOne: false;
+            referencedRelation: "lists";
             referencedColumns: ["id"];
           },
         ];

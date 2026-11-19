@@ -10,6 +10,7 @@
     "itinerary": "Itinerario",
     "planning": "Planificación",
     "resources": "Recursos",
+    "lists": "Listas",
     "stories": "Nuestras historias",
     "theme": "Choose color theme"
   },
@@ -102,7 +103,23 @@
     "optionNotFound": "Option not found",
     "confirmDeleteGroup": "¿Estás seguro de querer eliminar este grupo?",
     "confirmDeleteCategory": "¿Estás seguro de querer eliminar esta categoría?",
-    "confirmDeleteOption": "¿Estás seguro de querer eliminar esta opción?"
+    "confirmDeleteOption": "¿Estás seguro de querer eliminar esta opción?",
+    "members": "Miembros",
+    "addMember": "Añadir miembro",
+    "memberPlaceholder": "Nombre",
+    "member": "Miembro",
+    "unassigned": "Sin asignar"
+  },
+  "lists": {
+    "search": "Buscar lista o ítem",
+    "new": "Nueva lista",
+    "addItem": "Añadir ítem",
+    "saveAndAdd": "Guardar y añadir otro",
+    "noItems": "Todavía no hay ítems",
+    "empty": "Todavía no hay listas",
+    "noResults": "Ninguna lista coincide",
+    "loadError": "No se han podido cargar las listas",
+    "saveError": "No se ha podido guardar"
   },
   "resources": {
     "search": "Buscar recurso",

@@ -107,6 +107,7 @@ export function useTripEquipment() {
     price: string;
     link: string;
     quantity: string;
+    memberId: number | null;
   }) {
     const { data, error } = await supabase
       .from("options")
@@ -115,6 +116,7 @@ export function useTripEquipment() {
         unit_price: Number(changes.price),
         link: changes.link,
         quantity: Number(changes.quantity),
+        member_id: changes.memberId,
       })
       .eq("id", Number(id))
       .select()

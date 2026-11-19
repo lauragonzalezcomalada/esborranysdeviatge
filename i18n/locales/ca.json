@@ -10,6 +10,7 @@
     "itinerary": "Itinerari",
     "planning": "Planificació",
     "resources": "Recursos",
+    "lists": "Llistes",
     "stories": "Les nostres històries",
     "theme": "Tria el tema de color"
   },
@@ -99,7 +100,23 @@
     "editOption": "Edita l'opció",
     "groupNotFound": "No s'ha trobat el grup",
     "categoryNotFound": "No s'ha trobat la categoria",
-    "optionNotFound": "No s'ha trobat l'opció"
+    "optionNotFound": "No s'ha trobat l'opció",
+    "members": "Membres",
+    "addMember": "Afegeix un membre",
+    "memberPlaceholder": "Nom",
+    "member": "Membre",
+    "unassigned": "Sense assignar"
+  },
+  "lists": {
+    "search": "Cerca una llista o un ítem",
+    "new": "Nova llista",
+    "addItem": "Afegeix un ítem",
+    "saveAndAdd": "Desa i afegeix-ne un altre",
+    "noItems": "Encara no hi ha ítems",
+    "empty": "Encara no hi ha llistes",
+    "noResults": "Cap llista coincideix",
+    "loadError": "No s'han pogut carregar les llistes",
+    "saveError": "No s'ha pogut desar"
   },
   "resources": {
     "search": "Cerca un recurs",
