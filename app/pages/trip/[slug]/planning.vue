@@ -1,4 +1,6 @@
 <script setup>
+import { useMediaQuery } from '@vueuse/core'
+
 definePageMeta({
   layout: 'trip'
 })
@@ -26,6 +28,7 @@ const members = ref([])
 const memberNameInput = ref('')
 const membersModalOpen = ref(false)
 const search = ref('')
+const isMobile = useMediaQuery('(max-width: 767px)')
 
 const groupName = ref('')
 const categoryName = ref('')
@@ -77,6 +80,36 @@ function memberName(option) {
 function optionMatchesSearch(option) {
   const query = search.value.trim().toLowerCase()
   return Boolean(query) && option.name?.toLowerCase().includes(query)
+}
+
+function optionMenuItems(option, categoryId) {
+  const items = []
+
+  if (isMobile.value && option.link) {
+    items.push({
+      label: t('planning.itemLink'),
+      icon: 'i-heroicons-link',
+      onSelect: () => window.open(option.link, '_blank', 'noopener,noreferrer')
+    })
+  }
+
+  if (canBeEdited.value) {
+    items.push(
+      {
+        label: t('common.edit'),
+        icon: 'i-heroicons-pencil-square',
+        onSelect: () => openEditOptionModal(option, categoryId)
+      },
+      {
+        label: t('common.delete'),
+        icon: 'i-heroicons-trash',
+        color: 'error',
+        onSelect: () => removeOption(option.id, categoryId)
+      }
+    )
+  }
+
+  return items
 }
 
 function memberTotals(category) {
@@ -386,10 +419,7 @@ const cardBgColors = ref([
   'bg-(--app-fg)/70'
 ])
 
-const groupCardBgs = [
-  'bg-(--group-card-bg-1)',
-  'bg-(--group-card-bg-2)'
-]
+const groupCardBgs = ['bg-(--group-card-bg-1)', 'bg-(--group-card-bg-2)']
 
 function selectedCost(resource) {
   return (resource.categories ?? []).reduce((subtotal, category) => {
@@ -449,7 +479,7 @@ const memberTripTotals = computed(() => {
   <main
     class="min-h-screen w-full overflow-hidden bg-(--app-bg) flex flex-col py-2 md:py-4 px-4 md:px-8 pb-15 md:pb-5"
   >
-    <div class="relative mt-8 flex w-full items-center justify-end gap-3 md:mt-35">
+    <div class="relative mt-2 flex w-full items-center justify-end gap-3 md:mt-35">
       <div class="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block">
         <div class="relative">
           <div class="flex max-w-[50vw] flex-col items-center gap-2">
@@ -501,7 +531,7 @@ const memberTripTotals = computed(() => {
         </div>
       </div>
     </div>
-    <div class="relative mt-4 flex w-full items-center justify-center gap-8">
+    <div class="relative mt-10 flex w-full items-center justify-center gap-8">
       <div class="flex w-full items-end justify-end gap-4">
         <UInput
           v-model="search"
@@ -826,21 +856,27 @@ const memberTripTotals = computed(() => {
               </div>
 
               <div
-                class="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md p-2"
+                class="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md pt-3 pb-3.5 px-3"
                 :class="optionMatchesSearch(option) ? 'bg-red-200' : 'bg-blue-200'"
               >
-                <div class="min-w-0 w-1/2 md:w-3/5 shrink-0">
+                <div
+                  class="min-w-0 flex flex-col items-start justify-center gap-1 w-1/2 md:w-3/5 shrink-0"
+                >
                   <p class="text-(--ui-text) font-semibold tracking-tight">
                     {{ option.name }}
                   </p>
-                  <a
-                    :href="option.link"
+                  <UButton
+                    v-if="option.link"
+                    :to="option.link"
                     target="_blank"
-                    rel="noopener noreferrer"
-                    class="block text-[0.35rem] md:text-[0.5rem] leading-tight text-(--ui-text) italic wrap-anywhere hover:underline"
+                    leading-icon="i-heroicons-link"
+                    variant="link"
+                    :aria-label="t('planning.itemLink')"
+                    class="hidden w-fit p-0 text-(--ui-text)/80 text-xs italic tracking-tighter md:inline-flex"
+                    :ui="{ leadingIcon: 'size-4' }"
                   >
-                    {{ option.link }}
-                  </a>
+                    <span>{{ t('planning.itemLink') }}</span>
+                  </UButton>
                 </div>
                 <div class="flex min-w-0 flex-1 items-center justify-end md:gap-10 gap-2">
                   <p class="text-xs md:text-sm text-(--ui-text)/70 text-right">
@@ -852,21 +888,8 @@ const memberTripTotals = computed(() => {
                   </p>
 
                   <UDropdownMenu
-                    v-if="canBeEdited"
-                    :items="[
-                      {
-                        label: t('common.edit'),
-                        icon: 'i-heroicons-pencil-square',
-
-                        onSelect: () => openEditOptionModal(option, category.id)
-                      },
-                      {
-                        label: t('common.delete'),
-                        icon: 'i-heroicons-trash',
-                        color: 'error',
-                        onSelect: () => removeOption(option.id, category.id)
-                      }
-                    ]"
+                    v-if="canBeEdited || (isMobile && option.link)"
+                    :items="optionMenuItems(option, category.id)"
                     :ui="{
                       content: 'bg-(--ui-text) rounded-xl',
                       item: 'text-(--ui-text-contrast) rounded-xl hover:bg-(--ui-text-contrast)/10',

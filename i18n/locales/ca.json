@@ -107,7 +107,8 @@
     "member": "Membre",
     "unassigned": "Sense assignar",
     "search": "Cerca un grup, una categoria o una opció",
-    "noResults": "Res no coincideix"
+    "noResults": "Res no coincideix",
+    "itemLink": "Enllaç a l'ítem"
   },
   "lists": {
     "search": "Cerca una llista o un ítem",

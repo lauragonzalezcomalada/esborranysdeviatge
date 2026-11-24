@@ -110,7 +110,8 @@
     "member": "Miembro",
     "unassigned": "Sin asignar",
     "search": "Buscar grupo, categoría u opción",
-    "noResults": "Nada coincide"
+    "noResults": "Nada coincide",
+    "itemLink": "Link al item"
   },
   "lists": {
     "search": "Buscar lista o ítem",

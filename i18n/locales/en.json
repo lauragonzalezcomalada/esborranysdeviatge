@@ -107,7 +107,8 @@
     "member": "Member",
     "unassigned": "Unassigned",
     "search": "Search a group, category or option",
-    "noResults": "Nothing matches"
+    "noResults": "Nothing matches",
+    "itemLink": "Link to the item"
   },
   "lists": {
     "search": "Search a list or item",
