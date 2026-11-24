@@ -61,18 +61,18 @@ function parseCalendarDate(value: string | null): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function toPlace(row: PlaceRow): Place {
+function toPlace(row: Database["public"]["Tables"]["places"]["Row"]): Place {
   const days = Number(row.days);
   const longitude = row.longitude === null ? null : Number(row.longitude);
   const latitude = row.latitude === null ? null : Number(row.latitude);
   return {
-    id: row.id,
-    name: row.name,
+    id: row.id.toString(),
+    name: row.name ?? "",
     description: row.description ?? "",
     days: Number.isFinite(days) && days > 0 ? days : undefined,
     coordinates:
       longitude === null || latitude === null ? null : [longitude, latitude],
-    tripId: row.trip_id,
+    tripId: row.trip_id ?? "",
     orderWeight: Number(row.order_weight) || 0,
   };
 }
@@ -86,7 +86,7 @@ function toDateColumn(date: Date | null) {
   return `${date.getFullYear()}-${month}-${day}`;
 }
 
-function toTrip(row: TripRow): Trip {
+function toTrip(row: Database["public"]["Tables"]["trips"]["Row"]): Trip {
   return {
     id: row.id,
     name: row.name,
@@ -129,14 +129,12 @@ export function useTripPlaces() {
   }
 
   async function loadPublicTrips() {
-    console.log("loadPublicTrips");
     const { data, error } = await supabase
       .from("trips")
       .select("*")
       .eq("public", true)
       .order("created_at", { ascending: true });
 
-    console.log("data", data);
     if (error) {
       throw error;
     }
@@ -144,9 +142,7 @@ export function useTripPlaces() {
   }
 
   async function loadPersonalTrips() {
-    console.log("loadPersonalTrips");
     const user = useSupabaseUser();
-    console.log("user", user.value);
     if (!user.value) {
       throw new Error(t("errors.loginToLoadTrips"));
     }
@@ -156,7 +152,6 @@ export function useTripPlaces() {
       .eq("owner_id", user.value.sub)
       .order("created_at", { ascending: true });
 
-    console.log("data", data);
     if (error) {
       throw error;
     }

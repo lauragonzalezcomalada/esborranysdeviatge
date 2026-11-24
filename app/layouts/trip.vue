@@ -73,7 +73,7 @@ watch(
   <div class="relative flex h-dvh flex-col">
     <div class="z-30 shrink-0 md:h-0 0">
       <div
-        class="flex flex-col gap-3 px-4 pt-3 pb-2 md:pointer-events-none md:block md:p-0"
+        class="mx-auto flex w-full max-w-lg flex-col gap-3 px-4 pt-3 pb-2 md:pointer-events-none md:block md:max-w-none md:p-0"
       >
         <div class="pointer-events-auto md:hidden">
           <TripHeader
@@ -91,17 +91,17 @@ watch(
         </div>
 
         <div
-          class="pointer-events-auto relative mx-auto flex w-fit items-center gap-2 md:fixed md:top-8 md:left-1/2 md:block md:-translate-x-1/2"
+          class="pointer-events-auto relative mx-auto flex w-full max-w-full flex-wrap items-center justify-center gap-2 md:fixed md:top-8 md:left-1/2 md:block md:w-fit md:-translate-x-1/2"
         >
           <div
-            class="flex items-center gap-2 md:absolute md:top-0 md:right-full md:mr-2"
+            class="flex shrink-0 items-center gap-2 md:absolute md:top-0 md:right-full md:mr-2"
           >
             <LocaleSwitch mobile-side="bottom" />
             <ColorModeSelect mobile-side="bottom" />
           </div>
           <nav
             :aria-label="t('nav.trip')"
-            class="flex items-center gap-4 rounded-3xl border border-(--ui-border)/10 bg-white/40 px-4 py-1.5 text-sm shadow-[0_8px_32px_color-mix(in_srgb,var(--glass-shadow)_24%,transparent)] backdrop-blur-2xl md:gap-10 md:px-6 md:py-2 md:text-base"
+            class="flex max-w-full flex-wrap items-center justify-center gap-x-4 gap-y-1 rounded-3xl border border-(--ui-border)/10 bg-white/40 px-4 py-1.5 text-sm shadow-[0_8px_32px_color-mix(in_srgb,var(--glass-shadow)_24%,transparent)] backdrop-blur-2xl md:max-w-none md:flex-nowrap md:gap-10 md:px-6 md:py-2 md:text-base"
           >
             <NuxtLink
               :to="`/trip/${navTripId}`"

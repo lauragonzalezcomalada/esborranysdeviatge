@@ -18,6 +18,10 @@ const {
   deleteItem,
 } = useTripLists();
 
+
+const { canBeEdited } = useTripShell()
+
+
 const lists = ref<TripList[]>([]);
 const search = ref("");
 const loadError = ref("");
@@ -157,16 +161,18 @@ async function removeItem(listId: string, itemId: string) {
     class="min-h-screen w-full overflow-hidden bg-(--app-bg) flex flex-col py-2 md:py-4 px-4 md:px-8 pb-15 md:pb-5"
   >
     <div
-      class="relative mt-4 flex w-[50vw] ml-auto items-center justify-end gap-4 md:mt-24 "
+    class="relative mt-4 flex flex-col w-full items-center justify-center gap-3 md:mt-30"
     >
-      <!--        class="flex h-full min-h-0 flex-col gap-4 md:absolute md:inset-0 md:flex-row md:items-center md:justify-between bg-red-200"
--->
+   
+      <div class="flex gap-2 w-full justify-end">
+
 
       <UInput
         v-model="search"
         icon="i-lucide-search"
         :placeholder="t('lists.search')"
-        class="w-full md:max-w-sm"
+          size="lg"
+        class="w-full max-w-md"
         :ui="{
             base: 'rounded-full border-2 border-(--ui-bg-elevated) py-2 ps-11 pe-4 text-(--ui-bg-elevated) placeholder:text-(--ui-bg-elevated)/90 ring-0 focus-visible:ring-2 focus-visible:ring-(--ui-text)/30 focus-visible:bg-(--ui-text)/80 hover:bg-(--ui-text)/80',
             leadingIcon: 'size-5 text-(--ui-bg-elevated)/90'
@@ -183,38 +189,56 @@ async function removeItem(listId: string, itemId: string) {
         {{ loadError }}
       </p>
     </div>
+  </div>
 
     <div v-if="filteredLists.length" class=" mt-4 columns-1 md:columns-2 ">
       <article
         v-for="list in filteredLists"
         :key="list.id"
-        class="mb-4 flex break-inside-avoid flex-col gap-4 rounded-3xl bg-(--resource-card-bg) p-5 text-(--resource-card-text)"
-      >
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0">
-            <h2 class="text-xl font-black tracking-tight">
+        class="mb-3 break-inside-avoid flex flex-col bg-(--resource-card-bg) p-3 rounded-md text-(--resource-card-text)"
+        >
+
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex flex-col">
+            <h2 class="font-bold text-xl tracking-tighter">
               {{ list.name }}
             </h2>
             <p v-if="list.description" class="mt-1 text-sm opacity-80">
               {{ list.description }}
             </p>
           </div>
-
-          <UButton
+          <!-- <UButton
             v-if="user"
             icon="i-lucide-trash-2"
             color="neutral"
             variant="ghost"
             :aria-label="t('common.delete')"
             @click="removeList(list.id)"
-          />
-        </div>
+          /> -->
 
-        <ul class="flex flex-col gap-2">
+          <div
+              v-if="canBeEdited"
+              class="flex gap-2 items-center"
+            >
+             
+            <UButton
+        
+          color="neutral"
+          variant="solid"
+                  class="w-fit self-end rounded-full text-(--ui-text-contrast)"
+                  :ui="{ leadingIcon: 'size-4 md:size-5' }"
+          icon="i-lucide-plus"
+          :label="t('lists.addItem')"
+          @click="openItemModal(list.id)"
+        />
+            </div>
+
+       </div>
+        <ul class="flex flex-col gap-2  px-4 mt-4">
           <li
             v-for="item in list.list_items"
             :key="item.id"
-            class="flex items-center gap-2"
+            class="flex items-center gap-2 justify-center"
           >
             <UCheckbox
               :model-value="item.selected"
@@ -222,9 +246,14 @@ async function removeItem(listId: string, itemId: string) {
               @update:model-value="
                 toggleItem(list.id, item.id, Boolean($event))
               "
+      :ui="{
+                    base: 'border-2 border-(--ui-bg) data-[state=checked]:border-(--ui-bg)',
+                    indicator: 'bg-(--ui-bg) text-(--ui-text)'
+                  }"
+
             />
             <span
-              class="min-w-0 flex-1 text-sm font-semibold"
+              class="min-w-0 flex-1 tracking-tighter"
               :class="item.selected ? 'line-through opacity-60' : ''"
             >
               {{ item.name }}
@@ -241,21 +270,9 @@ async function removeItem(listId: string, itemId: string) {
           </li>
         </ul>
 
-        <p v-if="!list.list_items.length" class="text-sm opacity-70">
-          {{ t("lists.noItems") }}
-        </p>
-
-        <UButton
-          class="rounded-full self-start"
-          color="neutral"
-          variant="soft"
-          icon="i-lucide-plus"
-          :label="t('lists.addItem')"
-          @click="openItemModal(list.id)"
-        />
+       
       </article>
     </div>
-
     <p
       v-else-if="!loadError"
       class="text-sm  h-full flex-1 flex flex-col gap-2 items-center justify-center"
@@ -264,7 +281,7 @@ async function removeItem(listId: string, itemId: string) {
             name="i-lucide-face-slightly-frowning"
             class="size-6"
           />
-      <p >
+      <p>
         {{ search ? t("lists.noResults") : t("lists.empty") }}
       </p>
     </p>
@@ -274,12 +291,12 @@ async function removeItem(listId: string, itemId: string) {
       :title="t('lists.new')"
       :dismissible="!listSaving"
       :close="!listSaving"
-
       :ui="{
         title: 'text-(--ui-text-contrast) tracking-tight',
-        content: ' bg-(--ui-text)',
-        close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
-      }"
+                  content: 'bg-(--ui-text)',
+                  close:
+                    'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
+                }"
 
     >
       <template #body>
@@ -353,14 +370,14 @@ async function removeItem(listId: string, itemId: string) {
             @click="itemModalOpen = false"
           />
           <UButton
-            class="rounded-full"
+            class="rounded-full text-(--ui-text-contrast)"
             type="submit"
             form="new-item-form"
             :label="t('common.save')"
             :loading="itemSaving"
           />
           <UButton
-            class="rounded-full"
+            class="rounded-full text-(--ui-text-contrast)"
             :label="t('lists.saveAndAdd')"
             :loading="itemSaving"
             @click="saveItem(true)"

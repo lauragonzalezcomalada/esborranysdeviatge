@@ -72,7 +72,14 @@ export function useTripResources() {
       .eq("trip_id", input.tripId);
 
     if (error) throw error;
-    return (data ?? []) as TripResource[];
+    return (data ?? []).map((resource) => ({
+      id: resource.id.toString(),
+      name: resource.name,
+      description: resource.description ?? "",
+      link: resource.link ?? null,
+      trip_id: resource.trip_id ?? "",
+      file_path: resource.file_path ?? null,
+    })) as TripResource[];
   }
 
   async function insertResource(input: {
@@ -105,14 +112,21 @@ export function useTripResources() {
       }
       throw new Error(storageErrorMessage(error, t("errors.saveResource")));
     }
-    return data as TripResource;
+    return {
+      id: data.id.toString(),
+      name: data.name,
+      description: data.description ?? "",
+      link: data.link ?? null,
+      trip_id: data.trip_id ?? "",
+      file_path: data.file_path ?? null,
+    } as TripResource;
   }
 
   async function deleteResource(resourceId: string) {
     const { data: resourceData, error: resourceError } = await supabase
       .from("resources")
       .select("file_path")
-      .eq("id", resourceId)
+      .eq("id", parseInt(resourceId))
       .single();
     if (resourceError) throw resourceError;
     if (resourceData?.file_path) {
@@ -124,7 +138,7 @@ export function useTripResources() {
     const { error: deleteError } = await supabase
       .from("resources")
       .delete()
-      .eq("id", resourceId);
+      .eq("id", parseInt(resourceId));
     if (deleteError) throw deleteError;
   }
   async function updateResource(
@@ -135,15 +149,21 @@ export function useTripResources() {
       link: string;
     },
   ) {
-    console.log(input);
     const { data, error: updateError } = await supabase
       .from("resources")
       .update(input)
-      .eq("id", resourceId)
+      .eq("id", parseInt(resourceId))
       .select()
       .single();
     if (updateError) throw updateError;
-    return data as TripResource;
+    return {
+      id: data.id.toString(),
+      name: data.name,
+      description: data.description ?? "",
+      link: data.link ?? null,
+      trip_id: data.trip_id ?? "",
+      file_path: data.file_path ?? null,
+    } as TripResource;
   }
 
   return {

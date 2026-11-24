@@ -1,27 +1,26 @@
 <script setup lang="ts">
-const supabase = useSupabaseClient()
-const localePath = useLocalePath()
+const supabase = useSupabaseClient();
+const localePath = useLocalePath();
 
-const loading = ref(false)
-const email = ref('')
-const password = ref('')
+const loading = ref(false);
+const email = ref("");
+const password = ref("");
 const handleSignup = async () => {
-  console.log('handleSignup', email.value, password.value)
   try {
-    loading.value = true
+    loading.value = true;
     const { error } = await supabase.auth.signUp({
       email: email.value,
-      password: password.value
-    })
-    if (error) throw error
-    navigateTo(localePath('/'))
+      password: password.value,
+    });
+    if (error) throw error;
+    navigateTo(localePath("/"));
   } catch (error) {
-    alert((error as any).error_description || (error as any).message)
-    console.error(error)
+    alert((error as any).error_description || (error as any).message);
+    console.error(error);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 </script>
 
 <template>
@@ -36,10 +35,7 @@ const handleSignup = async () => {
           {{ $t("auth.signupTitle") }}
         </span>
 
-        <UForm
-          class="flex flex-col gap-2"
-          @submit.prevent="handleSignup"
-        >
+        <UForm class="flex flex-col gap-2" @submit.prevent="handleSignup">
           <UFormField
             :label="$t('common.email')"
             :ui="{ label: 'text-(--ui-text-contrast) text-lg tracking-tight' }"

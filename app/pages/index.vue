@@ -1,77 +1,77 @@
 <script setup lang="ts">
-import { useTripPlaces } from '~/composables/useTripPlaces'
-import UColorModeSelect from '~/components/ColorModeSelect.vue'
+import { useTripPlaces } from "~/composables/useTripPlaces";
+import UColorModeSelect from "~/components/ColorModeSelect.vue";
 
-const supabase = useSupabaseClient()
-const localePath = useLocalePath()
-const { loadPublicTrips, loadPersonalTrips, insertTrip } = useTripPlaces()
-const publicTrips = ref<Trip[]>([])
-const personalTrips = ref<Trip[]>([])
-const showPassword = ref(false)
-const newTripName = ref('')
-const user = useSupabaseUser()
+const supabase = useSupabaseClient();
+const localePath = useLocalePath();
+const { loadPublicTrips, loadPersonalTrips, insertTrip } = useTripPlaces();
+const publicTrips = ref<Trip[]>([]);
+const personalTrips = ref<Trip[]>([]);
+const showPassword = ref(false);
+const newTripName = ref("");
+const user = useSupabaseUser();
 
 onMounted(async () => {
   // true stands for only open trips
-  publicTrips.value = await loadPublicTrips()
+  publicTrips.value = await loadPublicTrips();
   if (user.value) {
-    personalTrips.value = await loadPersonalTrips()
+    personalTrips.value = await loadPersonalTrips();
   }
-})
+});
 
 watch(user, async (newUser) => {
   if (newUser) {
-    personalTrips.value = await loadPersonalTrips()
+    personalTrips.value = await loadPersonalTrips();
   }
-})
+});
 
 const openTripDetails = (trip: Trip) => {
-  navigateTo(localePath(`/trip/${trip.id}`))
-}
+  navigateTo(localePath(`/trip/${trip.id}`));
+};
 const startNewTrip = async () => {
   try {
     const data = await insertTrip({
-      name: newTripName.value
-    })
+      name: newTripName.value,
+    });
     navigateTo(
-      localePath(`/trip/${(data as unknown as { id: string })?.id ?? ''}`)
-    )
+      localePath(`/trip/${(data as unknown as { id: string })?.id ?? ""}`),
+    );
   } catch (error) {
-    console.error(error)
+    console.error(error);
   }
-}
+};
 
-const loading = ref(false)
-const email = ref('')
-const password = ref('')
+const loading = ref(false);
+const email = ref("");
+const password = ref("");
 
 const handleLogin = async () => {
   try {
-    loading.value = true
+    loading.value = true;
     const { error } = await supabase.auth.signInWithPassword({
       email: email.value,
-      password: password.value
-    })
-    if (error) throw error
-    navigateTo(localePath('/'))
+      password: password.value,
+    });
+    if (error) throw error;
+    navigateTo(localePath("/"));
   } catch (error) {
-    alert((error as any).error_description || (error as any).message)
+    alert((error as any).error_description || (error as any).message);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const handleLogout = async () => {
-  await supabase.auth.signOut()
-  navigateTo(localePath('/'))
-}
+  await supabase.auth.signOut();
+  navigateTo(localePath("/"));
+};
 
 const openOurStories = () => {
   window.open(
-    'https://lauragonzalezcomalada.github.io/borradoresdeviaje/',
-    '_blank'
-  )
-}
+    "https://lauragonzalezcomalada.github.io/borradoresdeviaje/",
+    "_blank",
+  );
+};
 </script>
 
 <template>
@@ -81,10 +81,7 @@ const openOurStories = () => {
   >
     <div class="flex flex-col md:flex-row gap-4 items-center">
       <LocaleSwitch mobile-side="right" />
-      <UColorModeSelect
-        class="w-fit"
-        mobile-side="right"
-      />
+      <UColorModeSelect class="w-fit" mobile-side="right" />
       <div
         class="rounded-3xl border border-(--ui-border)/10 bg-white/40 py-3 px-6 w-fit backdrop-blur-2xl shadow-[0_8px_32px_color-mix(in_srgb,var(--glass-shadow)_24%,transparent)]"
       >
@@ -112,9 +109,10 @@ const openOurStories = () => {
       >
         <UPopover
           :content="{
-            align: 'start',
+            align: 'center',
             side: 'bottom',
-            sideOffset: 8
+            sideOffset: 8,
+            onOpenAutoFocus: (event) => event.preventDefault(),
           }"
         >
           <UButton
@@ -128,10 +126,7 @@ const openOurStories = () => {
               <div class="text-(--ui-text-contrast)/90 font-semibold">
                 {{ $t("auth.enter") }}
               </div>
-              <UForm
-                class="flex flex-col gap-2"
-                @submit.prevent="handleLogin"
-              >
+              <UForm class="flex flex-col gap-2" @submit.prevent="handleLogin">
                 <UFormField
                   :label="$t('common.email')"
                   :ui="{ label: 'text-(--ui-text-contrast)/90' }"
@@ -141,6 +136,7 @@ const openOurStories = () => {
                     type="email"
                     class="w-full text-(--ui-text-contrast)"
                     :placeholder="$t('common.emailPlaceholder')"
+                    :ui="{ base: 'text-base' }"
                   />
                 </UFormField>
                 <UFormField
@@ -152,6 +148,7 @@ const openOurStories = () => {
                     :type="showPassword ? 'text' : 'password'"
                     class="w-full"
                     :placeholder="$t('common.passwordPlaceholder')"
+                    :ui="{ base: 'text-base' }"
                   >
                     <template #trailing>
                       <UButton
@@ -178,7 +175,8 @@ const openOurStories = () => {
                   <NuxtLink
                     :to="$localePath('/signup')"
                     class="text-(--ui-text-contrast)/90 font-semibold"
-                  >{{ $t("auth.signupNow") }}</NuxtLink>
+                    >{{ $t("auth.signupNow") }}</NuxtLink
+                  >
                 </div>
               </UForm>
             </div>
@@ -193,7 +191,7 @@ const openOurStories = () => {
           :content="{
             align: 'center',
             side: 'bottom',
-            sideOffset: 8
+            sideOffset: 8,
           }"
         >
           <UButton
@@ -239,10 +237,7 @@ const openOurStories = () => {
                 {{ trip.name }}
               </div>
             </div>
-            <USeparator
-              orientation="vertical"
-              class="h-4 shrink-0"
-            />
+            <USeparator orientation="vertical" class="h-4 shrink-0" />
             <UPopover
               class="shrink-0"
               :content="{ align: 'start', side: 'bottom', sideOffset: 8 }"
@@ -259,7 +254,7 @@ const openOurStories = () => {
                     :label="$t('home.tripNameQuestion')"
                     :ui="{
                       label:
-                        'text-(--ui-text-contrast)/90 tracking-tighter font-semibold italic'
+                        'text-(--ui-text-contrast)/90 tracking-tighter font-semibold italic',
                     }"
                   >
                     <UInput
