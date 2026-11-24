@@ -24,6 +24,8 @@ const { loadMembers, insertMember, deleteMember } = useTripMembers()
 const resources = ref([])
 const members = ref([])
 const memberNameInput = ref('')
+const membersModalOpen = ref(false)
+const search = ref('')
 
 const groupName = ref('')
 const categoryName = ref('')
@@ -56,8 +58,8 @@ onMounted(async () => {
 })
 
 const memberOptions = computed(() => [
-  { label: t('planning.unassigned'), value: '' },
-  ...members.value.map(member => ({
+  { label: t('planning.unassigned'), value: 'unassigned' },
+  ...members.value.map((member) => ({
     label: member.name,
     value: String(member.id)
   }))
@@ -65,7 +67,16 @@ const memberOptions = computed(() => [
 
 function memberName(option) {
   if (option.member_id == null) return ''
-  return members.value.find(member => String(member.id) === String(option.member_id))?.name ?? ''
+  return (
+    members.value
+      .find((member) => String(member.id) === String(option.member_id))
+      ?.name?.charAt(0) ?? ''
+  )
+}
+
+function optionMatchesSearch(option) {
+  const query = search.value.trim().toLowerCase()
+  return Boolean(query) && option.name?.toLowerCase().includes(query)
 }
 
 function memberTotals(category) {
@@ -77,11 +88,13 @@ function memberTotals(category) {
     totals.set(option.member_id, (totals.get(option.member_id) || 0) + amount)
   }
 
-  return [...totals.entries()].map(([id, total]) => ({
-    id,
-    name: members.value.find(member => String(member.id) === String(id))?.name ?? '',
-    total
-  })).filter(bubble => bubble.name)
+  return [...totals.entries()]
+    .map(([id, total]) => ({
+      id,
+      name: members.value.find((member) => String(member.id) === String(id))?.name ?? '',
+      total
+    }))
+    .filter((bubble) => bubble.name)
 }
 
 async function addMember() {
@@ -97,7 +110,7 @@ async function addMember() {
 async function removeMember(memberId) {
   if (!canBeEdited.value) return
   await deleteMember(memberId)
-  members.value = members.value.filter(member => member.id !== memberId)
+  members.value = members.value.filter((member) => member.id !== memberId)
 }
 
 async function saveGroup() {
@@ -127,9 +140,7 @@ async function saveCategory() {
     return
   }
   try {
-    const group = resources.value.find(
-      resource => resource.id === selectedGroupId.value
-    )
+    const group = resources.value.find((resource) => resource.id === selectedGroupId.value)
 
     if (!group) throw new Error(t('planning.groupNotFound'))
 
@@ -165,8 +176,8 @@ async function saveOption() {
   }
   try {
     const category = resources.value
-      .flatMap(group => group.categories ?? [])
-      .find(category => category.id === selectedCategoryId.value)
+      .flatMap((group) => group.categories ?? [])
+      .find((category) => category.id === selectedCategoryId.value)
 
     if (!category) throw new Error(t('planning.categoryNotFound'))
 
@@ -196,9 +207,9 @@ async function updateOptionSelection(optionId, categoryId) {
     return
   }
   const option = resources.value
-    .flatMap(group => group.categories ?? [])
-    .find(category => category.id === categoryId)
-    .options.find(o => o.id === optionId)
+    .flatMap((group) => group.categories ?? [])
+    .find((category) => category.id === categoryId)
+    .options.find((o) => o.id === optionId)
   option.selected = !option.selected
   try {
     await updateOptionSelected({
@@ -219,7 +230,7 @@ async function removeGroup(groupId) {
   }
   try {
     await deleteGroup(groupId)
-    resources.value = resources.value.filter(r => r.id !== groupId)
+    resources.value = resources.value.filter((r) => r.id !== groupId)
   } catch (error) {
     console.error(error)
   }
@@ -235,11 +246,11 @@ async function removeOption(optionId, categoryId) {
   try {
     await deleteOption(optionId)
     resources.value
-      .flatMap(group => group.categories ?? [])
-      .find(category => category.id === categoryId).options = resources.value
-        .flatMap(group => group.categories ?? [])
-        .find(category => category.id === categoryId)
-        .options.filter(o => o.id !== optionId)
+      .flatMap((group) => group.categories ?? [])
+      .find((category) => category.id === categoryId).options = resources.value
+      .flatMap((group) => group.categories ?? [])
+      .find((category) => category.id === categoryId)
+      .options.filter((o) => o.id !== optionId)
   } catch (error) {
     console.error(error)
   }
@@ -272,7 +283,7 @@ function openEditOptionModal(option, categoryId) {
     price: String(option.unit_price ?? ''),
     link: option.link ?? '',
     quantity: String(option.quantity ?? ''),
-    memberId: option.member_id == null ? '' : String(option.member_id)
+    memberId: option.member_id == null ? 'unassigned' : String(option.member_id)
   })
 
   editOptionModalOpen.value = true
@@ -294,13 +305,13 @@ async function saveEditedOption() {
   }
 
   if (
-    !changes.name
-    || editOptionForm.price === ''
-    || editOptionForm.quantity === ''
-    || !Number.isFinite(changes.unit_price)
-    || changes.unit_price < 0
-    || !Number.isInteger(changes.quantity)
-    || changes.quantity < 1
+    !changes.name ||
+    editOptionForm.price === '' ||
+    editOptionForm.quantity === '' ||
+    !Number.isFinite(changes.unit_price) ||
+    changes.unit_price < 0 ||
+    !Number.isInteger(changes.quantity) ||
+    changes.quantity < 1
   ) {
     editOptionError.value = 'Revisa el nombre, el precio y la cantidad.'
     return
@@ -310,18 +321,22 @@ async function saveEditedOption() {
 
   try {
     const category = resources.value
-      .flatMap(group => group.categories ?? [])
-      .find(category => category.id === editingCategoryId.value)
+      .flatMap((group) => group.categories ?? [])
+      .find((category) => category.id === editingCategoryId.value)
 
-    const option = category?.options?.find(
-      option => option.id === editingOptionId.value
-    )
+    const option = category?.options?.find((option) => option.id === editingOptionId.value)
 
     if (!option) throw new Error(t('planning.optionNotFound'))
 
-    const memberId = editOptionForm.memberId === ''
-      ? null
-      : Number(editOptionForm.memberId)
+    const selectedMember = editOptionForm.memberId
+    const memberId =
+      !selectedMember || selectedMember === 'unassigned' ? null : Number(selectedMember)
+
+    if (memberId !== null && !Number.isFinite(memberId)) {
+      editOptionError.value = t('planning.optionNotFound')
+      editOptionSaving.value = false
+      return
+    }
 
     await updateOption({
       id: String(option.id),
@@ -336,7 +351,10 @@ async function saveEditedOption() {
     editOptionModalOpen.value = false
   } catch (error) {
     console.error(error)
-    editOptionError.value = 'No se ha podido guardar la opción.'
+    editOptionError.value =
+      error && typeof error === 'object' && 'message' in error && error.message
+        ? String(error.message)
+        : 'No se ha podido guardar la opción.'
   } finally {
     editOptionSaving.value = false
   }
@@ -352,12 +370,10 @@ async function removeCategory(categoryId, groupId) {
   try {
     await deleteCategory(categoryId)
 
-    const group = resources.value.find(resource => resource.id === groupId)
+    const group = resources.value.find((resource) => resource.id === groupId)
 
     if (group) {
-      group.categories = group.categories.filter(
-        category => category.id !== categoryId
-      )
+      group.categories = group.categories.filter((category) => category.id !== categoryId)
     }
   } catch (error) {
     console.error('Error al eliminar la categoría:', error)
@@ -370,14 +386,18 @@ const cardBgColors = ref([
   'bg-(--app-fg)/70'
 ])
 
+const groupCardBgs = [
+  'bg-(--group-card-bg-1)',
+  'bg-(--group-card-bg-2)'
+]
+
 function selectedCost(resource) {
   return (resource.categories ?? []).reduce((subtotal, category) => {
     return (
-      subtotal
-      + (category.options ?? []).reduce((sum, option) => {
+      subtotal +
+      (category.options ?? []).reduce((sum, option) => {
         return option.selected
-          ? sum
-          + (Number(option.quantity) || 0) * (Number(option.unit_price) || 0)
+          ? sum + (Number(option.quantity) || 0) * (Number(option.unit_price) || 0)
           : sum
       }, 0)
     )
@@ -385,95 +405,170 @@ function selectedCost(resource) {
 }
 
 const tripTotal = computed(() =>
-  (resources.value ?? []).reduce(
-    (total, resource) => total + selectedCost(resource),
-    0
-  )
+  (resources.value ?? []).reduce((total, resource) => total + selectedCost(resource), 0)
 )
+
+const filteredResources = computed(() => {
+  const query = search.value.trim().toLowerCase()
+  if (!query) return resources.value ?? []
+
+  return (resources.value ?? []).filter((group) => {
+    if (group.name?.toLowerCase().includes(query)) return true
+    return (group.categories ?? []).some(
+      (category) =>
+        category.name?.toLowerCase().includes(query) ||
+        (category.options ?? []).some((option) => option.name?.toLowerCase().includes(query))
+    )
+  })
+})
+
+const memberTripTotals = computed(() => {
+  const totals = new Map()
+
+  for (const resource of resources.value ?? []) {
+    for (const category of resource.categories ?? []) {
+      for (const option of category.options ?? []) {
+        if (!option.selected || option.member_id == null) continue
+        const amount = (Number(option.quantity) || 0) * (Number(option.unit_price) || 0)
+        totals.set(option.member_id, (totals.get(option.member_id) || 0) + amount)
+      }
+    }
+  }
+
+  return [...totals.entries()]
+    .map(([id, total]) => ({
+      id,
+      name: members.value.find((member) => String(member.id) === String(id))?.name ?? '',
+      total
+    }))
+    .filter((badge) => badge.name)
+})
 </script>
 
 <template>
   <main
     class="min-h-screen w-full overflow-hidden bg-(--app-bg) flex flex-col py-2 md:py-4 px-4 md:px-8 pb-15 md:pb-5"
   >
-    <div
-      class="relative mt-4 flex w-full items-center justify-end gap-3 md:mt-24"
-    >
-      <div
-        class="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block"
-      >
+    <div class="relative mt-8 flex w-full items-center justify-end gap-3 md:mt-35">
+      <div class="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block">
         <div class="relative">
-          <div class="flex max-w-[50vw] flex-wrap justify-center gap-2">
-            <div
-              v-for="(resource, index) in resources"
-              :key="resource.id"
-              class="flex h-fit rounded-full px-2.5 py-1.5 text-sm"
-              :class="cardBgColors[index % cardBgColors.length]"
-            >
-              {{ resource.name }}: {{ selectedCost(resource) }} €
+          <div class="flex max-w-[50vw] flex-col items-center gap-2">
+            <div class="flex flex-wrap justify-center gap-2">
+              <div
+                v-for="(resource, index) in resources"
+                :key="resource.id"
+                class="flex h-fit rounded-full px-2.5 py-1.5 text-sm tracking-tighter"
+                :class="cardBgColors[index % cardBgColors.length]"
+              >
+                {{ resource.name }}: {{ selectedCost(resource) }} €
+              </div>
+            </div>
+            <div v-if="memberTripTotals.length" class="flex flex-wrap justify-center gap-2">
+              <div
+                v-for="badge in memberTripTotals"
+                :key="badge.id"
+                class="rounded-full bg-(--ui-text) px-2.5 py-1.5 text-sm text-(--ui-text-contrast) tracking-tighter"
+              >
+                {{ badge.name }}: {{ badge.total.toFixed(2) }} €
+              </div>
             </div>
           </div>
           <div
             class="absolute top-1/2 left-full ml-3 flex -translate-y-1/2 flex-row gap-1 rounded-full bg-(--ui-text) px-3 py-2 font-bold whitespace-nowrap text-(--ui-text-contrast)"
           >
-            <span>{{ t("common.total") }}</span>
+            <span>{{ t('common.total') }}</span>
             {{ tripTotal.toFixed(2) }}
             €
           </div>
         </div>
       </div>
-      <div
-        class="flex flex-col gap-1 rounded-full bg-(--ui-text) px-2 py-2 font-bold whitespace-nowrap text-(--ui-text-contrast) md:hidden"
-      >
-        <span class="hidden md:inline">{{ t("common.total") }}</span>
-        {{ tripTotal.toFixed(2) }}
-        €
-      </div>
-      <UModal
-        v-if="canBeEdited"
-        :title="t('planning.newGroup')"
-        :ui="{
-          title: 'text-(--ui-text-contrast) tracking-tight',
-          content: ' bg-(--ui-text)',
-          close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
-        }"
-        :open="addGroupModalOpen"
-        @update:open="addGroupModalOpen = $event"
-      >
-        <UButton
-          icon="i-heroicons-plus"
-          :label="t('planning.newGroup')"
-          color="neutral"
-          variant="subtle"
-          class="w-fit rounded-full"
-          :ui="{ leadingIcon: 'size-4 md:size-5' }"
-          @click="openAddGroupModal"
+      <div class="flex flex-col items-end gap-2 md:hidden">
+        <div
+          class="flex flex-col gap-1 rounded-full bg-(--ui-text) px-2 py-2 whitespace-nowrap text-(--ui-text-contrast)"
         >
-          <span class="hidden md:inline">{{ t("planning.newGroup") }}</span>
-          <span class="inline md:hidden">{{ t("planning.group") }}</span>
-        </UButton>
-
-        <template #body>
-          <UForm
-            id="add-place-form"
-            class="flex flex-col gap-3"
-            :on-submit="saveGroup"
+          <span class="hidden md:inline">{{ t('common.total') }}</span>
+          {{ tripTotal.toFixed(2) }}
+          €
+        </div>
+        <div v-if="memberTripTotals.length" class="flex max-w-[60vw] flex-wrap justify-end gap-1">
+          <div
+            v-for="badge in memberTripTotals"
+            :key="badge.id"
+            class="rounded-full bg-(--ui-text) px-2.5 py-1 text-xs text-(--ui-text-contrast) tracking-tighter"
           >
-            <UFormField
-              :label="t('common.name')"
-              :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
+            {{ badge.name }}: {{ badge.total.toFixed(2) }} €
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="relative mt-4 flex w-full items-center justify-center gap-8">
+      <div class="flex w-full items-end justify-end gap-4">
+        <UInput
+          v-model="search"
+          icon="i-lucide-search"
+          :placeholder="t('planning.search')"
+          size="lg"
+          class="w-full max-w-md"
+          :ui="{
+            base: 'rounded-full border-2 border-(--ui-bg-elevated) py-2 ps-11 pe-4 text-(--ui-bg-elevated) placeholder:text-(--ui-bg-elevated)/90 ring-0 focus-visible:ring-2 focus-visible:ring-(--ui-text)/30 focus-visible:bg-(--ui-text)/80 hover:bg-(--ui-text)/80',
+            leadingIcon: 'size-5 text-(--ui-bg-elevated)/90'
+          }"
+        />
+        <div v-if="canBeEdited" class="flex shrink-0 flex-col items-end gap-1">
+          <div class="flex items-center gap-1">
+            <span class="text-sm font-semibold text-(--ui-text)/70">{{ members.length }}</span>
+            <UIcon name="i-heroicons-user-group" class="size-3 md:size-4 text-(--ui-text)/70" />
+            <UButton
+              icon="i-heroicons-user-plus"
+              variant="subtle"
+              :aria-label="t('planning.members')"
+              class="w-fit rounded-full p-2"
+              color="neutral"
+              :ui="{ leadingIcon: 'size-4 md:size-5' }"
+              @click="membersModalOpen = true"
+            />
+          </div>
+
+          <UModal
+            :title="t('planning.newGroup')"
+            :ui="{
+              title: 'text-(--ui-text-contrast) tracking-tight',
+              content: ' bg-(--ui-text)',
+              close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
+            }"
+            :open="addGroupModalOpen"
+            @update:open="addGroupModalOpen = $event"
+          >
+            <UButton
+              icon="i-heroicons-plus"
+              :label="t('planning.newGroup')"
+              color="neutral"
+              variant="subtle"
+              class="w-fit rounded-full"
+              :ui="{ leadingIcon: 'size-4 md:size-5' }"
+              @click="openAddGroupModal"
             >
-              <UInput
-                v-model="groupName"
-                :placeholder="t('common.exampleName')"
-                required
-                :ui="{
-                  base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)'
-                }"
-                class="w-full"
-              />
-            </UFormField>
-            <!-- <UFormField
+              <span class="hidden md:inline">{{ t('planning.newGroup') }}</span>
+              <span class="inline md:hidden">{{ t('planning.group') }}</span>
+            </UButton>
+
+            <template #body>
+              <UForm id="add-place-form" class="flex flex-col gap-3" :on-submit="saveGroup">
+                <UFormField
+                  :label="t('common.name')"
+                  :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
+                >
+                  <UInput
+                    v-model="groupName"
+                    :placeholder="t('common.exampleName')"
+                    required
+                    :ui="{
+                      base: 'placeholder:text-(--ui-text-contrast) placeholder:opacity-60 text-(--ui-text-contrast)'
+                    }"
+                    class="w-full"
+                  />
+                </UFormField>
+                <!-- <UFormField
               label="Descripción"
               :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
             >
@@ -486,77 +581,33 @@ const tripTotal = computed(() =>
                 }"
               />
             </UFormField> -->
-          </UForm>
-        </template>
-        <template #footer>
-          <div class="flex w-full justify-end gap-2">
-            <UButton
-              type="submit"
-              form="add-place-form"
-              class="rounded-full"
-            >
-              {{ t("common.save") }}
-            </UButton>
-          </div>
-        </template>
-      </UModal>
-    </div>
-    <div class="flex flex-col">
-      <div class="mt-8 flex flex-col gap-2">
-        <p class="text-(--ui-text) font-semibold tracking-tight">
-          {{ t('planning.members') }}
-        </p>
-        <div class="flex flex-wrap items-center gap-2">
-          <span
-            v-for="member in members"
-            :key="member.id"
-            class="inline-flex items-center gap-1 rounded-full bg-(--ui-text) px-3 py-1 text-xs font-bold text-(--ui-text-contrast)"
-          >
-            {{ member.name }}
-            <button
-              v-if="canBeEdited"
-              type="button"
-              class="leading-none"
-              :aria-label="t('common.delete')"
-              @click="removeMember(member.id)"
-            >
-              ×
-            </button>
-          </span>
-          <form
-            v-if="canBeEdited"
-            class="flex gap-2"
-            @submit.prevent="addMember"
-          >
-            <UInput
-              v-model="memberNameInput"
-              :placeholder="t('planning.memberPlaceholder')"
-            />
-            <UButton
-              type="submit"
-              class="rounded-full"
-              :label="t('planning.addMember')"
-            />
-          </form>
+              </UForm>
+            </template>
+            <template #footer>
+              <div class="flex w-full justify-end gap-2">
+                <UButton type="submit" form="add-place-form" class="rounded-full">
+                  {{ t('common.save') }}
+                </UButton>
+              </div>
+            </template>
+          </UModal>
         </div>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-8">
+    </div>
+    <div class="flex flex-col">
+      <div class="mt-2 columns-1 gap-2 md:columns-2">
         <div
-          v-for="resource in resources"
+          v-for="(resource, index) in filteredResources"
           :key="resource.id"
-          class="p-2 md:p-4 rounded-md bg-(--ui-bg-elevated) flex flex-col gap-2 md:gap-4 h-fit"
+          class="mb-2 break-inside-avoid p-2 md:p-4 rounded-md flex flex-col gap-2 md:gap-4"
+          :class="groupCardBgs[index % groupCardBgs.length]"
         >
           <div class="flex gap-2 items-center justify-between">
-            <p
-              class="font-semibold text-lg md:text-xl text-(--ui-text) tracking-tight"
-            >
+            <p class="font-semibold text-lg md:text-xl text-(--ui-text) tracking-tight">
               {{ resource.name }}
             </p>
 
-            <div
-              v-if="canBeEdited"
-              class="flex gap-2 items-center"
-            >
+            <div v-if="canBeEdited" class="flex gap-2 items-center">
               <UButton
                 icon="i-heroicons-trash"
                 :aria-label="t('planning.deleteGroup')"
@@ -565,9 +616,7 @@ const tripTotal = computed(() =>
                 :ui="{ leadingIcon: 'size-4 md:size-5' }"
                 @click="removeGroup(resource.id)"
               >
-                <span class="hidden md:inline">{{
-                  t("planning.deleteGroup")
-                }}</span>
+                <span class="hidden md:inline">{{ t('planning.deleteGroup') }}</span>
               </UButton>
               <UModal
                 :title="t('planning.newCategory')"
@@ -575,8 +624,7 @@ const tripTotal = computed(() =>
                 :ui="{
                   title: 'text-(--ui-text-contrast) tracking-tight',
                   content: 'bg-(--ui-text)',
-                  close:
-                    'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
+                  close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
                 }"
                 @update:open="addCategoryModalOpen = $event"
               >
@@ -588,9 +636,7 @@ const tripTotal = computed(() =>
                   :ui="{ leadingIcon: 'size-4 md:size-5' }"
                   @click="openAddCategoryModal(resource.id)"
                 >
-                  <span class="hidden md:inline">{{
-                    t("planning.newCategory")
-                  }}</span>
+                  <span class="hidden md:inline">{{ t('planning.newCategory') }}</span>
                 </UButton>
 
                 <template #body>
@@ -625,7 +671,7 @@ const tripTotal = computed(() =>
                       :form="`add-category-form-${resource.id}`"
                       class="rounded-full text-(--ui-text-contrast)"
                     >
-                      {{ t("common.add") }}
+                      {{ t('common.add') }}
                     </UButton>
                   </div>
                 </template>
@@ -639,16 +685,11 @@ const tripTotal = computed(() =>
             class="flex flex-col gap-2 rounded-md p-2 md:p-4 bg-(--category-card-bg)"
           >
             <div class="flex gap-2 items-center justify-between">
-              <p
-                class="font-semibold text-md md:text-lg text-(--ui-text-contrast) tracking-tight"
-              >
+              <p class="font-semibold text-md md:text-lg text-(--ui-text-contrast) tracking-tight">
                 {{ category.name }}
               </p>
 
-              <div
-                v-if="canBeEdited"
-                class="flex items-center gap-2"
-              >
+              <div v-if="canBeEdited" class="flex items-center gap-2">
                 <UButton
                   icon="i-heroicons-trash"
                   :aria-label="t('planning.deleteCategory')"
@@ -657,21 +698,16 @@ const tripTotal = computed(() =>
                   :ui="{ leadingIcon: 'size-4 md:size-5' }"
                   @click="removeCategory(category.id, resource.id)"
                 >
-                  <span class="hidden md:inline">{{
-                    t("planning.deleteCategory")
-                  }}</span>
+                  <span class="hidden md:inline">{{ t('planning.deleteCategory') }}</span>
                 </UButton>
 
                 <UModal
-                  :open="
-                    addOptionModalOpen && selectedCategoryId === category.id
-                  "
+                  :open="addOptionModalOpen && selectedCategoryId === category.id"
                   :title="t('planning.newOption')"
                   :ui="{
                     title: 'text-(--ui-text-contrast) tracking-tight',
                     content: ' bg-(--ui-text)',
-                    close:
-                      'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
+                    close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
                   }"
                 >
                   <UButton
@@ -681,17 +717,11 @@ const tripTotal = computed(() =>
                     :ui="{ leadingIcon: 'size-4 md:size-5' }"
                     @click="openAddOptionModal(category.id)"
                   >
-                    <span class="hidden md:inline">{{
-                      t("planning.newOption")
-                    }}</span>
+                    <span class="hidden md:inline">{{ t('planning.newOption') }}</span>
                   </UButton>
 
                   <template #body>
-                    <UForm
-                      id="add-place-form"
-                      class="flex flex-col gap-3"
-                      :on-submit="saveOption"
-                    >
+                    <UForm id="add-place-form" class="flex flex-col gap-3" :on-submit="saveOption">
                       <UFormField
                         :label="t('common.name')"
                         :ui="{
@@ -765,7 +795,7 @@ const tripTotal = computed(() =>
                         form="add-place-form"
                         class="rounded-full text-(--ui-text-contrast)"
                       >
-                        {{ t("common.add") }}
+                        {{ t('common.add') }}
                       </UButton>
                     </div>
                   </template>
@@ -785,20 +815,19 @@ const tripTotal = computed(() =>
                     base: 'border-2 border-(--ui-bg) data-[state=checked]:border-(--ui-bg)',
                     indicator: 'bg-(--ui-bg) text-(--ui-text)'
                   }"
-                  @update:model-value="
-                    updateOptionSelection(option.id, category.id)
-                  "
+                  @update:model-value="updateOptionSelection(option.id, category.id)"
                 />
                 <span
                   v-if="memberName(option)"
-                  class="max-w-16 text-center text-[0.6rem] font-semibold leading-tight text-(--ui-text)"
+                  class="size-6 grid place-items-center text-center bg-(--ui-text-contrast) rounded-full text-[0.6rem] font-semibold leading-tight text-(--ui-text)"
                 >
-                  {{ memberName(option) }}
+                  <span class="w-full min-w-0 truncate">{{ memberName(option) }}</span>
                 </span>
               </div>
 
               <div
-                class="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md bg-blue-200 p-2"
+                class="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-md p-2"
+                :class="optionMatchesSearch(option) ? 'bg-red-200' : 'bg-blue-200'"
               >
                 <div class="min-w-0 w-1/2 md:w-3/5 shrink-0">
                   <p class="text-(--ui-text) font-semibold tracking-tight">
@@ -813,16 +842,12 @@ const tripTotal = computed(() =>
                     {{ option.link }}
                   </a>
                 </div>
-                <div
-                  class="flex min-w-0 flex-1 items-center justify-end md:gap-10 gap-2"
-                >
+                <div class="flex min-w-0 flex-1 items-center justify-end md:gap-10 gap-2">
                   <p class="text-xs md:text-sm text-(--ui-text)/70 text-right">
                     {{ option.quantity }} x {{ option.unit_price }}€
                   </p>
 
-                  <p
-                    class="text-sm md:text-md text-(--ui-text) font-semibold whitespace-nowrap"
-                  >
+                  <p class="text-sm md:text-md text-(--ui-text) font-semibold whitespace-nowrap">
                     {{ option.quantity * option.unit_price }} €
                   </p>
 
@@ -833,8 +858,7 @@ const tripTotal = computed(() =>
                         label: t('common.edit'),
                         icon: 'i-heroicons-pencil-square',
 
-                        onSelect: () =>
-                          openEditOptionModal(option, category.id)
+                        onSelect: () => openEditOptionModal(option, category.id)
                       },
                       {
                         label: t('common.delete'),
@@ -863,21 +887,18 @@ const tripTotal = computed(() =>
 
             <div class="flex flex-col items-end gap-2">
               <div class="text-(--ui-text) font-semibold">
-                {{ t("common.total") }}
+                {{ t('common.total') }}
                 {{
                   category.options?.reduce((acc, option) => {
                     if (option.selected) {
-                      return acc + option.quantity * option.unit_price;
+                      return acc + option.quantity * option.unit_price
                     }
-                    return acc;
+                    return acc
                   }, 0)
                 }}
                 €
               </div>
-              <div
-                v-if="memberTotals(category).length"
-                class="flex flex-wrap justify-end gap-1"
-              >
+              <div v-if="memberTotals(category).length" class="flex flex-wrap justify-end gap-1">
                 <span
                   v-for="bubble in memberTotals(category)"
                   :key="bubble.id"
@@ -890,18 +911,18 @@ const tripTotal = computed(() =>
           </div>
           <div class="flex gap-2 items-center justify-end">
             <p class="text-(--ui-text) font-bold tracking-tight">
-              {{ t("common.total") }}
+              {{ t('common.total') }}
               {{
                 resource?.categories?.reduce((acc, category) => {
                   return (
-                    acc
-                    + category.options?.reduce((acc, option) => {
+                    acc +
+                    category.options?.reduce((acc, option) => {
                       if (option.selected) {
-                        return acc + option.quantity * option.unit_price;
+                        return acc + option.quantity * option.unit_price
                       }
-                      return acc;
+                      return acc
                     }, 0)
-                  );
+                  )
                 }, 0)
               }}
               €
@@ -909,6 +930,12 @@ const tripTotal = computed(() =>
           </div>
         </div>
       </div>
+      <p
+        v-if="search.trim() && !filteredResources.length"
+        class="mt-8 text-center text-sm text-(--ui-text)/70"
+      >
+        {{ t('planning.noResults') }}
+      </p>
       <!--
       <p class="text-(--ui-text) font-semibold tracking-tight self-end">
         Total del viaje:
@@ -936,6 +963,46 @@ const tripTotal = computed(() =>
     </div>
 
     <UModal
+      v-model:open="membersModalOpen"
+      :title="t('planning.members')"
+      :ui="{
+        title: 'text-(--ui-text-contrast) tracking-tight',
+        content: 'bg-(--ui-text)',
+        close: 'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
+      }"
+    >
+      <template #body>
+        <div class="flex flex-col gap-4">
+          <div class="flex flex-wrap gap-2">
+            <span
+              v-for="member in members"
+              :key="member.id"
+              class="inline-flex items-center gap-1 rounded-full bg-(--ui-text-contrast) px-3 py-1 text-xs font-bold text-(--ui-text)"
+            >
+              {{ member.name }}
+              <button
+                type="button"
+                class="leading-none"
+                :aria-label="t('common.delete')"
+                @click="removeMember(member.id)"
+              >
+                ×
+              </button>
+            </span>
+          </div>
+          <form class="flex gap-2" @submit.prevent="addMember">
+            <UInput
+              v-model="memberNameInput"
+              :placeholder="t('planning.memberPlaceholder')"
+              class="w-full"
+            />
+            <UButton type="submit" class="rounded-full" :label="t('planning.addMember')" />
+          </form>
+        </div>
+      </template>
+    </UModal>
+
+    <UModal
       v-model:open="editOptionModalOpen"
       :title="t('planning.editOption')"
       :dismissible="!editOptionSaving"
@@ -958,11 +1025,7 @@ const tripTotal = computed(() =>
             name="name"
             :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
           >
-            <UInput
-              v-model="editOptionForm.name"
-              required
-              class="w-full"
-            />
+            <UInput v-model="editOptionForm.name" required class="w-full" />
           </UFormField>
 
           <UFormField
@@ -985,10 +1048,7 @@ const tripTotal = computed(() =>
             name="link"
             :ui="{ label: 'font-semibold text-(--ui-text-contrast)' }"
           >
-            <UInput
-              v-model="editOptionForm.link"
-              class="w-full"
-            />
+            <UInput v-model="editOptionForm.link" class="w-full" />
           </UFormField>
 
           <UFormField
@@ -1019,11 +1079,7 @@ const tripTotal = computed(() =>
             />
           </UFormField>
 
-          <p
-            v-if="editOptionError"
-            role="alert"
-            class="text-sm text-red-500"
-          >
+          <p v-if="editOptionError" role="alert" class="text-sm text-red-500">
             {{ editOptionError }}
           </p>
         </UForm>

@@ -105,11 +105,14 @@
     "addMember": "Afegeix un membre",
     "memberPlaceholder": "Nom",
     "member": "Membre",
-    "unassigned": "Sense assignar"
+    "unassigned": "Sense assignar",
+    "search": "Cerca un grup, una categoria o una opció",
+    "noResults": "Res no coincideix"
   },
   "lists": {
     "search": "Cerca una llista o un ítem",
     "new": "Nova llista",
+    "short": "Llista",
     "addItem": "Afegeix un ítem",
     "saveAndAdd": "Desa i afegeix-ne un altre",
     "noItems": "Encara no hi ha ítems",

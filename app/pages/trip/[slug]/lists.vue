@@ -179,11 +179,16 @@ async function removeItem(listId: string, itemId: string) {
           }"
       />
       <UButton
-        class="rounded-full"
         icon="i-lucide-plus"
-        :label="t('lists.new')"
+
+         class="w-fit rounded-full"
+         color="neutral"
+            variant="subtle"
+            :ui="{ leadingIcon: 'size-3 md:size-4' }"
         @click="openListModal"
-      />
+      > <span class="hidden md:inline">{{ t("lists.new") }}</span>
+      <span class="inline md:hidden">{{ t("lists.short") }}</span>
+    </UButton>
 
       <p v-if="loadError" role="alert" class="text-sm text-red-500">
         {{ loadError }}
@@ -230,6 +235,7 @@ async function removeItem(listId: string, itemId: string) {
           icon="i-lucide-plus"
           :label="t('lists.addItem')"
           @click="openItemModal(list.id)"
+          
         />
             </div>
 
@@ -238,26 +244,30 @@ async function removeItem(listId: string, itemId: string) {
           <li
             v-for="item in list.list_items"
             :key="item.id"
-            class="flex items-center gap-2 justify-center"
+            class="flex items-center gap-2"
           >
-            <UCheckbox
-              :model-value="item.selected"
+            <button
+              type="button"
+              class="flex min-w-0 flex-1 items-center gap-2 text-left"
               :disabled="!user"
-              @update:model-value="
-                toggleItem(list.id, item.id, Boolean($event))
-              "
-      :ui="{
-                    base: 'border-2 border-(--ui-bg) data-[state=checked]:border-(--ui-bg)',
-                    indicator: 'bg-(--ui-bg) text-(--ui-text)'
-                  }"
-
-            />
-            <span
-              class="min-w-0 flex-1 tracking-tighter"
-              :class="item.selected ? 'line-through opacity-60' : ''"
+              @click="toggleItem(list.id, item.id, !item.selected)"
             >
-              {{ item.name }}
-            </span>
+              <UCheckbox
+                :model-value="item.selected"
+                :disabled="!user"
+                class="pointer-events-none"
+                :ui="{
+                  base: 'border-2 border-(--ui-bg) data-[state=checked]:border-(--ui-bg)',
+                  indicator: 'bg-(--ui-bg) text-(--ui-text)'
+                }"
+              />
+              <span
+                class="min-w-0 flex-1 tracking-tighter"
+                :class="item.selected ? 'line-through opacity-60' : ''"
+              >
+                {{ item.name }}
+              </span>
+            </button>
             <UButton
               v-if="user"
               icon="i-lucide-x"
@@ -343,6 +353,13 @@ async function removeItem(listId: string, itemId: string) {
       :title="t('lists.addItem')"
       :dismissible="!itemSaving"
       :close="!itemSaving"
+      :ui="{
+        title: 'text-(--ui-text-contrast) tracking-tight',
+                  content: 'bg-(--ui-text)',
+                  close:
+                    'text-(--ui-text-contrast) hover:bg-(--ui-text-contrast)/10'
+                }"
+                
     >
       <template #body>
         <UForm

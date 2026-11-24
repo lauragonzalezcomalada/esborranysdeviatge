@@ -105,11 +105,14 @@
     "addMember": "Add member",
     "memberPlaceholder": "Name",
     "member": "Member",
-    "unassigned": "Unassigned"
+    "unassigned": "Unassigned",
+    "search": "Search a group, category or option",
+    "noResults": "Nothing matches"
   },
   "lists": {
     "search": "Search a list or item",
-    "new": "New list",
+    "new": "New list",  
+    "short": "List",
     "addItem": "Add item",
     "saveAndAdd": "Save and add another",
     "noItems": "No items yet",

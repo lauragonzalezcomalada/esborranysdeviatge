@@ -35,6 +35,8 @@
   --resource-card-bg: #6bb640;
   --resource-card-text: #b93739;
   --ui-text-inverted: #b93739;
+  --group-card-bg-1: #9fc7f0;
+  --group-card-bg-2: #6bb640;
 }
 
 .psico {
@@ -56,6 +58,8 @@
   --ui-text-inverted: #FF8000;
   --resource-card-bg: #00FF37;
   --resource-card-text: #7540FF;
+  --group-card-bg-1: #C3FF00;
+  --group-card-bg-2: #00FF37;
 }
 
 .mnm {
@@ -77,6 +81,8 @@
   --resource-card-bg: #ffc800;
   --resource-card-text: #383838;
   --ui-text-inverted: #383838;
+  --group-card-bg-1: #ffc800;
+  --group-card-bg-2: #a0a0a0;
 
 }
 

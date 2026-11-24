@@ -108,11 +108,14 @@
     "addMember": "Añadir miembro",
     "memberPlaceholder": "Nombre",
     "member": "Miembro",
-    "unassigned": "Sin asignar"
+    "unassigned": "Sin asignar",
+    "search": "Buscar grupo, categoría u opción",
+    "noResults": "Nada coincide"
   },
   "lists": {
     "search": "Buscar lista o ítem",
     "new": "Nueva lista",
+    "short": "Lista",
     "addItem": "Añadir ítem",
     "saveAndAdd": "Guardar y añadir otro",
     "noItems": "Todavía no hay ítems",

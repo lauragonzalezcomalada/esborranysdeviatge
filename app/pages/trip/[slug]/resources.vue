@@ -13,6 +13,11 @@ const { loadTripResources, insertResource, deleteResource, updateResource }
 
 const resources = ref<TripResource[]>([])
 
+const groupCardBgs = [
+  'bg-(--group-card-bg-1)',
+  'bg-(--group-card-bg-2)'
+]
+
 const search = ref('')
 const addResourceModalOpen = ref(false)
 const resourceName = ref('')
@@ -251,9 +256,10 @@ async function saveEditedResource() {
 
       <div class="w-full columns-1 gap-3 sm:columns-2 lg:columns-3">
         <article
-          v-for="resource in filteredResources"
+          v-for="(resource, index) in filteredResources"
           :key="resource.id"
-          class="mb-3 break-inside-avoid flex flex-col bg-(--resource-card-bg) p-3 rounded-md text-(--resource-card-text)"
+          class="mb-3 break-inside-avoid flex flex-col p-3 rounded-md text-(--resource-card-text)"
+          :class="groupCardBgs[index % groupCardBgs.length]"
         >
           <div class="flex items-center justify-between gap-2">
             <h2 class="font-bold text-xl tracking-tighter">
