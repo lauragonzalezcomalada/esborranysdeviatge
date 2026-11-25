@@ -1,10 +1,11 @@
 import type { Database } from "~/types/database.types";
+
 export function useTripEquipment() {
   const supabase = useSupabaseClient<Database>();
   const { t } = useI18n();
 
   async function loadTripEquipment(tripId: string) {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("groups")
       .select(
         `

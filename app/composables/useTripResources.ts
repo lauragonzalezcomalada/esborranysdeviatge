@@ -49,7 +49,7 @@ export function useTripResources() {
     const safeName =
       file.name
         .normalize("NFKD")
-        .replace(/[^\w.\-]+/g, "_")
+        .replace(/[^\w.-]+/g, "_")
         .replace(/_+/g, "_")
         .slice(0, 80) || "archivo";
     const path = `${userId}/${tripId}/${crypto.randomUUID()}-${safeName}`;

@@ -15,7 +15,8 @@ const handleSignup = async () => {
     if (error) throw error;
     navigateTo(localePath("/"));
   } catch (error) {
-    alert((error as any).error_description || (error as any).message);
+    const authError = error as { error_description?: string; message?: string };
+    alert(authError.error_description || authError.message);
     console.error(error);
   } finally {
     loading.value = false;

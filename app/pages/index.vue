@@ -55,7 +55,8 @@ const handleLogin = async () => {
     if (error) throw error;
     navigateTo(localePath("/"));
   } catch (error) {
-    alert((error as any).error_description || (error as any).message);
+    const authError = error as { error_description?: string; message?: string };
+    alert(authError.error_description || authError.message);
   } finally {
     loading.value = false;
   }
@@ -75,7 +76,6 @@ const openOurStories = () => {
 </script>
 
 <template>
-  <!--  bg-[url('/bg_image.jpg')] bg-cover bg-center  -->
   <div
     class="relative h-dvh w-full flex flex-col items-center justify-between py-8 px-[10vw]"
   >

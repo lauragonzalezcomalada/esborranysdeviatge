@@ -14,7 +14,6 @@ const {
   insertList,
   insertItem,
   updateItemSelected,
-  deleteList,
   deleteItem,
 } = useTripLists();
 
@@ -142,11 +141,6 @@ async function toggleItem(listId: string, itemId: string, selected: boolean) {
   }
 }
 
-async function removeList(id: string) {
-  await deleteList(id);
-  lists.value = lists.value.filter((list) => list.id !== id);
-}
-
 async function removeItem(listId: string, itemId: string) {
   await deleteItem(itemId);
   const list = lists.value.find((entry) => entry.id === listId);
@@ -212,15 +206,6 @@ async function removeItem(listId: string, itemId: string) {
               {{ list.description }}
             </p>
           </div>
-          <!-- <UButton
-            v-if="user"
-            icon="i-lucide-trash-2"
-            color="neutral"
-            variant="ghost"
-            :aria-label="t('common.delete')"
-            @click="removeList(list.id)"
-          /> -->
-
           <div
               v-if="canBeEdited"
               class="flex gap-2 items-center"
@@ -283,7 +268,7 @@ async function removeItem(listId: string, itemId: string) {
        
       </article>
     </div>
-    <p
+    <div
       v-else-if="!loadError"
       class="text-sm  h-full flex-1 flex flex-col gap-2 items-center justify-center"
     >
@@ -294,7 +279,7 @@ async function removeItem(listId: string, itemId: string) {
       <p>
         {{ search ? t("lists.noResults") : t("lists.empty") }}
       </p>
-    </p>
+    </div>
 
     <UModal
       v-model:open="listModalOpen"
