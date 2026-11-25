@@ -925,7 +925,7 @@ const memberTripTotals = computed(() => {
                 <span
                   v-for="bubble in memberTotals(category)"
                   :key="bubble.id"
-                  class="rounded-full bg-(--ui-text) px-2.5 py-1 text-[0.65rem] font-bold text-(--ui-text-contrast)"
+                  class="rounded-full bg-(--ui-text) px-2.5 py-1 text-[0.6rem] font-bold text-(--ui-text-contrast)"
                 >
                   {{ bubble.name }} {{ bubble.total }} €
                 </span>
