@@ -477,42 +477,40 @@ const memberTripTotals = computed(() => {
 
 <template>
   <main
-    class="min-h-screen w-full overflow-hidden bg-(--app-bg) flex flex-col py-2 md:py-4 px-4 md:px-8 pb-15 md:pb-5"
+    class="min-h-screen w-full overflow-x-hidden bg-(--app-bg) flex flex-col py-2 md:py-4 px-4 md:px-8 pb-15 md:pb-5"
   >
-    <div class="relative mt-2 flex w-full items-center justify-end gap-3 md:mt-35">
-      <div class="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block">
-        <div class="relative">
-          <div class="flex max-w-[50vw] flex-col items-center gap-2">
-            <div class="flex flex-wrap justify-center gap-2">
-              <div
-                v-for="(resource, index) in resources"
-                :key="resource.id"
-                class="flex h-fit rounded-full px-2.5 py-1.5 text-sm tracking-tighter"
-                :class="cardBgColors[index % cardBgColors.length]"
-              >
-                {{ resource.name }}: {{ selectedCost(resource) }} €
-              </div>
-            </div>
-            <div v-if="memberTripTotals.length" class="flex flex-wrap justify-center gap-2">
-              <div
-                v-for="badge in memberTripTotals"
-                :key="badge.id"
-                class="rounded-full bg-(--ui-text) px-2.5 py-1.5 text-sm text-(--ui-text-contrast) tracking-tighter"
-              >
-                {{ badge.name }}: {{ badge.total.toFixed(2) }} €
-              </div>
+    <div class="relative mt-2 flex w-full flex-col items-center gap-3 md:mt-36">
+      <div class="hidden w-full items-center justify-center gap-3 md:flex">
+        <div class="flex max-w-[50vw] flex-col items-center gap-2">
+          <div class="flex flex-wrap justify-center gap-2">
+            <div
+              v-for="(resource, index) in resources"
+              :key="resource.id"
+              class="flex h-fit rounded-full px-2.5 py-1.5 text-sm tracking-tighter"
+              :class="cardBgColors[index % cardBgColors.length]"
+            >
+              {{ resource.name }}: {{ selectedCost(resource) }} €
             </div>
           </div>
-          <div
-            class="absolute top-1/2 left-full ml-3 flex -translate-y-1/2 flex-row gap-1 rounded-full bg-(--ui-text) px-3 py-2 font-bold whitespace-nowrap text-(--ui-text-contrast)"
-          >
-            <span>{{ t('common.total') }}</span>
-            {{ tripTotal.toFixed(2) }}
-            €
+          <div v-if="memberTripTotals.length" class="flex flex-wrap justify-center gap-2">
+            <div
+              v-for="badge in memberTripTotals"
+              :key="badge.id"
+              class="rounded-full bg-(--ui-text) px-2.5 py-1.5 text-sm text-(--ui-text-contrast) tracking-tighter"
+            >
+              {{ badge.name }}: {{ badge.total.toFixed(2) }} €
+            </div>
           </div>
         </div>
+        <div
+          class="flex shrink-0 flex-row gap-1 rounded-full bg-(--ui-text) px-3 py-2 font-bold whitespace-nowrap text-(--ui-text-contrast)"
+        >
+          <span>{{ t('common.total') }}</span>
+          {{ tripTotal.toFixed(2) }}
+          €
+        </div>
       </div>
-      <div class="flex flex-col items-end gap-2 md:hidden">
+      <div class="flex w-full flex-col items-end gap-2 md:hidden">
         <div
           class="flex flex-col gap-1 rounded-full bg-(--ui-text) px-2 py-2 whitespace-nowrap text-(--ui-text-contrast)"
         >
@@ -872,7 +870,7 @@ const memberTripTotals = computed(() => {
                     leading-icon="i-heroicons-link"
                     variant="link"
                     :aria-label="t('planning.itemLink')"
-                    class="hidden w-fit p-0 text-(--ui-text)/80 text-xs italic tracking-tighter md:inline-flex"
+                    class="max-md:hidden w-fit p-0 text-(--ui-text)/80 text-xs italic tracking-tighter"
                     :ui="{ leadingIcon: 'size-4' }"
                   >
                     <span>{{ t('planning.itemLink') }}</span>
