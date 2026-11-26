@@ -479,57 +479,57 @@ const memberTripTotals = computed(() => {
   <main
     class="min-h-screen w-full overflow-x-hidden bg-(--app-bg) flex flex-col py-2 md:py-4 px-4 md:px-8 pb-15 md:pb-5"
   >
-    <div class="relative mt-2 flex w-full flex-col items-center gap-3 md:mt-36">
-      <div class="hidden w-full items-center justify-center gap-3 md:flex">
-        <div class="flex max-w-[50vw] flex-col items-center gap-2">
-          <div class="flex flex-wrap justify-center gap-2">
-            <div
-              v-for="(resource, index) in resources"
-              :key="resource.id"
-              class="flex h-fit rounded-full px-2.5 py-1.5 text-sm tracking-tighter"
-              :class="cardBgColors[index % cardBgColors.length]"
-            >
-              {{ resource.name }}: {{ selectedCost(resource) }} €
+    <div class="relative flex w-full flex-col gap-8 max-md:mt-2 md:mt-36">
+      <div class="flex w-full flex-col items-center gap-3">
+        <div class="hidden w-full items-center justify-center gap-3 md:flex">
+          <div class="flex max-w-[50vw] flex-col items-center gap-2">
+            <div class="flex flex-wrap justify-center gap-2">
+              <div
+                v-for="(resource, index) in resources"
+                :key="resource.id"
+                class="flex h-fit rounded-full px-2.5 py-1.5 text-sm tracking-tighter"
+                :class="cardBgColors[index % cardBgColors.length]"
+              >
+                {{ resource.name }}: {{ selectedCost(resource) }} €
+              </div>
+            </div>
+            <div v-if="memberTripTotals.length" class="flex flex-wrap justify-center gap-2">
+              <div
+                v-for="badge in memberTripTotals"
+                :key="badge.id"
+                class="rounded-full bg-(--ui-text) px-2.5 py-1.5 text-sm text-(--ui-text-contrast) tracking-tighter"
+              >
+                {{ badge.name }}: {{ badge.total.toFixed(2) }} €
+              </div>
             </div>
           </div>
-          <div v-if="memberTripTotals.length" class="flex flex-wrap justify-center gap-2">
+          <div
+            class="flex shrink-0 flex-row gap-1 rounded-full bg-(--ui-text) px-3 py-2 font-bold whitespace-nowrap text-(--ui-text-contrast)"
+          >
+            <span>{{ t('common.total') }}</span>
+            {{ tripTotal.toFixed(2) }}
+            €
+          </div>
+        </div>
+        <div class="flex w-full flex-col items-end gap-2 md:hidden">
+          <div
+            class="flex flex-col gap-1 rounded-full bg-(--ui-text) px-2 py-2 whitespace-nowrap text-(--ui-text-contrast)"
+          >
+            <span class="hidden md:inline">{{ t('common.total') }}</span>
+            {{ tripTotal.toFixed(2) }}
+            €
+          </div>
+          <div v-if="memberTripTotals.length" class="flex max-w-[60vw] flex-wrap justify-end gap-1">
             <div
               v-for="badge in memberTripTotals"
               :key="badge.id"
-              class="rounded-full bg-(--ui-text) px-2.5 py-1.5 text-sm text-(--ui-text-contrast) tracking-tighter"
+              class="rounded-full bg-(--ui-text) px-2.5 py-1 text-xs text-(--ui-text-contrast) tracking-tighter"
             >
               {{ badge.name }}: {{ badge.total.toFixed(2) }} €
             </div>
           </div>
         </div>
-        <div
-          class="flex shrink-0 flex-row gap-1 rounded-full bg-(--ui-text) px-3 py-2 font-bold whitespace-nowrap text-(--ui-text-contrast)"
-        >
-          <span>{{ t('common.total') }}</span>
-          {{ tripTotal.toFixed(2) }}
-          €
-        </div>
       </div>
-      <div class="flex w-full flex-col items-end gap-2 md:hidden">
-        <div
-          class="flex flex-col gap-1 rounded-full bg-(--ui-text) px-2 py-2 whitespace-nowrap text-(--ui-text-contrast)"
-        >
-          <span class="hidden md:inline">{{ t('common.total') }}</span>
-          {{ tripTotal.toFixed(2) }}
-          €
-        </div>
-        <div v-if="memberTripTotals.length" class="flex max-w-[60vw] flex-wrap justify-end gap-1">
-          <div
-            v-for="badge in memberTripTotals"
-            :key="badge.id"
-            class="rounded-full bg-(--ui-text) px-2.5 py-1 text-xs text-(--ui-text-contrast) tracking-tighter"
-          >
-            {{ badge.name }}: {{ badge.total.toFixed(2) }} €
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="relative mt-10 flex w-full items-center justify-center gap-8">
       <div class="flex w-full items-end justify-end gap-4">
         <UInput
           v-model="search"
@@ -910,12 +910,14 @@ const memberTripTotals = computed(() => {
               <div class="text-(--ui-text) font-semibold">
                 {{ t('common.total') }}
                 {{
-                  category.options?.reduce((acc, option) => {
-                    if (option.selected) {
-                      return acc + option.quantity * option.unit_price
-                    }
-                    return acc
-                  }, 0)
+                  category.options
+                    ?.reduce((acc, option) => {
+                      if (option.selected) {
+                        return acc + option.quantity * option.unit_price
+                      }
+                      return acc
+                    }, 0)
+                    .toFixed(2)
                 }}
                 €
               </div>
@@ -925,7 +927,7 @@ const memberTripTotals = computed(() => {
                   :key="bubble.id"
                   class="rounded-full bg-(--ui-text) px-2.5 py-1 text-[0.6rem] font-bold text-(--ui-text-contrast)"
                 >
-                  {{ bubble.name }} {{ bubble.total }} €
+                  {{ bubble.name }} {{ bubble.total.toFixed(2) }} €
                 </span>
               </div>
             </div>
@@ -934,17 +936,19 @@ const memberTripTotals = computed(() => {
             <p class="text-(--ui-text) font-bold tracking-tight">
               {{ t('common.total') }}
               {{
-                resource?.categories?.reduce((acc, category) => {
-                  return (
-                    acc +
-                    category.options?.reduce((acc, option) => {
-                      if (option.selected) {
-                        return acc + option.quantity * option.unit_price
-                      }
-                      return acc
-                    }, 0)
-                  )
-                }, 0)
+                resource?.categories
+                  ?.reduce((acc, category) => {
+                    return (
+                      acc +
+                      category.options?.reduce((acc, option) => {
+                        if (option.selected) {
+                          return acc + option.quantity * option.unit_price
+                        }
+                        return acc
+                      }, 0)
+                    )
+                  }, 0)
+                  .toFixed(2)
               }}
               €
             </p>
