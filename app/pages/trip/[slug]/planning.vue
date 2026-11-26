@@ -479,7 +479,7 @@ const memberTripTotals = computed(() => {
   <main
     class="min-h-screen w-full overflow-x-hidden bg-(--app-bg) flex flex-col py-2 md:py-4 px-4 md:px-8 pb-15 md:pb-5"
   >
-    <div class="relative flex w-full flex-col gap-8 max-md:mt-2 md:mt-36">
+    <div class="relative flex w-full flex-col max-md:mt-2 md:mt-24">
       <div class="flex w-full flex-col items-center gap-3">
         <div class="hidden w-full items-center justify-center gap-3 md:flex">
           <div class="flex max-w-[50vw] flex-col items-center gap-2">
@@ -536,6 +536,7 @@ const memberTripTotals = computed(() => {
           icon="i-lucide-search"
           :placeholder="t('planning.search')"
           size="lg"
+          variant="ghost"
           class="w-full max-w-md"
           :ui="{
             base: 'rounded-full border-2 border-(--ui-bg-elevated) py-2 ps-11 pe-4 text-(--ui-bg-elevated) placeholder:text-(--ui-bg-elevated)/90 ring-0 focus-visible:ring-2 focus-visible:ring-(--ui-text)/30 focus-visible:bg-(--ui-text)/80 hover:bg-(--ui-text)/80',
@@ -741,7 +742,7 @@ const memberTripTotals = computed(() => {
                   <UButton
                     icon="i-heroicons-plus"
                     variant="solid"
-                    class="w-fit self-end bg-(--ui-text) text-(--ui-text-contrast) rounded-full"
+                    class="w-fit self-end bg-(--ui-bubble-bg) text-(--ui-text-contrast) rounded-full"
                     :ui="{ leadingIcon: 'size-4 md:size-5' }"
                     @click="openAddOptionModal(category.id)"
                   >
@@ -907,7 +908,7 @@ const memberTripTotals = computed(() => {
             </div>
 
             <div class="flex flex-col items-end gap-2">
-              <div class="text-(--ui-text) font-semibold">
+              <div class="text-(--ui-text-contrast) font-semibold">
                 {{ t('common.total') }}
                 {{
                   category.options
@@ -925,7 +926,7 @@ const memberTripTotals = computed(() => {
                 <span
                   v-for="bubble in memberTotals(category)"
                   :key="bubble.id"
-                  class="rounded-full bg-(--ui-text) px-2.5 py-1 text-[0.6rem] font-bold text-(--ui-text-contrast)"
+                  class="rounded-full bg-(--ui-bubble-bg) px-2.5 py-1 text-[0.6rem] font-bold text-(--ui-text-contrast)"
                 >
                   {{ bubble.name }} {{ bubble.total.toFixed(2) }} €
                 </span>
