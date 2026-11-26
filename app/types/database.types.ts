@@ -275,8 +275,51 @@ export type Database = {
           },
         ];
       };
+      collections: {
+        Row: {
+          created_at: string;
+          description: string | null;
+          id: string;
+          parent_id: string | null;
+          title: string;
+          trip_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          parent_id?: string | null;
+          title: string;
+          trip_id: string;
+        };
+        Update: {
+          created_at?: string;
+          description?: string | null;
+          id?: string;
+          parent_id?: string | null;
+          title?: string;
+          trip_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "collections_parent_id_fkey";
+            columns: ["parent_id"];
+            isOneToOne: false;
+            referencedRelation: "collections";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "collections_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       resources: {
         Row: {
+          collection_id: string | null;
           created_at: string;
           description: string | null;
           file_path: string | null;
@@ -286,6 +329,7 @@ export type Database = {
           trip_id: string | null;
         };
         Insert: {
+          collection_id?: string | null;
           created_at?: string;
           description?: string | null;
           file_path?: string | null;
@@ -295,6 +339,7 @@ export type Database = {
           trip_id?: string | null;
         };
         Update: {
+          collection_id?: string | null;
           created_at?: string;
           description?: string | null;
           file_path?: string | null;
@@ -304,6 +349,13 @@ export type Database = {
           trip_id?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: "resources_collection_id_fkey";
+            columns: ["collection_id"];
+            isOneToOne: false;
+            referencedRelation: "collections";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "resources_trip_id_fkey";
             columns: ["trip_id"];

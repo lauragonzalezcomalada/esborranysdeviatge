@@ -241,16 +241,6 @@ async function removeItem(listId: string, itemId: string) {
         </ul>
       </article>
     </div>
-    <div
-      v-else-if="!loadError"
-      class="text-sm h-full flex-1 flex flex-col gap-2 items-center justify-center"
-    >
-      <UIcon name="i-lucide-face-slightly-frowning" class="size-6" />
-      <p>
-        {{ search ? t('lists.noResults') : t('lists.empty') }}
-      </p>
-    </div>
-
     <UModal
       v-model:open="listModalOpen"
       :title="t('lists.new')"

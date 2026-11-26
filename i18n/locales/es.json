@@ -119,19 +119,27 @@
     "short": "Lista",
     "addItem": "Añadir ítem",
     "saveAndAdd": "Guardar y añadir otro",
-    "noItems": "Todavía no hay ítems",
-    "empty": "Todavía no hay listas",
     "noResults": "Ninguna lista coincide",
     "loadError": "No se han podido cargar las listas",
     "saveError": "No se ha podido guardar"
   },
   "resources": {
     "search": "Buscar recurso",
-    "new": "Nuevo recurso",
+    "new": "Recurso",
     "short": "Recurso",
+    "newCollection": "Nueva colección",
+    "newSubcollection": "Colección",
+    "shortCollection": "Colección",
+    "collection": "Colección",
+    "unassigned": "Sin colección",
+    
+    "noResults": "Ninguna colección coincide",
     "namePlaceholder": "Ex. Guia de viajes",
     "descriptionPlaceholder": "Ex. Guia que hemos encontrado en la librería...",
-    "edit": "Editar recurso"
+    "edit": "Editar recurso",
+    "editCollection": "Editar colección",
+    "confirmDeleteResource": "¿Estás seguro de querer eliminar este recurso?",
+    "confirmDeleteCollection": "¿Estás seguro de querer eliminar esta colección? También se eliminarán sus subcolecciones."
   },
   "errors": {
     "loadTrip": "No se pudo cargar el viaje.",
@@ -141,6 +149,7 @@
     "saveOrder": "No se pudo guardar el orden.",
     "missingSupabase": "Añade NUXT_PUBLIC_SUPABASE_URL y NUXT_PUBLIC_SUPABASE_KEY en .env.",
     "saveResource": "No se pudo guardar el recurso.",
+    "saveCollection": "No se pudo guardar la colección.",
     "signInToUpload": "Inicia sesión para subir un archivo.",
     "loginToLoadTrips": "You need to be logged in to load your trips",
     "loginToCreateTrip": "You need to be logged in to insert a trip",

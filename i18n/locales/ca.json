@@ -126,9 +126,19 @@
     "search": "Cerca un recurs",
     "new": "Nou recurs",
     "short": "Recurs",
+    "newCollection": "Nova col·lecció",
+    "newSubcollection": "Nova subcol·lecció",
+    "shortCollection": "Col·lecció",
+    "collection": "Col·lecció",
+    "unassigned": "Sense col·lecció",
+    "empty": "Encara no hi ha col·leccions",
+    "noResults": "Cap col·lecció coincideix",
     "namePlaceholder": "Ex. Guia de viatge",
     "descriptionPlaceholder": "Ex. Guia que hem trobat a la llibreria...",
-    "edit": "Edita el recurs"
+    "edit": "Edita el recurs",
+    "editCollection": "Edita la col·lecció",
+    "confirmDeleteResource": "Segur que vols eliminar aquest recurs?",
+    "confirmDeleteCollection": "Segur que vols eliminar aquesta col·lecció? També s'eliminaran les subcol·leccions."
   },
   "errors": {
     "loadTrip": "No s'ha pogut carregar el viatge.",
@@ -138,6 +148,7 @@
     "saveOrder": "No s'ha pogut desar l'ordre.",
     "missingSupabase": "Afegeix NUXT_PUBLIC_SUPABASE_URL i NUXT_PUBLIC_SUPABASE_KEY a .env.",
     "saveResource": "No s'ha pogut desar el recurs.",
+    "saveCollection": "No s'ha pogut desar la col·lecció.",
     "signInToUpload": "Inicia la sessió per pujar un fitxer.",
     "loginToLoadTrips": "Has d'iniciar la sessió per carregar els teus viatges",
     "loginToCreateTrip": "Has d'iniciar la sessió per crear un viatge",

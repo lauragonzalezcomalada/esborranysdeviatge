@@ -126,9 +126,19 @@
     "search": "Search resource",
     "new": "New resource",
     "short": "Resource",
+    "newCollection": "New collection",
+    "newSubcollection": "New subcollection",
+    "shortCollection": "Collection",
+    "collection": "Collection",
+    "unassigned": "No collection",
+    "empty": "No collections yet",
+    "noResults": "No collections match",
     "namePlaceholder": "Ex. Travel guide",
     "descriptionPlaceholder": "Ex. Found in the library...",
-    "edit": "Edit resource"
+    "edit": "Edit resource",
+    "editCollection": "Edit collection",
+    "confirmDeleteResource": "Are you sure you want to delete this resource?",
+    "confirmDeleteCollection": "Are you sure you want to delete this collection? Its subcollections will be deleted too."
   },
   "errors": {
     "loadTrip": "The trip could not be loaded.",
@@ -138,6 +148,7 @@
     "saveOrder": "The order could not be saved.",
     "missingSupabase": "Add NUXT_PUBLIC_SUPABASE_URL and NUXT_PUBLIC_SUPABASE_KEY to .env.",
     "saveResource": "The resource could not be saved.",
+    "saveCollection": "The collection could not be saved.",
     "signInToUpload": "Sign in to upload a file.",
     "loginToLoadTrips": "You need to be logged in to load your trips",
     "loginToCreateTrip": "You need to be logged in to insert a trip",

@@ -7,6 +7,7 @@ export type TripResource = {
   link: string | null;
   trip_id: string;
   file_path: string | null;
+  collection_id: string | null;
 };
 
 const RESOURCES_BUCKET = "resources";
@@ -72,14 +73,27 @@ export function useTripResources() {
       .eq("trip_id", input.tripId);
 
     if (error) throw error;
-    return (data ?? []).map((resource) => ({
+    return (data ?? []).map(toTripResource);
+  }
+
+  function toTripResource(resource: {
+    id: number;
+    name: string;
+    description: string | null;
+    link: string | null;
+    trip_id: string | null;
+    file_path: string | null;
+    collection_id: string | null;
+  }): TripResource {
+    return {
       id: resource.id.toString(),
       name: resource.name,
       description: resource.description ?? "",
       link: resource.link ?? null,
       trip_id: resource.trip_id ?? "",
       file_path: resource.file_path ?? null,
-    })) as TripResource[];
+      collection_id: resource.collection_id ?? null,
+    };
   }
 
   async function insertResource(input: {
@@ -88,6 +102,7 @@ export function useTripResources() {
     description: string;
     link: string;
     file: File | null;
+    collectionId: string | null;
   }) {
     let filePath: string | null = null;
     if (input.file) {
@@ -101,6 +116,7 @@ export function useTripResources() {
         description: input.description,
         link: input.link,
         trip_id: input.tripId,
+        collection_id: input.collectionId,
         ...(filePath ? { file_path: filePath } : {}),
       })
       .select()
@@ -112,14 +128,7 @@ export function useTripResources() {
       }
       throw new Error(storageErrorMessage(error, t("errors.saveResource")));
     }
-    return {
-      id: data.id.toString(),
-      name: data.name,
-      description: data.description ?? "",
-      link: data.link ?? null,
-      trip_id: data.trip_id ?? "",
-      file_path: data.file_path ?? null,
-    } as TripResource;
+    return toTripResource(data);
   }
 
   async function deleteResource(resourceId: string) {
@@ -147,23 +156,22 @@ export function useTripResources() {
       name: string;
       description: string;
       link: string;
+      collectionId: string | null;
     },
   ) {
     const { data, error: updateError } = await supabase
       .from("resources")
-      .update(input)
+      .update({
+        name: input.name,
+        description: input.description,
+        link: input.link,
+        collection_id: input.collectionId,
+      })
       .eq("id", parseInt(resourceId))
       .select()
       .single();
     if (updateError) throw updateError;
-    return {
-      id: data.id.toString(),
-      name: data.name,
-      description: data.description ?? "",
-      link: data.link ?? null,
-      trip_id: data.trip_id ?? "",
-      file_path: data.file_path ?? null,
-    } as TripResource;
+    return toTripResource(data);
   }
 
   return {
